@@ -46,5 +46,12 @@
       </div>
       <div class="right-panel"></div>
     </div>
+    <h1>Текущая дата и время (UTC+3):</h1>
+
+<?php
+date_default_timezone_set('UTC+3');
+echo "Сегодня: " . date("Y-m-d") . "<br>";
+echo "Текущее время: " . date("h:i:sa");
+?>
   </body>
 </html>
