@@ -1,16 +1,50 @@
+<!DOCTYPE html>
 <html>
   <head>
-    <title>Девлог</title>
+    <style>
+      body {
+        background-color: #555;
+        font-weight: bold;
+        color: white;
+      }
+      .container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+      }
+      .left-panel {
+        width: 20%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+      }
+      .right-panel {
+        width: 80%;
+        background-color: #ddd;
+        height: 100vh;
+      }
+      .btn {
+        background-color: lightblue;
+        border-radius: 10px;
+        padding: 20px;
+        width: 100%;
+        text-align: center;
+        margin-bottom: 20px;
+      }
+    </style>
   </head>
   <body>
-    <h1>Девлог</h1>
-    <nav>
-      <ul>
-        <li><a href="index.html">Описание игры</a></li>
-        <li><a href="devlog.html">Девлог</a></li>
-        <li><a href="roadmap.html">Дорожная карта</a></li>
-        <li><a href="contact-info.html">Контактная информация</a></li>
-      </ul>
-    </nav>
+    <div class="container">
+      <div class="left-panel">
+        <h1>Девлог</h1>
+        <a href="index.html" class="btn">Описание игры</a>
+        <a href="devlog.html" class="btn">Девлог</a>
+        <a href="roadmap.html" class="btn">Дорожная карта</a>
+        <a href="contact-info.html" class="btn">Контактная информация</a>
+      </div>
+      <div class="right-panel"></div>
+    </div>
   </body>
 </html>
