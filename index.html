@@ -36,6 +36,10 @@
     </style>
   </head>
   <body>
+	    <?php
+  echo showDateTime();
+  include 'datetime.php';
+  ?>
     <div class="container">
       <div class="left-panel">
         <h1>Описание игры</h1>
@@ -47,12 +51,4 @@
       <div class="right-panel"></div>
     </div>
   </body>
-  <head>
-	<title>Текущая дата и время</title>
-</head>
-<body>
-<?php
-include 'datetime.php';
-?>
-</body>
 </html>
