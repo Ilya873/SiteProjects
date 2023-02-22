@@ -22,7 +22,7 @@ class TicTacToe {
       $(`table tr:nth-child(${x + 1}) td:nth-child(${y + 1})`).text(this.current_player);
       this.board[x][y] = this.current_player;
       if (this.check_win()) {
-        alert(`Player ${this.current_player} wins!`);
+        alert(`Ты победил!`);
         this.reset_board();
       } else if (this.check_draw()) {
         alert("Draw!");
@@ -46,7 +46,7 @@ class TicTacToe {
       $(`table tr:nth-child(${x + 1}) td:nth-child(${y + 1})`).text("O");
       this.board[x][y] = "O";
       if (this.check_win()) {
-        alert("You lose!");
+        alert("Ты проиграл!");
         this.reset_board();
       } else if (this.check_draw()) {
         alert("Draw!");
