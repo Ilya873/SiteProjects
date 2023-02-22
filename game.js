@@ -25,7 +25,7 @@ class TicTacToe {
         alert(`Ты победил!`);
         this.reset_board();
       } else if (this.check_draw()) {
-        alert("Draw!");
+        alert("Ничья!");
         this.reset_board();
       } else {
         this.switch_player();
@@ -49,7 +49,7 @@ class TicTacToe {
         alert("Ты проиграл!");
         this.reset_board();
       } else if (this.check_draw()) {
-        alert("Draw!");
+        alert("Ничья!");
         this.reset_board();
       } else {
         this.switch_player();
