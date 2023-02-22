@@ -24,15 +24,25 @@
         text-align: center;
         cursor: pointer;
       }
-      .red {
+      .red-button {
         background-color: red;
       }
-      .green {
+      .green-button {
         background-color: green;
       }
     </style>
   </head>
   <body>
+    <h1>Крестики-Нолики</h1>
+    <div id="game"></div>
+    <div>
+      <div class="button red-button" onclick="location.href='TicTacToe.html';">Невозможный</div>
+      <div class="button green-button" onclick="location.href='TicTacToe2.html';">Оптимальный</div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="game2.js"></script>
+  </body>
+</html>
     <h1>Крестики-Нолики</h1>
     <div id="game"></div>
     <div>
