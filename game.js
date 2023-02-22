@@ -57,90 +57,83 @@ class TicTacToe {
     }
   }
 
-  get_free_cells() {
-    const free_cells = [];
-    for (let i = 0; i < 3; i++) {
-      for (let j = 0; j < 3; j++) {
-        if (this.board[i][j] === "") {
-          free_cells.push([i, j]);
-        }
-      }
-    }
-    return free_cells;
-  }
+get_free_cells() {
+const free_cells = [];
+for (let i = 0; i < 3; i++) {
+for (let j = 0; j < 3; j++) {
+if (this.board[i][j] === "") {
+free_cells.push([i, j]);
+}
+}
+}
+return free_cells;
+}
 
-  get_best_move() {
-    let best_score = -Infinity;
-    let best_move = null;
-    for (let i = 0; i < 3; i++) {
-      for (let j = 0; j < 3; j++) {
-        if (this.board[i][j] === "") {
-          this.board[i][j] = "O";
-          const score = this.minimax(0, false);
-          this.board[i][j] = "";
+get_best_move() {
+const free_cells = this.get_free_cells();
+let best_score = -Infinity;
+let best_move = null;
+for (const [x, y] of free_cells) {
+this.board[x][y] = "O";
+const score = this.minimax(false);
+this.board[x][y] = "";
 if (score > best_score) {
 best_score = score;
-best_move = [i, j];
-}
-}
+best_move = [x, y];
 }
 }
 return best_move;
 }
 
-minimax(depth, is_maximizing) {
+minimax(is_maximizing) {
 if (this.check_win()) {
-if (this.current_player === "O") {
-return 10 - depth;
-} else {
-return depth - 10;
+return is_maximizing ? -1 : 1;
 }
-} else if (this.check_draw()) {
+if (this.check_draw()) {
 return 0;
 }
 if (is_maximizing) {
 let best_score = -Infinity;
-for (let i = 0; i < 3; i++) {
-for (let j = 0; j < 3; j++) {
-if (this.board[i][j] === "") {
-this.board[i][j] = "O";
-const score = this.minimax(depth + 1, false);
-this.board[i][j] = "";
+for (const [x, y] of this.get_free_cells()) {
+this.board[x][y] = "O";
+const score = this.minimax(false);
+this.board[x][y] = "";
 best_score = Math.max(best_score, score);
-}
-}
 }
 return best_score;
 } else {
 let best_score = Infinity;
-for (let i = 0; i < 3; i++) {
-for (let j = 0; j < 3; j++) {
-if (this.board[i][j] === "") {
-this.board[i][j] = "X";
-const score = this.minimax(depth + 1, true);
-this.board[i][j] = "";
+for (const [x, y] of this.get_free_cells()) {
+this.board[x][y] = "X";
+const score = this.minimax(true);
+this.board[x][y] = "";
 best_score = Math.min(best_score, score);
-}
-}
 }
 return best_score;
 }
 }
 
 check_win() {
+// check rows
 for (let i = 0; i < 3; i++) {
 if (this.board[i][0] !== "" && this.board[i][0] === this.board[i][1] && this.board[i][1] === this.board[i][2]) {
 return true;
 }
-if (this.board[0][i] !== "" && this.board[0][i] === this.board[1][i] && this.board[1][i] === this.board[2][i]) {
+}
+// check columns
+for (let j = 0; j < 3; j++) {
+if (this.board[0][j] !== "" && this.board[0][j] === this.board[1][j] && this.board[1][j] === this.board[2][j]) {
 return true;
 }
 }
-if (this.board[0][0] !== "" && this.board[0][0] === this.board[1][1] && this.board[1][1] === this.board[2][2]) {
+// check diagonals
+if (this.board[1][1] !== "") {
+if (this.board[0][0] === this.board[1][1] && this.board[1][1] === this.board[2][2]) {
 return true;
 }
-if (this.board[0][2] !== "" && this.board[0][2] === this.board[1][1] && this.board[1][1] === this.board[2][0]) {
+if (this.board[0][2] === this.board[1][1] && this.board[1][1] === this.board[2][0]) {
 return true;
+}
 }
 return false;
 }
@@ -159,7 +152,7 @@ return true;
 switch_player() {
 this.current_player = this.current_player === "X" ? "O" : "X";
 }
-
+  
 reset_board() {
 this.current_player = "X";
 this.board = [["", "", ""], ["", "", ""], ["", "", ""]];
