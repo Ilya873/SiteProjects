@@ -2,9 +2,27 @@
 <html>
   <head>
     <title>Крестики-Нолики</title>
+    <style>
+      body {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+      }
+      h1 {
+        text-align: center;
+      }
+      #game {
+        width: 300px;
+        height: 300px;
+        border: 1px solid black;
+      }
+    </style>
   </head>
   <body>
-    <h1>Tic Tac Toe</h1>
+    <h1>Крестики-Нолики</h1>
     <div id="game"></div>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="game.js"></script>
