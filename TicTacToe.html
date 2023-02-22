@@ -14,11 +14,31 @@
       h1 {
         text-align: center;
       }
+      .button {
+        display: inline-block;
+        padding: 10px 20px;
+        margin: 10px;
+        border-radius: 5px;
+        color: white;
+        font-size: 16px;
+        text-align: center;
+        cursor: pointer;
+      }
+      .red-button {
+        background-color: green;
+      }
+      .green-button {
+        background-color: red;
+      }
     </style>
   </head>
   <body>
     <h1>Крестики-Нолики</h1>
     <div id="game"></div>
+    <div>
+      <div class="button red-button" onclick="location.href='TicTacToe.html';">Невозможный</div>
+      <div class="button green-button" onclick="location.href='TicTacToe2.html';">Оптимальный</div>
+    </div>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="game.js"></script>
   </body>
