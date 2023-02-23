@@ -1,0 +1,34 @@
+.canvas-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin-top: 50px;
+}
+
+canvas {
+  border: 1px solid black;
+  margin-top: 10px;
+}
+
+#controls-top {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+#controls {
+  display: flex;
+  align-items: center;
+  margin-top: 10px;
+}
+
+#save-button {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+}
+
+label {
+  margin-right: 10px;
+}
