@@ -8,13 +8,34 @@
 
 canvas {
   border: 1px solid black;
-  margin-top: 10px;
+  margin-top: 50px;
+}
+
+#controls-file {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1;
+  background-color: #f0f8ff;
+  align-items: center;
+  width: calc(100% - 40px);
+  padding: 10px 20px;
+  text-align: left;
+height: 40px;
 }
 
 #controls-top {
-  display: flex;
+  position: fixed;
+  top: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1;
+  background-color: #f2f2f2;
   align-items: center;
-  margin-bottom: 10px;
+  width: calc(100% - 40px);
+  padding: 0 20px;
+  text-align: center;
 }
 
 #controls {
@@ -23,11 +44,7 @@ canvas {
   margin-top: 10px;
 }
 
-#save-button {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-}
+
 
 label {
   margin-right: 10px;
