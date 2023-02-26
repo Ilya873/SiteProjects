@@ -11,6 +11,8 @@ const resizeButton = document.getElementById('resize-button');
 const clearButton = document.getElementById('clear-button');
 const fillButton = document.getElementById('fill-button');
 const brushButton = document.getElementById('brush-button');
+const zoomIn = document.getElementById('zoom-in');
+const zoomOut = document.getElementById('zoom-out');
 
 let fillMode = false;
 
@@ -92,6 +94,19 @@ canvas.addEventListener('mouseup', function() {
 });
 
 canvas.addEventListener('mouseleave', function() {
+  isDrawing = false;
+});
+
+canvas.addEventListener('touchmove', function(event) {
+  drawLine();
+  event.preventDefault();
+});
+
+canvas.addEventListener('touchend', function() {
+  isDrawing = false;
+});
+
+canvas.addEventListener('touchcancel', function() {
   isDrawing = false;
 });
 
@@ -191,5 +206,28 @@ canvas.addEventListener('wheel', function(e) {
   const canvasOriginX = mouseX / canvas.width;
   const canvasOriginY = mouseY / canvas.height;
   canvas.style.transformOrigin = `${canvasOriginX * 100}% ${canvasOriginY * 100}%`;
+  canvas.style.transform = `scale(${scaleFactor})`;
+});
+
+// Нажатие на кнопку "Приблизить"
+zoomIn.addEventListener('click', function() {
+  scaleFactor *= 1.1;
+  // ограничиваем масштабирование
+  scaleFactor = Math.max(0.1, Math.min(scaleFactor, 10));
+  
+  // устанавливаем новый масштаб холста и точку трансформации
+  // устанавливаем новый масштаб холста и точку трансформации
+  canvas.style.transformOrigin = `${50}% ${50}%`;
+  canvas.style.transform = `scale(${scaleFactor})`;
+});
+
+// Нажатие на кнопку "Отдалить"
+zoomOut.addEventListener('click', function() {
+  scaleFactor /= 1.1;
+  // ограничиваем масштабирование
+  scaleFactor = Math.max(0.1, Math.min(scaleFactor, 10));
+  
+  // устанавливаем новый масштаб холста и точку трансформации
+  canvas.style.transformOrigin = `${50}% ${50}%`;
   canvas.style.transform = `scale(${scaleFactor})`;
 });
