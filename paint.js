@@ -163,8 +163,15 @@ function colorsMatch(color1, color2) {
 // Функция рисования линии, закраски
 function drawLine(e) {
   if (isDrawing === true) {
-    const x = e.offsetX;
-    const y = e.offsetY;
+    //const x = e.offsetX;
+    //const y = e.offsetY;
+if (event.type === 'mousemove') {
+    const x = event.offsetX;
+    const y = event.offsetY;
+  } else if (event.type === 'touchmove') {
+    const x = event.touches[0].clientX - canvas.offsetLeft;
+    const y = event.touches[0].clientY - canvas.offsetTop;
+  }
     if (fillMode === true) {
       const fillColor = currentColor;
       fillCanvas(x, y, fillColor);
