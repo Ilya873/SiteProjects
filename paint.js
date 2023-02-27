@@ -99,14 +99,15 @@ canvas.addEventListener('mouseleave', function() {
 
 canvas.addEventListener('touchstart', function(e) {
   isDrawing = true;
-  lastX = e.touches[0].clientX - canvas.offsetLeft;
-  lastY = e.touches[0].clientY - canvas.offsetTop;
-  drawLine(e);
+  lastX = e.touches[0].clientX;
+  lastY = e.touches[0].clientY;
 });
 
 canvas.addEventListener('touchmove', function(e) {
-  e.preventDefault();
-  drawLine(e.touches[0]);
+  if (isDrawing) {
+    drawLine(e.touches[0]);
+    e.preventDefault();
+  }
 });
 
 canvas.addEventListener('touchend', function() {
