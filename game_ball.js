@@ -5,9 +5,10 @@ var x = 50; //начальной расположение x
 var y = 50; //начальной расположение y
 var dx = 2; //начальный импульс x
 var dy = 0; //начальный импульс y
-var radius = 20;
-var gravity = 0.2;
-var friction = 0.3;
+var radius = 20; //радиус шара
+var gravity = 0.2; //сила гравитации
+var friction = 0.05; //сила трения
+var bounce = 0.5; //сила отскока
 var isMoving = false;
 
 // функция инициализации
@@ -41,20 +42,27 @@ function animate() {
     x += dx;
     y += dy;
     dy += gravity;
-if (x + radius > canvas.width) {
-  x = canvas.width - radius;
-  dx = -dx * friction;
-} else if (x - radius < 0) {
-  x = radius;
-  dx = -dx * friction;
-}
-if (y + radius > canvas.height) {
-  y = canvas.height - radius;
-  dy = -dy * friction;
-} else if (y - radius < 0) {
-  y = radius;
-  dy = -dy * friction;
-}
+
+    // определяем, находится ли шар на земле
+    var isOnGround = y + radius >= canvas.height;
+
+    // изменяем скорость, если шар на земле
+    if (isOnGround) {
+      y = canvas.height - radius;
+      dy = -dy * bounce;
+      dx = dx * (1 - friction);
+    }
+
+    // обрабатываем столкновения со стенами
+    if (x + radius > canvas.width) {
+      x = canvas.width - radius;
+      dx = -dx * (1 - friction);
+    } else if (x - radius < 0) {
+      x = radius;
+      dx = -dx * (1 - friction);
+    }
+
+    // останавливаем шар, если он почти не двигается
     if (Math.abs(dx) < 0.1) {
       dx = 0;
     }
