@@ -145,6 +145,7 @@ dy = -dy * bounce;
   }
 }
 
+
 // функция рисования круга
 function drawCircle() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
