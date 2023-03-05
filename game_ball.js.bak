@@ -157,8 +157,8 @@ else
 
       // отражаем скорость шарика относительно нормали стены
       var dot = dx * normal.x + dy * normal.y;
-      dx = (dx - 1.5 * dot * normal.x) * (1 - friction);
-      dy = (dy - 1.5 * dot * normal.y) * (1 - friction);
+      dx = (dx - 1 * dot * normal.x) * (1 - friction);
+      dy = (dy - 1 * dot * normal.y) * (1 - friction);
     }
 }
 	}

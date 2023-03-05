@@ -9,7 +9,7 @@ var walls = [
 function drawWalls() {
 ctx.fillStyle = "black";
 for (var i = 0; i < walls.length; i++) {
-if (walls[i].shape === 'triangle') {
+if (walls[i].share === 'triangle') {
 ctx.beginPath();
 ctx.moveTo(walls[i].points[0].x + walls[i].x, walls[i].points[0].y + walls[i].y);
 ctx.lineTo(walls[i].points[1].x + walls[i].x, walls[i].points[1].y + walls[i].y);
