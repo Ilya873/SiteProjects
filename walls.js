@@ -3,7 +3,7 @@ var walls = [];
 //Создание квадрата
 function addSquare(x, y) {
   // Создание объекта фигуры с использованием координат x и y
-  let figure = { x: x, y: y, width: 100, height: 200 };
+  let figure = { x: x-50, y: y-50, width: 100, height: 100 };
   
   // Добавление объекта фигуры в массив walls
   walls.push(figure);
@@ -12,7 +12,7 @@ function addSquare(x, y) {
 //Создание треугольника_1
 function addTriangle_1(x, y) {
   // Создание объекта фигуры с использованием координат x и y
-  let figure = { x: x, y: y, points: [{x: 200, y: 250}, {x: 200, y: 350}, {x: 100, y: 350}], shape: 'triangle' };
+  let figure = { x: x+50, y: y-100, points: [{x: 0, y: 50}, {x: 0, y: 150}, {x: -100, y: 150}], shape: 'triangle' };
   
   // Добавление объекта фигуры в массив walls
   walls.push(figure);
@@ -21,7 +21,7 @@ function addTriangle_1(x, y) {
 //Создание треугольника_2
 function addTriangle_2(x, y) {
   // Создание объекта фигуры с использованием координат x и y
-  let figure = { x: x, y: y, points: [{x: 200, y: 250}, {x: 200, y: 350}, {x: 100, y: 350}], shape: 'triangle' };
+  let figure = { x: x-150, y: y-100, points: [{x: 100, y: 50}, {x: 200, y: 150}, {x: 100, y: 150}], shape: 'triangle' };
   
   // Добавление объекта фигуры в массив walls
   walls.push(figure);
@@ -30,7 +30,7 @@ function addTriangle_2(x, y) {
 //Создание динамита
 function addDynamite(x, y) {
   // Создание объекта фигуры с использованием координат x и y
-  let figure = { x: x, y: y, width: 100, height: 100, shape: 'dynamite' };
+  let figure = { x: x-50, y: y-50, width: 100, height: 100, shape: 'dynamite' };
   
   // Добавление объекта фигуры в массив walls
   walls.push(figure);
@@ -56,13 +56,4 @@ ctx.fillStyle = "black";
 ctx.fillRect(walls[i].x, walls[i].y, walls[i].width, walls[i].height);
 }
 }
-}
-
-function drawCircle() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  drawWalls();
-  ctx.beginPath();
-  ctx.arc(x, y, radius, 0, 2 * Math.PI, false);
-  ctx.fillStyle = "red";
-  ctx.fill();
 }

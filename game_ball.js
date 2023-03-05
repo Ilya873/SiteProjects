@@ -21,34 +21,74 @@ function init() {
   drawCircle();
   canvas.addEventListener("click", function(event) {
 	 if (!isMoving) {
+		 		// Вычисление координат ячейки
+let cellX = Math.floor((event.clientX - canvas.offsetLeft) / 100);
+let cellY = Math.floor((event.clientY - canvas.offsetTop) / 100);
+
+// Вычисление центра ячейки
+let centerX = cellX * 100 + 50;
+let centerY = cellY * 100 + 50;
 		if (elem === 0)
 	{
-      x = event.clientX - canvas.offsetLeft;
-      y = event.clientY - canvas.offsetTop;
+      x = centerX;
+      y = centerY;
       drawCircle();
 	}
 		if (elem === 1)
 	{
-		addSquare(event.clientX, event.clientY);
+		addSquare(centerX, centerY);
 		drawWalls();
 	}
 		if (elem === 2)
 	{
-		addTriangle_1(event.clientX, event.clientY);
+		addTriangle_1(centerX, centerY);
 		drawWalls();
 	}
 		if (elem === 3)
 	{
-		addTriangle_2(event.clientX, event.clientY);
+		addTriangle_2(centerX, centerY);
 		drawWalls();
 	}
 		if (elem === 4)
 	{
-		addDynamite(event.clientX, event.clientY);
+		addDynamite(centerX, centerY);
 		drawWalls();
 	}
 	  }
   });
+  
+canvas.addEventListener("contextmenu", function(event) {
+  event.preventDefault(); // предотвращаем открытие контекстного меню браузера
+  if (!isMoving) { 
+    let mouseX = event.clientX - canvas.offsetLeft;
+    let mouseY = event.clientY - canvas.offsetTop;
+
+    // проверяем, находится ли точка клика внутри какой-либо из фигур
+    for (let i = 0; i < walls.length; i++) {
+      let figure = walls[i];
+      if (figure.shape === 'triangle') {
+        let triangle = new SAT.Polygon(new SAT.Vector(figure.x, figure.y), [
+          new SAT.Vector(figure.points[0].x, figure.points[0].y),
+          new SAT.Vector(figure.points[1].x, figure.points[1].y),
+          new SAT.Vector(figure.points[2].x, figure.points[2].y)
+        ]);
+        let point = new SAT.Vector(mouseX, mouseY);
+        if (SAT.pointInPolygon(point, triangle)) {
+          walls.splice(i, 1); // удаление треугольника из массива walls
+          break;
+        }
+      } else if (mouseX >= figure.x && mouseX <= figure.x + figure.width && mouseY >= figure.y && mouseY <= figure.y + figure.height) {
+        walls.splice(i, 1); // удаление фигуры из массива walls
+        break;
+      }
+    }
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawCircle();
+    drawWalls();
+  }
+});
+
 document.addEventListener("keydown", function(event) {
   if (event.keyCode === 13 && !isMoving) {
     isMoving = true;
@@ -63,6 +103,7 @@ function animate() {
     requestAnimationFrame(animate);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawCircle();
+	drawWalls();
     x += dx;
     y += dy;
     dy += gravity;
@@ -183,8 +224,8 @@ else if (wall.shape === "triangle")
 
       // отражаем скорость шарика относительно нормали стены
       var dot = dx * normal.x + dy * normal.y;
-      dx = (dx - 2 * dot * normal.x) * (1 - friction);
-      dy = (dy - 2 * dot * normal.y) * (1 - friction);
+      dx = (dx - 1.9 * dot * normal.x) * (1 - friction);
+      dy = (dy - 1.9 * dot * normal.y) * (1 - friction);
     }
 }
 else if (wall.shape === "dynamite")
@@ -244,7 +285,6 @@ numWalls--;
 
 // функция рисования круга
 function drawCircle() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.beginPath();
   ctx.arc(x, y, radius, 0, 2 * Math.PI, false);
   ctx.fillStyle = "red";
