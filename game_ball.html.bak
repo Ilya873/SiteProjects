@@ -55,6 +55,5 @@
     <script src="SAT.js"></script>
     <script src="game_ball.js"></script>
     <script src="walls.js"></script>
-	<script src="buttons_game_ball.js"></script>
   </body>
 </html>

@@ -10,6 +10,7 @@ var gravity = 0.2; //сила гравитации
 var friction = 0.05; //сила трения
 var bounce = 0.5; //сила отскока
 var isMoving = false;
+var elem = 0; //0 - шар, 1 - прямоугольник, 2 - треугольник_1, 3 - треугольник_2, 4 - динамит
 
 // функция инициализации
 function init() {
@@ -19,11 +20,34 @@ function init() {
   canvas.height = 500;
   drawCircle();
   canvas.addEventListener("click", function(event) {
-    if (!isMoving) {
+	 if (!isMoving) {
+		if (elem === 0)
+	{
       x = event.clientX - canvas.offsetLeft;
       y = event.clientY - canvas.offsetTop;
       drawCircle();
-    }
+	}
+		if (elem === 1)
+	{
+		addSquare(event.clientX, event.clientY);
+		drawWalls();
+	}
+		if (elem === 2)
+	{
+		addTriangle_1(event.clientX, event.clientY);
+		drawWalls();
+	}
+		if (elem === 3)
+	{
+		addTriangle_2(event.clientX, event.clientY);
+		drawWalls();
+	}
+		if (elem === 4)
+	{
+		addDynamite(event.clientX, event.clientY);
+		drawWalls();
+	}
+	  }
   });
 document.addEventListener("keydown", function(event) {
   if (event.keyCode === 13 && !isMoving) {
@@ -67,11 +91,13 @@ if (y - radius < 0) {
   dy = -dy * bounce;
 }
 
+
+
     // обрабатываем столкновения со стенами
     for (var i = 0; i < walls.length; i++) {
       var wall = walls[i];
 	  // определяем столкновение с обычными прямоугольниками
-	  if (wall.shape !== "triangle") {
+	  if (wall.shape !== "triangle" && wall.shape !== "dynamite") {
       // определяем расстояние от центра шара до границы стены
       var distX = Math.abs(x - wall.x - wall.width / 2);
       var distY = Math.abs(y - wall.y - wall.height / 2);
@@ -135,7 +161,7 @@ dy = -dy * bounce;
 }
 }
 }
-else
+else if (wall.shape === "triangle")
 {
 // определяем столкновение с треугольниками
     // определяем вершины треугольника
@@ -157,9 +183,52 @@ else
 
       // отражаем скорость шарика относительно нормали стены
       var dot = dx * normal.x + dy * normal.y;
-      dx = (dx - 1.5 * dot * normal.x) * (1 - friction);
-      dy = (dy - 1.5 * dot * normal.y) * (1 - friction);
+      dx = (dx - 2 * dot * normal.x) * (1 - friction);
+      dy = (dy - 2 * dot * normal.y) * (1 - friction);
     }
+}
+else if (wall.shape === "dynamite")
+{
+      // определяем расстояние от центра шара до границы стены
+      var distX = Math.abs(x - wall.x - wall.width / 2);
+      var distY = Math.abs(y - wall.y - wall.height / 2);
+
+      // проверяем, находится ли центр шара внутри границ стены
+      if (distX <= wall.width / 2 + radius && distY <= wall.height / 2 + radius) {
+        // произошло столкновение со стеной, определяем направление отскока
+
+        // определяем сторону стены, с которой произошло столкновение
+        var overlapX = wall.width / 2 - distX;
+        var overlapY = wall.height / 2 - distY;
+        
+        // проверяем, находится ли шарик внутри стены
+        if (overlapX >= 0 && overlapY >= 0) {
+          if (overlapX < overlapY) {
+            // столкновение произошло со стороной стены (отскок по горизонтали)
+            if (x < wall.x + wall.width / 2) {
+              // шар столкнулся с левой стороной стены
+              x = wall.x - radius;
+            } else {
+              // шар столкнулся с правой стороной стены
+              x = wall.x + wall.width + radius;
+            }
+            dx = -dx * bounce*10;
+          } else {
+            // столкновение произошло с верхней или нижней стороной стены (отскок по вертикали)
+            if (y < wall.y + wall.height / 2) {
+              // шар столкнулся с верхней стороной стены
+              y = wall.y - radius;
+            } else {
+              // шар столкнулся с нижней стороной стены
+              y = wall.y + wall.height + radius;
+}
+dy = -dy * bounce*10;
+}
+walls.splice(i, 1); // удаляем динамит из массива стен
+i--;
+numWalls--;
+}
+}
 }
 	}
 
