@@ -43,17 +43,20 @@
   <body>
     <canvas id="canvas"></canvas>
     <div class="buttons-container">
+	  <button class="button" id="ball-button">Мячик</button>
       <button class="button" id="square-button">Квадрат</button>
       <button class="button" id="triangle1-button">Треугольник_1</button>
       <button class="button" id="triangle2-button">Треугольник_2</button>
       <button class="button" id="bomb-button">Динамит</button>
     </div>
 	 <div class="buttons-container_2">
+	  <p>Очков: <span id="Score"></span></p>
 	  <button class="button" id="start-button">Старт</button>
 	  <button class="button" id="end-button">Завершить</button>
 	 </div>
     <script src="SAT.js"></script>
     <script src="game_ball.js"></script>
     <script src="walls.js"></script>
+	<script src="buttons_game_ball.js"></script>
   </body>
 </html>

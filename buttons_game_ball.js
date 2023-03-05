@@ -24,10 +24,23 @@
   });
   
     document.getElementById("start-button").addEventListener("click", function(event) {
+		if (!isMoving)
+		{
     isMoving = true;
 	animate();
+		}
   });
   
     document.getElementById("end-button").addEventListener("click", function(event) {
-    //завершение игры
+    isMoving = false;
+	dx = 0;
+	dy = 0;
+	score_game = 0;
+	score.innerHTML = score_game;
+	x = x_start;
+	y = y_start;
+	resetDynamites();
+	ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawCircle();
+    drawWalls();
   });

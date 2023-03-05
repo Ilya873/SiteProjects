@@ -11,6 +11,10 @@ var friction = 0.05; //сила трения
 var bounce = 0.5; //сила отскока
 var isMoving = false;
 var elem = 0; //0 - шар, 1 - прямоугольник, 2 - треугольник_1, 3 - треугольник_2, 4 - динамит
+var score = document.getElementById("Score");
+var score_game = 0;
+
+score.innerHTML = score_game;
 
 // функция инициализации
 function init() {
@@ -32,6 +36,8 @@ let centerY = cellY * 100 + 50;
 	{
       x = centerX;
       y = centerY;
+	  x_start = centerX;
+	  y_start = centerY;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       drawCircle();
       drawWalls();
@@ -80,7 +86,15 @@ canvas.addEventListener("contextmenu", function(event) {
           break;
         }
       } else if (mouseX >= figure.x && mouseX <= figure.x + figure.width && mouseY >= figure.y && mouseY <= figure.y + figure.height) {
-        walls.splice(i, 1); // удаление фигуры из массива walls
+		  if (figure.shape !== 'dynamite')
+		  {
+			  walls.splice(i, 1); // удаление фигуры из массива walls
+		  }
+		  else
+		  {
+			  walls.splice(i, 1); // удаление фигуры из массива walls
+			  dynamites.splice(dynamites.indexOf(figure), 1); // удаление динамита из массива dynamites
+		  }
         break;
       }
     }
@@ -165,6 +179,11 @@ if (y - radius < 0) {
               x = wall.x + wall.width + radius;
             }
             dx = -dx * bounce;
+			if (dx>0.1)
+{
+	    score_game++;
+	score.innerHTML = score_game;
+}
           } else {
             // столкновение произошло с верхней или нижней стороной стены (отскок по вертикали)
             if (y < wall.y + wall.height / 2) {
@@ -176,6 +195,11 @@ if (y - radius < 0) {
               y = wall.y + wall.height + radius;
 }
 dy = -dy * bounce;
+if (dy>0.1)
+{
+	    score_game++;
+	score.innerHTML = score_game;
+}
 }
 } else {
 // столкновение произошло с углом стены (отскок по диагонали)
@@ -189,6 +213,11 @@ x = wall.x - radius;
 x = wall.x + wall.width + radius;
 }
 dx = -dx * bounce;
+if (dx>0.1)
+{
+	    score_game++;
+	score.innerHTML = score_game;
+}
 } else {
 // отскок по вертикали
 if (y < wall.y + wall.height / 2) {
@@ -200,6 +229,11 @@ y = wall.y - radius;
 y = wall.y + wall.height + radius;
 }
 dy = -dy * bounce;
+if (dy>0.1)
+{
+	    score_game++;
+	score.innerHTML = score_game;
+}
 }
 }
 }
@@ -228,6 +262,16 @@ else if (wall.shape === "triangle")
       var dot = dx * normal.x + dy * normal.y;
       dx = (dx - 1.9 * dot * normal.x) * (1 - friction);
       dy = (dy - 1.9 * dot * normal.y) * (1 - friction);
+	  if (dy>2)
+{
+	    score_game++;
+	score.innerHTML = score_game;
+}
+if (dx>2)
+{
+	    score_game++;
+	score.innerHTML = score_game;
+}
     }
 }
 else if (wall.shape === "dynamite")
@@ -267,6 +311,8 @@ else if (wall.shape === "dynamite")
 }
 dy = -dy * bounce*10;
 }
+	    score_game++;
+	score.innerHTML = score_game;
 walls.splice(i, 1); // удаляем динамит из массива стен
 i--;
 numWalls--;
@@ -289,7 +335,7 @@ numWalls--;
 function drawCircle() {
   ctx.beginPath();
   ctx.arc(x, y, radius, 0, 2 * Math.PI, false);
-  ctx.fillStyle = "red";
+  ctx.fillStyle = "blue";
   ctx.fill();
 }
 
