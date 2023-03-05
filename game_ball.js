@@ -32,7 +32,9 @@ let centerY = cellY * 100 + 50;
 	{
       x = centerX;
       y = centerY;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
       drawCircle();
+      drawWalls();
 	}
 		if (elem === 1)
 	{

@@ -1,4 +1,8 @@
   // обработчики событий на кнопки
+  document.getElementById("ball-button").addEventListener("click", function(event) {
+    //выбор мячика
+	elem=0;
+  });
   document.getElementById("square-button").addEventListener("click", function(event) {
     //выбор прямоугольника
 	elem=1;
