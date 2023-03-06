@@ -24,6 +24,9 @@
   });
   
     document.getElementById("start-button").addEventListener("click", function(event) {
+  music2.pause();
+  music.loop = true;
+  music.play();
 		if (!isMoving)
 		{
     isMoving = true;
@@ -32,9 +35,17 @@
   });
   
     document.getElementById("end-button").addEventListener("click", function(event) {
+  music.pause();
+  music2.loop = true;
+  music2.play();
     isMoving = false;
 	dx = 0;
 	dy = 0;
+if (score_game_record<score_game)
+{
+        score_game_record=score_game;
+	score_record.innerHTML = score_game_record;
+}
 	score_game = 0;
 	score.innerHTML = score_game;
 	x = x_start;

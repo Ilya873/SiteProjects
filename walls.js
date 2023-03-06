@@ -67,7 +67,7 @@ function resetDynamites() {
 function drawWalls() {
 for (var i = 0; i < walls.length; i++) {
 if (walls[i].shape === 'triangle') {
-ctx.fillStyle = "black";
+ctx.fillStyle = color_wall;
 ctx.beginPath();
 ctx.moveTo(walls[i].points[0].x + walls[i].x, walls[i].points[0].y + walls[i].y);
 ctx.lineTo(walls[i].points[1].x + walls[i].x, walls[i].points[1].y + walls[i].y);
@@ -75,12 +75,12 @@ ctx.lineTo(walls[i].points[2].x + walls[i].x, walls[i].points[2].y + walls[i].y)
 ctx.closePath();
 ctx.fill();
 } else if (walls[i].shape === 'dynamite'){
-ctx.fillStyle = "red";
+ctx.fillStyle = color_dynamite;
 ctx.fillRect(walls[i].x, walls[i].y, walls[i].width, walls[i].height);
 }
 else
 {
-ctx.fillStyle = "black";
+ctx.fillStyle = color_wall;
 ctx.fillRect(walls[i].x, walls[i].y, walls[i].width, walls[i].height);
 }
 }

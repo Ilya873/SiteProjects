@@ -6,6 +6,7 @@
       body {
         margin: 0;
         padding: 0;
+background-color: #dce0e0;
       }
       canvas {
         display: block;
@@ -34,6 +35,34 @@
         display: flex;
         align-items: center;
       }
+	   .buttons-container_3 {
+        position: absolute;
+        top: 50%;
+        right: 65%;
+        transform: translateY(-50%);
+        display: flex;
+	flex-direction: column;
+        align-items: center;
+      }
+	   .buttons-container_4 {
+        position: absolute;
+        top: 20%;
+        right: 60%;
+        transform: translateY(-50%);
+        display: flex;
+	flex-direction: column;
+        align-items: center;
+      }
+.buttons-container_5 {
+  position: absolute;
+  top: 85%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  width: 100%;
+}
       .button {
         margin: 10px;
         padding: 5px;
@@ -50,13 +79,27 @@
       <button class="button" id="bomb-button">Динамит</button>
     </div>
 	 <div class="buttons-container_2">
-	  <p>Очков: <span id="Score"></span></p>
 	  <button class="button" id="start-button">Старт</button>
 	  <button class="button" id="end-button">Завершить</button>
 	 </div>
+	 <div class="buttons-container_3">
+<label>Цвет шара: <input type="color" id="color-ball" value="#0000ff"></label>
+<label>Цвет стен: <input type="color" id="color-wall" value="#000000"></label>
+<label>Цвет фона: <input type="color" id="color-background" value="#ffffff"></label>
+<label>Цвет динамита: <input type="color" id="color-dynamite" value="#ff0000"></label>
+</div>
+	 <div class="buttons-container_4">
+          <p>Рекорд: <span id="Score_record"></span></p>
+          <p>Очков: <span id="Score"></span></p>
+</div>
+	 <div class="buttons-container_5">
+Пинаем мяч!<br>Данная игра сделана специально на КОД 19. Рикошет<br>Правила:<br>
+Набрать как можно больше очков<br>Очки добываются от рикошетов мяча. Чем больше и сильнее рикошеты, тем больше очков.<br>
+В игре могут быть баги в физике.
+</div>
     <script src="SAT.js"></script>
     <script src="game_ball.js"></script>
     <script src="walls.js"></script>
-	<script src="buttons_game_ball.js"></script>
+    <script src="buttons_game_ball.js"></script>
   </body>
 </html>

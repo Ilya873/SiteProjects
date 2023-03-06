@@ -13,17 +13,65 @@ var isMoving = false;
 var elem = 0; //0 - шар, 1 - прямоугольник, 2 - треугольник_1, 3 - треугольник_2, 4 - динамит
 var score = document.getElementById("Score");
 var score_game = 0;
+var score_record = document.getElementById("Score_record");
+var score_game_record = 0;
+var music = new Audio('MusicGame.wav');
+var music2 = new Audio('MusicGame2.wav');
 
 score.innerHTML = score_game;
+score_record.innerHTML = score_game_record;
+
+const colorBallInput = document.querySelector('#color-ball');
+const colorWallInput = document.querySelector('#color-wall');
+const colorBackgroundInput = document.querySelector('#color-background');
+const colorDynamiteInput = document.querySelector('#color-dynamite');
+
+color_ball = colorBallInput.value; //цвет шара
+color_wall = colorWallInput.value; //цвет стен
+color_background = colorBackgroundInput.value; //цвет фона
+color_dynamite = colorDynamiteInput.value; //цвет динамита
+
+colorBallInput.addEventListener('input', () => {
+  color_ball = colorBallInput.value;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawCircle();
+    drawWalls();
+});
+
+colorWallInput.addEventListener('input', () => {
+  color_wall = colorWallInput.value;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawCircle();
+    drawWalls();
+});
+
+colorBackgroundInput.addEventListener('input', () => {
+  color_background = colorBackgroundInput.value;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawCircle();
+    drawWalls();
+});
+
+colorDynamiteInput.addEventListener('input', () => {
+  color_dynamite = colorDynamiteInput.value;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawCircle();
+    drawWalls();
+});
 
 // функция инициализации
 function init() {
+  x_start = x;
+  y_start = y;
   canvas = document.getElementById("canvas");
   ctx = canvas.getContext("2d");
   canvas.width = 500;
   canvas.height = 500;
   drawCircle();
   canvas.addEventListener("click", function(event) {
+  music.pause();
+  music2.loop = true;
+  music2.play();
 	 if (!isMoving) {
 		 		// Вычисление координат ячейки
 let cellX = Math.floor((event.clientX - canvas.offsetLeft) / 100);
@@ -119,7 +167,7 @@ function animate() {
     requestAnimationFrame(animate);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawCircle();
-	drawWalls();
+    drawWalls();
     x += dx;
     y += dy;
     dy += gravity;
@@ -331,11 +379,13 @@ numWalls--;
   }
 }
 
-// функция рисования круга
+// функция рисования круга и фона
 function drawCircle() {
+ctx.fillStyle = color_background; // установка цвета фона в белый
+ctx.fillRect(0, 0, canvas.width, canvas.height); // рисование прямоугольника на всю область canvas
   ctx.beginPath();
   ctx.arc(x, y, radius, 0, 2 * Math.PI, false);
-  ctx.fillStyle = "blue";
+  ctx.fillStyle = color_ball;
   ctx.fill();
 }
 
