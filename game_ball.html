@@ -67,6 +67,34 @@ background-color: #dce0e0;
         margin: 10px;
         padding: 5px;
       }
+	  table {
+  border-collapse: collapse;
+  margin: 20px auto;
+  margin-left: 0;
+}
+
+caption {
+  font-size: 1.5em;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+th {
+  background-color: #eee;
+  color: #666;
+  font-weight: bold;
+  padding: 10px;
+  text-align: left;
+}
+
+td, th {
+  padding: 10px;
+  border: 1px solid black;
+}
+
+tbody tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
     </style>
   </head>
   <body>
@@ -97,6 +125,22 @@ background-color: #dce0e0;
 Набрать как можно больше очков<br>Очки добываются от рикошетов мяча. Чем больше и сильнее рикошеты, тем больше очков.<br>
 В игре могут быть баги в физике.
 </div>
+<table>
+    <!-- Таблица рекордов -->
+    <table>
+      <caption>Таблица рекордов</caption>
+      <thead>
+        <tr>
+          <th>Игрок</th>
+          <th>Очки</th>
+        </tr>
+      </thead>
+      <tbody id="table-body">
+      </tbody>
+    </table>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.15.5/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.15.5/firebase-database.js"></script>
     <script src="SAT.js"></script>
     <script src="game_ball.js"></script>
     <script src="walls.js"></script>

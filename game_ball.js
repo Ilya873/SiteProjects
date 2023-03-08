@@ -59,6 +59,59 @@ colorDynamiteInput.addEventListener('input', () => {
     drawWalls();
 });
 
+var config = {
+    apiKey: "AIzaSyAAWPiBoZYYImN_yR52qAism8DmBAOdT0s",
+    authDomain: "gamescore-713e7.firebaseapp.com",
+    databaseURL: "https://gamescore-713e7-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "gamescore-713e7",
+    storageBucket: "gamescore-713e7.appspot.com",
+    messagingSenderId: "102939775023",
+    appId: "1:102939775023:web:d7c320e0be370632ee76da",
+    measurementId: "G-GT6P7HP89P"
+};
+firebase.initializeApp(config);
+var messagesRef = firebase.database().ref('scores');
+
+const tableBody = document.querySelector('#table-body');
+
+messagesRef.once('value').then((snapshot) => {
+  const data = snapshot.val();
+  const maxScores = {};
+
+  // Группируем данные по имени игрока и сохраняем максимальное количество очков
+  Object.keys(data).forEach(key => {
+    const item = data[key];
+    const name = item.name;
+    const score = item.score;
+    if (!maxScores[name] || score > maxScores[name]) {
+      maxScores[name] = score;
+    }
+  });
+
+  // Создаем список игроков и их максимальных очков
+  const sortedData = Object.keys(maxScores)
+  .map(name => ({ name, score: maxScores[name] }))
+  .sort((a, b) => b.score - a.score)
+  .slice(0, 10);
+  
+  sortedData.forEach((item) => {
+    const name = item.name;
+    const score = item.score;
+
+    const row = document.createElement('tr');
+    const nameCell = document.createElement('td');
+    const scoreCell = document.createElement('td');
+
+    nameCell.textContent = name;
+    scoreCell.textContent = score;
+
+    row.appendChild(nameCell);
+    row.appendChild(scoreCell);
+
+    tableBody.appendChild(row);
+  });
+});
+
 // функция инициализации
 function init() {
   x_start = x;

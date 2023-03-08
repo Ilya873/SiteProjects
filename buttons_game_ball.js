@@ -1,8 +1,14 @@
   // обработчики событий на кнопки
-  document.getElementById("ball-button").addEventListener("click", function(event) {
-    //выбор мячика
+document.getElementById("ball-button").addEventListener("click", function(event) {
+	//выбор мячика
 	elem=0;
-  });
+  // Обновляем данные пользователя
+    var newMessageRef = messagesRef.push();
+    newMessageRef.set({
+        name: name_game,
+        score: score_game
+    });
+});
   document.getElementById("square-button").addEventListener("click", function(event) {
     //выбор прямоугольника
 	elem=1;
@@ -46,12 +52,69 @@ if (score_game_record<score_game)
         score_game_record=score_game;
 	score_record.innerHTML = score_game_record;
 }
-	score_game = 0;
-	score.innerHTML = score_game;
 	x = x_start;
 	y = y_start;
 	resetDynamites();
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawCircle();
     drawWalls();
+	let name_game = prompt(`Количество набранных очков: ${score_game}, введите ваше имя (до 10 символов).`);
+	name_game = name_game.substring(0, 10);
+	  // Сохраняем имя игрока и количество очков в базу данных
+  if (name_game) {
+    const messagesRef = firebase.database().ref('scores');
+    messagesRef.push({
+      name: name_game,
+      score: score_game
+    });
+     // Обновляем таблицу с данными
+    updateTable();
+  }
+  	score_game = 0;
+	score.innerHTML = score_game;
+});
+
+function updateTable() {
+  const messagesRef = firebase.database().ref('scores');
+  messagesRef.once('value').then((snapshot) => {
+    const data = snapshot.val();
+    const maxScores = {};
+
+    // Группируем данные по имени игрока и сохраняем максимальное количество очков
+    Object.keys(data).forEach(key => {
+      const item = data[key];
+      const name = item.name;
+      const score = item.score;
+      if (!maxScores[name] || score > maxScores[name]) {
+        maxScores[name] = score;
+      }
+    });
+
+    // Создаем список игроков и их максимальных очков
+      const sortedData = Object.keys(maxScores)
+  .map(name => ({ name, score: maxScores[name] }))
+  .sort((a, b) => b.score - a.score)
+  .slice(0, 10);
+
+    // Очищаем таблицу
+    tableBody.innerHTML = '';
+
+    // Заполняем таблицу новыми данными
+    sortedData.forEach((item) => {
+      const name = item.name;
+      const score = item.score;
+
+      const row = document.createElement('tr');
+      const nameCell = document.createElement('td');
+      const scoreCell = document.createElement('td');
+
+      nameCell.textContent = name;
+      scoreCell.textContent = score;
+
+      row.appendChild(nameCell);
+      row.appendChild(scoreCell);
+
+      tableBody.appendChild(row);
+    });
   });
+}
