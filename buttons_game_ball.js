@@ -58,20 +58,21 @@ if (score_game_record<score_game)
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawCircle();
     drawWalls();
-	let name_game = prompt(`Количество набранных очков: ${score_game}, введите ваше имя (до 10 символов).`);
+	let score_save = score_game;
+  	score_game = 0;
+	score.innerHTML = score_game;
+	let name_game = prompt(`Количество набранных очков: ${score_save}, введите ваше имя (до 10 символов).`);
 	name_game = name_game.substring(0, 10);
 	  // Сохраняем имя игрока и количество очков в базу данных
   if (name_game) {
     const messagesRef = firebase.database().ref('scores');
     messagesRef.push({
       name: name_game,
-      score: score_game
+      score: score_save
     });
      // Обновляем таблицу с данными
     updateTable();
   }
-  	score_game = 0;
-	score.innerHTML = score_game;
 });
 
 function updateTable() {

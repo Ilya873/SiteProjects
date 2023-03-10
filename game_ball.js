@@ -94,17 +94,20 @@ messagesRef.once('value').then((snapshot) => {
   .sort((a, b) => b.score - a.score)
   .slice(0, 10);
   
-  sortedData.forEach((item) => {
+  sortedData.forEach((item, index) => {
     const name = item.name;
     const score = item.score;
 
     const row = document.createElement('tr');
+    const indexCell = document.createElement('td');
     const nameCell = document.createElement('td');
     const scoreCell = document.createElement('td');
 
+    indexCell.textContent = index + 1; // добавляем номер ряда
     nameCell.textContent = name;
     scoreCell.textContent = score;
 
+    row.appendChild(indexCell);
     row.appendChild(nameCell);
     row.appendChild(scoreCell);
 
@@ -341,39 +344,45 @@ if (dy>0.1)
 }
 else if (wall.shape === "triangle")
 {
-// определяем столкновение с треугольниками
-    // определяем вершины треугольника
-    var triangle = new SAT.Polygon(new SAT.Vector(wall.x, wall.y), [
-      new SAT.Vector(wall.points[0].x, wall.points[0].y),
-      new SAT.Vector(wall.points[1].x, wall.points[1].y),
-      new SAT.Vector(wall.points[2].x, wall.points[2].y)
-    ]);
-    // определяем круг
-    var circle = new SAT.Circle(new SAT.Vector(x, y), radius);
-    // проверяем столкновение
-    var response = new SAT.Response();
-    var collided = SAT.testCirclePolygon(circle, triangle, response);
-    if (collided) {
-      // произошло столкновение со стеной, определяем направление отскока
-      var overlap = response.overlapV;
-      var normal = response.overlapN;
-      // отбрасываем шарик на расстояние, равное перекрытию
-
-      // отражаем скорость шарика относительно нормали стены
-      var dot = dx * normal.x + dy * normal.y;
-      dx = (dx - 1.9 * dot * normal.x) * (1 - friction);
-      dy = (dy - 1.9 * dot * normal.y) * (1 - friction);
-	  if (dy>2)
-{
-	    score_game++;
-	score.innerHTML = score_game;
-}
-if (dx>2)
-{
-	    score_game++;
-	score.innerHTML = score_game;
-}
+  // определяем столкновение с треугольниками
+  // определяем вершины треугольника
+  var triangle = new SAT.Polygon(new SAT.Vector(wall.x, wall.y), [    new SAT.Vector(wall.points[0].x, wall.points[0].y),
+    new SAT.Vector(wall.points[1].x, wall.points[1].y),
+    new SAT.Vector(wall.points[2].x, wall.points[2].y)
+  ]);
+  // определяем круг
+  var circle = new SAT.Circle(new SAT.Vector(x, y), radius);
+  // проверяем столкновение
+  var response = new SAT.Response();
+  var collided = SAT.testCirclePolygon(circle, triangle, response);
+  if (collided) {
+    // произошло столкновение со стеной, определяем направление отскока
+    var overlap = response.overlapV;
+    var normal = response.overlapN;
+    // отбрасываем шарик на расстояние, равное перекрытию
+    x -= overlap.x;
+    y -= overlap.y;
+    // проверяем, находится ли центр шара внутри треугольника
+    var isInside = SAT.pointInPolygon(new SAT.Vector(x, y), triangle);
+    if (isInside) {
+      // отбрасываем шар за пределы треугольника
+      var dist = response.overlap;
+      x += dist * normal.x;
+      y += dist * normal.y;
     }
+    // отражаем скорость шарика относительно нормали стены
+    var dot = dx * normal.x + dy * normal.y;
+    dx = (dx - 1.5 * dot * normal.x) * (1 - friction);
+    dy = (dy - 1.5 * dot * normal.y) * (1 - friction);
+    if (dy > 2) {
+      score_game++;
+      score.innerHTML = score_game;
+    }
+    if (dx > 2) {
+      score_game++;
+      score.innerHTML = score_game;
+    }
+  }
 }
 else if (wall.shape === "dynamite")
 {
