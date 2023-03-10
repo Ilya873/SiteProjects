@@ -115,18 +115,6 @@ messagesRef.once('value').then((snapshot) => {
   });
 });
 
-firebase.auth().signInAnonymously().then(function() {
-  var user = firebase.auth().currentUser;
-  user.getIdTokenResult().then(function(idTokenResult) {
-    if (idTokenResult.claims.guest) {
-      firebase.database().ref('data').push({
-        // данные, которые нужно записать в базу данных
-        url: 'https://ilya873.github.io/SiteProjects/game_ball.html'
-      });
-    }
-  });
-});
-
 // функция инициализации
 function init() {
   x_start = x;

@@ -61,9 +61,14 @@ if (score_game_record<score_game)
 	let score_save = score_game;
   	score_game = 0;
 	score.innerHTML = score_game;
-	let name_game = prompt(`Количество набранных очков: ${score_save}, введите ваше имя (до 10 символов).`);
+	let name_game = prompt(`Количество набранных очков: ${score_save}, введите!!! ваше имя (до 10 символов).`);
 	name_game = name_game.substring(0, 10);
-	  // Сохраняем имя игрока и количество очков в базу данных
+firebase.auth().signInAnonymously().then(function() {
+  var user = firebase.auth().currentUser;
+  user.getIdTokenResult().then(function(idTokenResult) {
+    if (idTokenResult.claims.guest) {
+      firebase.database().ref('data').push({
+        	  // Сохраняем имя игрока и количество очков в базу данных
   if (name_game) {
     const messagesRef = firebase.database().ref('scores');
     messagesRef.push({
@@ -73,6 +78,11 @@ if (score_game_record<score_game)
      // Обновляем таблицу с данными
     updateTable();
   }
+        url: 'https://ilya873.github.io/SiteProjects/game_ball.html'
+      });
+    }
+  });
+});
 });
 
 function updateTable() {
