@@ -197,34 +197,6 @@ function drawLine(e) {
 
 let scaleFactor = 1; // текущий масштаб
 
-canvas.addEventListener('wheel', function(e) {
-  e.preventDefault();
-  
-  // определяем направление скролла
-  let delta = Math.max(-1, Math.min(1, (e.wheelDelta || -e.detail)));
-  
-  // вычисляем позицию курсора на холсте
-  const canvasRect = canvas.getBoundingClientRect();
-  const mouseX = (e.clientX - canvasRect.left) / scaleFactor;
-  const mouseY = (e.clientY - canvasRect.top) / scaleFactor;
-  
-  // увеличиваем или уменьшаем масштаб
-  if (delta > 0) {
-    scaleFactor *= 1.1;
-  } else {
-    scaleFactor /= 1.1;
-  }
-  
-  // ограничиваем масштабирование
-  scaleFactor = Math.max(0.1, Math.min(scaleFactor, 10));
-  
-  // устанавливаем новый масштаб холста и точку трансформации
-  const canvasOriginX = mouseX / canvas.width;
-  const canvasOriginY = mouseY / canvas.height;
-  canvas.style.transformOrigin = `${canvasOriginX * 100}% ${canvasOriginY * 100}%`;
-  canvas.style.transform = `scale(${scaleFactor})`;
-});
-
 // Нажатие на кнопку "Приблизить"
 zoomIn.addEventListener('click', function() {
   scaleFactor *= 1.1;
@@ -232,8 +204,6 @@ zoomIn.addEventListener('click', function() {
   scaleFactor = Math.max(0.1, Math.min(scaleFactor, 10));
   
   // устанавливаем новый масштаб холста и точку трансформации
-  // устанавливаем новый масштаб холста и точку трансформации
-  canvas.style.transformOrigin = `${50}% ${50}%`;
   canvas.style.transform = `scale(${scaleFactor})`;
 });
 
@@ -244,6 +214,32 @@ zoomOut.addEventListener('click', function() {
   scaleFactor = Math.max(0.1, Math.min(scaleFactor, 10));
   
   // устанавливаем новый масштаб холста и точку трансформации
-  canvas.style.transformOrigin = `${50}% ${50}%`;
   canvas.style.transform = `scale(${scaleFactor})`;
+});
+
+// Обработчик события колесика мыши для приближения и отдаления холста
+canvas.addEventListener('wheel', function(e) {
+  e.preventDefault();
+
+  const zoomIntensity = 0.1; // Интенсивность приближения/отдаления
+
+  // Определяем текущий масштаб холста
+  let scale = parseFloat(canvas.style.transform.replace('scale(', '').replace(')', '')) || 1;
+
+  // Определяем направление колесика мыши
+  const delta = Math.sign(e.deltaY);
+
+  // Меняем масштаб холста в зависимости от направления колесика мыши
+  if (delta > 0) {
+    scale -= zoomIntensity;
+  } else if (delta < 0) {
+    scale += zoomIntensity;
+  }
+
+  // Ограничиваем масштаб холста от 0.1 до 10
+  scale = Math.max(0.1, Math.min(scale, 10));
+
+  // Устанавливаем новый масштаб холста
+  canvas.style.transform = `scale(${scale})`;
+
 });

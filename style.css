@@ -4,11 +4,13 @@
   justify-content: center;
   align-items: center;
   margin-top: 50px;
+  image-rendering: pixelated;
 }
 
 canvas {
   border: 1px solid black;
   margin-top: 50px;
+  transform-origin: top left;
 }
 
 #controls-file {
