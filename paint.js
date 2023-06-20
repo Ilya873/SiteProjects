@@ -15,6 +15,7 @@ const zoomIn = document.getElementById('zoom-in');
 const zoomOut = document.getElementById('zoom-out');
 
 let fillMode = false;
+let brushType = "round"; // По умолчанию рисуем кругами
 
 // Сохраняем холст в PNG при нажатии на кнопку
 saveButton.addEventListener('click', function() {
@@ -51,7 +52,7 @@ clearButton.addEventListener('click', function() {
 });
 
 // Отслеживаем изменения выбранного цвета
-colorPicker.addEventListener('change', function() {
+colorPicker.addEventListener('input', function() {
   currentColor = colorPicker.value;
 });
 
@@ -73,6 +74,17 @@ fillButton.addEventListener('click', function() {
 // Нажатие на кнопку "Кисть"
 brushButton.addEventListener('click', function() {
   fillMode = false;
+});
+
+const brushTypeButton = document.getElementById('brush-button');
+const brushTypeSelect = document.getElementById('brush-type');
+
+brushTypeButton.addEventListener('click', function() {
+  brushTypeSelect.style.display = brushTypeSelect.style.display === "none" ? "inline-block" : "none";
+});
+
+brushTypeSelect.addEventListener('change', function() {
+  brushType = brushTypeSelect.value;
 });
 
 // Отслеживаем перемещение мыши на холсте и рисуем линию
@@ -124,7 +136,6 @@ canvas.addEventListener('touchmove', function(e) {
 canvas.addEventListener('touchend', function() {
   isDrawing = false;
 });
-
 
 function fillCanvas(x, y, fillColor) {
   // Создаем пустой стек и помещаем в него начальную точку
@@ -181,14 +192,20 @@ function drawLine(e) {
       const fillColor = currentColor;
       fillCanvas(x, y, fillColor);
     } else {
-      context.strokeStyle = currentColor;
-      context.lineWidth = currentBrushSize;
+      context.fillStyle = currentColor;
       context.globalAlpha = currentOpacity;
-      context.lineCap = 'round';
+
       context.beginPath();
-      context.moveTo(lastX, lastY);
-      context.lineTo(x, y);
-      context.stroke();
+      
+      if (brushType === "round") {
+        const radius = Math.max(1, Math.floor(currentBrushSize / 2));
+        context.arc(x, y, radius, 0, 2 * Math.PI);
+        context.fill();
+      } else if (brushType === "square") {
+        const halfSize = Math.floor(currentBrushSize / 2);
+        context.fillRect(x - halfSize, y - halfSize, currentBrushSize, currentBrushSize);
+      }
+      
       lastX = x;
       lastY = y;
     }
