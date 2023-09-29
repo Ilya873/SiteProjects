@@ -1,0 +1,58 @@
+body {
+    background-image: url('https://i.postimg.cc/90WVQRtD/ufo-64454021.png');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    margin: 0;
+    font-family: Arial, sans-serif;
+    box-shadow: 0px 0px 30px rgba(0, 0, 0, 0.5);
+}
+
+.container {
+    display: flex;
+    height: 100vh;
+}
+
+.sidebar {
+    background-color: #333;
+    color: #fff;
+    width: 250px;
+    padding: 20px;
+    box-shadow: 20px 0px 30px rgba(0, 0, 0, 0.7); /* Тень справа */
+}
+
+h1 {
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+
+.nav {
+    list-style: none;
+    padding: 0;
+}
+
+.nav li {
+    margin-bottom: 10px;
+}
+
+.nav a {
+    text-decoration: none;
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 5px;
+    display: block;
+    transition: background-color 0.3s, transform 0.3s;
+}
+
+.nav a:hover {
+    background-color: #007bff;
+    color: #fff;
+    transform: scale(1.05);
+}
+
+.content {
+    flex-grow: 1;
+    background-color: rgba(0, 0, 0, 0.7);
+    padding: 20px;
+    overflow: auto;
+}
