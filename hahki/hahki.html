@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Игра в шашки с ботом</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        #gameContainer {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        #game {
+            display: grid;
+            grid-template-columns: repeat(8, 50px);
+            grid-template-rows: repeat(8, 50px);
+            margin: 0 20px;
+        }
+        .cell {
+            width: 50px;
+            height: 50px;
+            position: relative;
+        }
+        .cell.black {
+            background-image: url('kletka2.png');
+        }
+        .cell.white {
+            background-image: url('kletka1.png');
+        }
+        .piece {
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            position: relative;
+        }
+        .piece.white {
+            background-image: url('white.png');
+        }
+        .piece.black {
+            background-image: url('black.png');
+        }
+        .selected {
+            outline: 2px solid red;
+        }
+        .king {
+            background-image: url('korona.png');
+            background-size: cover;
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+        #captured {
+            display: flex;
+            flex-direction: column;
+        }
+        .capturedPieces {
+            display: flex;
+            flex-wrap: wrap;
+            width: 100px;
+        }
+        .capturedPieces .piece {
+            width: 25px;
+            height: 25px;
+        }
+        .capturedLabel {
+            margin-bottom: 10px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div id="playerChoice">
+        <p>Выберите, за кого вы хотите играть:</p>
+        <button onclick="startGame('white')">Белые</button>
+        <button onclick="startGame('black')">Чёрные</button>
+    </div>
+    <div id="gameContainer" style="display: none;">
+        <div id="capturedWhite">
+            <div class="capturedLabel">Взятые белые</div>
+            <div class="capturedPieces"></div>
+        </div>
+        <div id="game"></div>
+        <div id="capturedBlack">
+            <div class="capturedLabel">Взятые чёрные</div>
+            <div class="capturedPieces"></div>
+        </div>
+    </div>
+    <div id="result" style="display: none;">
+        <p id="resultMessage"></p>
+        <button onclick="resetGame()">Начать заново</button>
+    </div>
+
+    <script>
+        const gameElement = document.getElementById('game');
+        const gameContainerElement = document.getElementById('gameContainer');
+        const playerChoiceElement = document.getElementById('playerChoice');
+        const capturedWhiteElement = document.getElementById('capturedWhite').querySelector('.capturedPieces');
+        const capturedBlackElement = document.getElementById('capturedBlack').querySelector('.capturedPieces');
+        const resultElement = document.getElementById('result');
+        const resultMessageElement = document.getElementById('resultMessage');
+        let playerColor = 'white';
+        let botColor = 'black';
+        let selectedPiece = null;
+        let turn = 'white';
+
+        function createBoard() {
+            gameElement.innerHTML = ''; // Очищаем игровое поле
+            for (let row = 0; row < 8; row++) {
+                for (let col = 0; col < 8; col++) {
+                    const cell = document.createElement('div');
+                    cell.classList.add('cell');
+                    cell.dataset.row = row;
+                    cell.dataset.col = col;
+                    if ((row + col) % 2 === 0) {
+                        cell.classList.add('white');
+                    } else {
+                        cell.classList.add('black');
+                        if (row < 3) {
+                            const piece = document.createElement('div');
+                            piece.classList.add('piece', 'black');
+                            piece.dataset.color = 'black';
+                            cell.appendChild(piece);
+                        } else if (row > 4) {
+                            const piece = document.createElement('div');
+                            piece.classList.add('piece', 'white');
+                            piece.dataset.color = 'white';
+                            cell.appendChild(piece);
+                        }
+                    }
+                    cell.addEventListener('click', onCellClick);
+                    gameElement.appendChild(cell);
+                }
+            }
+        }
+
+        function startGame(color) {
+            playerColor = color;
+            botColor = color === 'white' ? 'black' : 'white';
+            playerChoiceElement.style.display = 'none';
+            gameContainerElement.style.display = 'flex';
+            createBoard();
+            turn = 'white';
+            // Если бот ходит первым
+            if (botColor === 'white') {
+                botMove();
+            }
+        }
+
+        function onCellClick(event) {
+            if (turn !== playerColor) return;
+
+            const cell = event.currentTarget;
+            const piece = cell.querySelector('.piece');
+            if (selectedPiece) {
+                if (piece) {
+                    if (piece.dataset.color === playerColor) {
+                        // Переключить выделение на другую фигуру
+                        selectedPiece.classList.remove('selected');
+                        selectedPiece = piece;
+                        selectedPiece.classList.add('selected');
+                    }
+                } else {
+                    movePiece(cell);
+                }
+            } else if (piece && piece.dataset.color === playerColor) {
+                selectedPiece = piece;
+                selectedPiece.classList.add('selected');
+            }
+        }
+
+        function movePiece(targetCell) {
+            const targetRow = parseInt(targetCell.dataset.row);
+            const targetCol = parseInt(targetCell.dataset.col);
+            const currentRow = parseInt(selectedPiece.parentElement.dataset.row);
+            const currentCol = parseInt(selectedPiece.parentElement.dataset.col);
+
+            const rowDiff = targetRow - currentRow;
+            const colDiff = targetCol - currentCol;
+            const isKing = selectedPiece.classList.contains('king');
+
+            if (isKing) {
+                if (Math.abs(rowDiff) === Math.abs(colDiff)) {
+                    let pathClear = true;
+                    let capturedPieces = [];
+                    const rowStep = rowDiff / Math.abs(rowDiff);
+                    const colStep = colDiff / Math.abs(colDiff);
+                    for (let i = 1; i < Math.abs(rowDiff); i++) {
+                        const intermediateRow = currentRow + i * rowStep;
+                        const intermediateCol = currentCol + i * colStep;
+                        const intermediateCell = gameElement.querySelector(`.cell[data-row="${intermediateRow}"][data-col="${intermediateCol}"]`);
+                        const intermediatePiece = intermediateCell.querySelector('.piece');
+                        if (intermediatePiece) {
+                            if (intermediatePiece.dataset.color === playerColor) {
+                                pathClear = false;
+                                break;
+                            } else {
+                                capturedPieces.push(intermediatePiece);
+                            }
+                        }
+                    }
+                    if (pathClear) {
+                        targetCell.appendChild(selectedPiece);
+                        capturedPieces.forEach(piece => {
+                            piece.parentElement.removeChild(piece);
+                            if (piece.dataset.color === 'white') {
+                                capturedWhiteElement.appendChild(piece.cloneNode(true));
+                            } else {
+                                capturedBlackElement.appendChild(piece.cloneNode(true));
+                            }
+                        });
+                        checkKing(selectedPiece, targetCell);
+                        endTurn();
+                        return;
+                    }
+                }
+            } else {
+                if (Math.abs(rowDiff) === 1 && Math.abs(colDiff) === 1 && (playerColor === 'white' ? rowDiff === -1 : rowDiff === 1)) {
+                    // Обычный ход
+                    targetCell.appendChild(selectedPiece);
+                    checkKing(selectedPiece, targetCell);
+                    endTurn();
+                } else if (Math.abs(rowDiff) === 2 && Math.abs(colDiff) === 2) {
+                    // Взятие шашки
+                    const capturedRow = currentRow + rowDiff / 2;
+                    const capturedCol = currentCol + colDiff / 2;
+                    const capturedCell = gameElement.querySelector(`.cell[data-row="${capturedRow}"][data-col="${capturedCol}"]`);
+                    const capturedPiece = capturedCell.querySelector('.piece');
+                    if (capturedPiece && capturedPiece.dataset.color !== playerColor) {
+                        // Удаление взятой шашки
+                        if (capturedPiece.dataset.color === 'white') {
+                            capturedWhiteElement.appendChild(capturedPiece.cloneNode(true));
+                        } else {
+                            capturedBlackElement.appendChild(capturedPiece.cloneNode(true));
+                        }
+                        capturedCell.removeChild(capturedPiece);
+                        targetCell.appendChild(selectedPiece);
+                        checkKing(selectedPiece, targetCell);
+                        endTurn();
+                    }
+                }
+            }
+        }
+
+        function checkKing(piece, cell) {
+            const row = parseInt(cell.dataset.row);
+            if ((piece.dataset.color === 'white' && row === 0) || (piece.dataset.color === 'black' && row === 7)) {
+                piece.classList.add('king');
+                const crown = document.createElement('div');
+                crown.classList.add('king');
+                piece.appendChild(crown);
+            }
+        }
+
+        function endTurn() {
+            if (selectedPiece) {
+                selectedPiece.classList.remove('selected');
+                selectedPiece = null;
+            }
+            turn = botColor;
+
+            if (checkVictory(playerColor)) {
+                showResult('Вы победили!');
+                return;
+            } else if (checkVictory(botColor)) {
+                showResult('Бот победил!');
+                return;
+            }
+
+            setTimeout(botMove, 500); // Бот делает ход с задержкой
+        }
+
+        function botMove() {
+            const pieces = Array.from(gameElement.querySelectorAll(`.piece.${botColor}`));
+            const capturingMoves = [];
+            const regularMoves = [];
+
+            pieces.forEach(piece => {
+                const row = parseInt(piece.parentElement.dataset.row);
+                const col = parseInt(piece.parentElement.dataset.col);
+                const isKing = piece.classList.contains('king');
+                const directions = isKing
+                    ? [[1, 1], [1, -1], [-1, 1], [-1, -1]]
+                    : botColor === 'black'
+                        ? [[1, 1], [1, -1]]
+                        : [[-1, 1], [-1, -1]];
+
+                directions.forEach(([dr, dc]) => {
+                    const targetRow = row + dr;
+                    const targetCol = col + dc;
+                    if (targetRow >= 0 && targetRow < 8 && targetCol >= 0 && targetCol < 8) {
+                        const targetCell = gameElement.querySelector(`.cell[data-row="${targetRow}"][data-col="${targetCol}"]`);
+                        if (!targetCell.querySelector('.piece')) {
+                            regularMoves.push({ piece, targetCell });
+                        } else {
+                            const captureRow = row + dr * 2;
+                            const captureCol = col + dc * 2;
+                            if (captureRow >= 0 && captureRow < 8 && captureCol >= 0 && captureCol < 8) {
+                                const captureCell = gameElement.querySelector(`.cell[data-row="${captureRow}"][data-col="${captureCol}"]`);
+                                const capturedPiece = targetCell.querySelector('.piece');
+                                if (capturedPiece && capturedPiece.dataset.color === playerColor && !captureCell.querySelector('.piece')) {
+                                    capturingMoves.push({ piece, captureCell, capturedPiece });
+                                }
+                            }
+                        }
+                    }
+                });
+            });
+
+            if (capturingMoves.length > 0) {
+                const { piece, captureCell, capturedPiece } = capturingMoves[Math.floor(Math.random() * capturingMoves.length)];
+                captureCell.appendChild(piece);
+                capturedPiece.parentElement.removeChild(capturedPiece);
+                if (capturedPiece.dataset.color === 'white') {
+                    capturedWhiteElement.appendChild(capturedPiece.cloneNode(true));
+                } else {
+                    capturedBlackElement.appendChild(capturedPiece.cloneNode(true));
+                }
+                checkKing(piece, captureCell);
+                // Завершаем ход после взятия шашки
+                turn = playerColor;
+
+                if (checkVictory(botColor)) {
+                    showResult('Бот победил!');
+                }
+				
+            } else if (regularMoves.length > 0) {
+                const { piece, targetCell } = regularMoves[Math.floor(Math.random() * regularMoves.length)];
+                targetCell.appendChild(piece);
+                checkKing(piece, targetCell);
+                turn = playerColor;
+
+                if (checkVictory(botColor)) {
+                    showResult('Бот победил!');
+                }
+            }
+        }
+
+        function checkVictory(color) {
+            const opponentColor = color === 'white' ? 'black' : 'white';
+            const opponentPieces = gameElement.querySelectorAll(`.piece.${opponentColor}`);
+            return opponentPieces.length === 0;
+        }
+
+        function showResult(message) {
+            resultMessageElement.textContent = message;
+            resultElement.style.display = 'block';
+            gameContainerElement.style.display = 'none';
+        }
+
+        function resetGame() {
+            playerChoiceElement.style.display = 'block';
+            resultElement.style.display = 'none';
+            gameContainerElement.style.display = 'none';
+            capturedWhiteElement.innerHTML = '';
+            capturedBlackElement.innerHTML = '';
+            createBoard();
+        }
+
+        createBoard();
+    </script>
+</body>
+</html>
