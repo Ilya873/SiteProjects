@@ -292,26 +292,53 @@
                 const isKing = piece.classList.contains('king');
                 const directions = isKing
                     ? [[1, 1], [1, -1], [-1, 1], [-1, -1]]
-                    : botColor === 'black'
-                        ? [[1, 1], [1, -1]]
-                        : [[-1, 1], [-1, -1]];
+                    : [[1, 1], [1, -1], [-1, 1], [-1, -1]];
 
                 directions.forEach(([dr, dc]) => {
-                    const targetRow = row + dr;
-                    const targetCol = col + dc;
-                    if (targetRow >= 0 && targetRow < 8 && targetCol >= 0 && targetCol < 8) {
-                        const targetCell = gameElement.querySelector(`.cell[data-row="${targetRow}"][data-col="${targetCol}"]`);
-                        if (!targetCell.querySelector('.piece')) {
-                            regularMoves.push({ piece, targetCell });
-                        } else {
-                            const captureRow = row + dr * 2;
-                            const captureCol = col + dc * 2;
-                            if (captureRow >= 0 && captureRow < 8 && captureCol >= 0 && captureCol < 8) {
-                                const captureCell = gameElement.querySelector(`.cell[data-row="${captureRow}"][data-col="${captureCol}"]`);
-                                const capturedPiece = targetCell.querySelector('.piece');
-                                if (capturedPiece && capturedPiece.dataset.color === playerColor && !captureCell.querySelector('.piece')) {
-                                    capturingMoves.push({ piece, captureCell, capturedPiece });
+                    if (isKing) {
+                        for (let i = 1; i < 8; i++) {
+                            const targetRow = row + dr * i;
+                            const targetCol = col + dc * i;
+                            if (targetRow >= 0 && targetRow < 8 && targetCol >= 0 && targetCol < 8) {
+                                const targetCell = gameElement.querySelector(`.cell[data-row="${targetRow}"][data-col="${targetCol}"]`);
+                                if (!targetCell.querySelector('.piece')) {
+                                    regularMoves.push({ piece, targetCell });
+                                } else {
+                                    const captureRow = row + dr * (i + 1);
+                                    const captureCol = col + dc * (i + 1);
+                                    if (captureRow >= 0 && captureRow < 8 && captureCol >= 0 && captureCol < 8) {
+                                        const captureCell = gameElement.querySelector(`.cell[data-row="${captureRow}"][data-col="${captureCol}"]`);
+                                        const capturedPiece = targetCell.querySelector('.piece');
+                                        if (capturedPiece && capturedPiece.dataset.color === playerColor && !captureCell.querySelector('.piece')) {
+                                            capturingMoves.push({ piece, captureCell, capturedPiece });
+                                        }
+                                    }
+                                    break; // Прерываем цикл, если на пути есть фигура
                                 }
+                            } else {
+                                break; // Прерываем цикл, если выходит за границы поля
+                            }
+                        }
+                    } else {
+                        const targetRow = row + dr;
+                        const targetCol = col + dc;
+                        if (targetRow >= 0 && targetRow < 8 && targetCol >= 0 && targetCol < 8) {
+                            const targetCell = gameElement.querySelector(`.cell[data-row="${targetRow}"][data-col="${targetCol}"]`);
+                            if (!targetCell.querySelector('.piece')) {
+							if ((botColor === 'black' && dr==1) || (botColor === 'white' && dr==-1))
+							{
+                                regularMoves.push({ piece, targetCell });
+								}
+                            } else {
+                                const captureRow = row + dr * 2;
+                                const captureCol = col + dc * 2;
+                                if (captureRow >= 0 && captureRow < 8 && captureCol >= 0 && captureCol < 8) {
+                                    const captureCell = gameElement.querySelector(`.cell[data-row="${captureRow}"][data-col="${captureCol}"]`);
+                                    const capturedPiece = targetCell.querySelector('.piece');
+                                    if (capturedPiece && capturedPiece.dataset.color === playerColor && !captureCell.querySelector('.piece')) {
+                                        capturingMoves.push({ piece, captureCell, capturedPiece });
+                                    }
+								}
                             }
                         }
                     }
