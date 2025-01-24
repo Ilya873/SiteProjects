@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Симулятор Земли</title>
+    <style>
+    body {
+        background: linear-gradient(45deg, #1a1a2e, #16213e);
+        color: #fff;
+        font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        margin: 0;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-height: 100vh;
+    }
+
+    h1 {
+        color: #e94560;
+        font-weight: 300;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        margin: 20px 0;
+    }
+
+    .controls {
+        background: rgba(255, 255, 255, 0.08);
+        padding: 15px 25px;
+        border-radius: 15px;
+        margin-bottom: 25px;
+        display: flex;
+        gap: 15px;
+        flex-wrap: wrap;
+        backdrop-filter: blur(8px);
+        border: 1px solid rgba(255,255,255,0.1);
+        box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        max-width: 800px;
+        width: 100%;
+    }
+	
+select {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255,255,255,0.2);
+    appearance: none;
+    -webkit-appearance: none;
+    position: relative;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 12px;
+}
+
+select option {
+    background: #2d4263;
+    color: white;
+    padding: 10px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+select option:hover {
+    background: #e94560 !important;
+    cursor: pointer;
+}
+
+select option:checked {
+    background: #3a5b92;
+}
+
+    select, input[type="number"], button {
+        padding: 10px 15px;
+        border: none;
+        border-radius: 8px;
+        background: rgba(255,255,255,0.1);
+        color: #fff;
+        font-size: 14px;
+        transition: all 0.3s ease;
+        border: 1px solid rgba(255,255,255,0.2);
+    }
+
+    select:focus, input[type="number"]:focus, button:focus {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(233, 69, 96, 0.3);
+    }
+
+    button {
+        background: linear-gradient(45deg, #e94560, #ff6b6b);
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    button::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+            120deg,
+            transparent,
+            rgba(255,255,255,0.2),
+            transparent
+        );
+        transition: all 0.6s ease;
+    }
+
+    button:hover::before {
+        left: 100%;
+    }
+
+    button.active {
+        background: linear-gradient(45deg, #2d4263, #3a5b92);
+        box-shadow: inset 0 4px 15px rgba(0,0,0,0.2);
+    }
+
+    label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 14px;
+        color: rgba(255,255,255,0.9);
+    }
+
+    input[type="number"] {
+        width: 80px;
+        padding: 8px 12px;
+        background: rgba(0,0,0,0.3);
+    }
+
+    canvas {
+        border: 2px solid rgba(255,255,255,0.1);
+        border-radius: 12px;
+        width: 800px;
+        height: 600px;
+        background: #0f3460;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    }
+
+    .info {
+        margin-top: 20px;
+        padding: 12px 20px;
+        background: rgba(255,255,255,0.05);
+        border-radius: 8px;
+        border: 1px solid rgba(255,255,255,0.1);
+        font-size: 14px;
+        color: rgba(255,255,255,0.8);
+    }
+
+    /* Анимации */
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .controls, canvas, .info {
+        animation: fadeIn 0.6s ease-out;
+    }
+
+    /* Адаптивность */
+    @media (max-width: 820px) {
+        .controls {
+            padding: 12px;
+            gap: 10px;
+        }
+        
+        canvas {
+            width: 95%;
+            height: auto;
+            aspect-ratio: 4/3;
+        }
+        
+        button, select, input {
+            font-size: 13px;
+            padding: 8px 12px;
+        }
+    }
+    </style>
+</head>
+<body>
+    <h1>Симулятор Земли</h1>
+    <div class="controls">
+        <label>
+            Размер кисти:
+            <input type="number" id="brushSize" value="5" min="1" max="50">
+        </label>
+        <label>
+            Время (год/сек):
+            <input type="number" id="timeSpeed" value="1" min="1" max="100" step="1">
+        </label>
+        <button id="toggleMode" class="mode-toggle active">Режим: Рисование</button>
+        <button id="toggleTemperatureLayer" class="mode-toggle">Включить слой температур</button>
+		        <select id="terrainType">
+            <option value="ocean">Океан</option>
+            <option value="plains">Луга</option>
+            <option value="steppe">Степь</option>
+            <option value="forest">Лес</option>
+            <option value="taiga">Тайга</option>
+            <option value="jungle">Джунгли</option>
+            <option value="desert">Пустыня</option>
+            <option value="snow">Снег</option>
+            <option value="mountain">Горы</option>
+        </select>
+    </div>
+    <canvas id="worldCanvas" width="800" height="600"></canvas>
+    <div class="info" id="cellInfo">Выберите ячейку для информации.</div>
+    <script>
+	
+	        // Добавляем русские названия биомов
+        const biomeNames = {
+            ocean: "Океан",
+            plains: "Луга",
+            steppe: "Степь",
+            forest: "Лес",
+            taiga: "Тайга",
+            jungle: "Джунгли",
+            desert: "Пустыня",
+            snow: "Снег",
+            mountain: "Горы"
+        };
+
+        const canvas = document.getElementById("worldCanvas");
+        const ctx = canvas.getContext("2d");
+        const terrainType = document.getElementById("terrainType");
+        const originalTerrainOptions = terrainType.innerHTML;
+        const brushSize = document.getElementById("brushSize");
+        const toggleMode = document.getElementById("toggleMode");
+        const toggleTemperatureLayer = document.getElementById("toggleTemperatureLayer");
+        const cellInfo = document.getElementById("cellInfo");
+
+        const mapWidth = 80;
+        const mapHeight = 60;
+        const cellSize = 10;
+        const neighbors = [[-1,0],[1,0],[0,-1],[0,1],[-1,-1],[-1,1],[1,-1],[1,1]];
+
+        const biomes = {
+            ocean: { 
+                color: "#0000FF", 
+                baseTemp: 15,
+                growthRate: [0, 0],
+                decayRate: [0, 0]
+            },
+            plains: { 
+                color: "#7CFC00", 
+                baseTemp: 20,
+                growthRate: [1, 80],
+                decayRate: [1, 2]
+            },
+            steppe: { 
+                color: "#F4A460", 
+                baseTemp: 25,
+                growthRate: [1, 60],
+                decayRate: [1, 10]
+            },
+            forest: { 
+                color: "#228B22", 
+                baseTemp: 18,
+                growthRate: [1, 60],
+                decayRate: [1, 5]
+            },
+            taiga: { 
+                color: "#2E8B57", 
+                baseTemp: 10,
+                growthRate: [1, 50],
+                decayRate: [5, 20]
+            },
+            jungle: { 
+                color: "#006400", 
+                baseTemp: 28,
+                growthRate: [1, 80],
+                decayRate: [5, 15]
+            },
+            desert: { 
+                color: "#FFD700", 
+                baseTemp: 35,
+                growthRate: [1, 40],
+                decayRate: [1, 30]
+            },
+            snow: { 
+                color: "#FFFFFF", 
+                baseTemp: -5,
+                growthRate: [1, 40],
+                decayRate: [1, 30]
+            },
+            mountain: { 
+                color: "#A9A9A9", 
+                baseTemp: 5,
+                growthRate: [1, 50],
+                decayRate: [10, 20]
+            }
+        };
+
+        const map = Array.from({ length: mapHeight }, () =>
+            Array.from({ length: mapWidth }, () => ({
+                biome: "ocean",
+                population: 0,
+                temperature: biomes.ocean.baseTemp
+            }))
+        );
+
+        let isDrawingMode = true;
+        let isTemperatureLayerActive = false;			
+        let lastTime = 0;
+        let accumulatedTime = 0;
+
+        function drawMap() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let y = 0; y < mapHeight; y++) {
+                for (let x = 0; x < mapWidth; x++) {
+                    const cell = map[y][x];
+                    ctx.fillStyle = biomes[cell.biome].color;
+                    ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+
+                    if (isTemperatureLayerActive) {
+                        const color = getTemperatureColor(cell.temperature);
+                        ctx.fillStyle = color;
+                        ctx.globalAlpha = 0.5;
+                        ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+                        ctx.globalAlpha = 1;
+                    }
+
+                    if (cell.population > 0) {
+                        const opacity = Math.min(cell.population / 10000, 1) * 0.5;
+                        ctx.fillStyle = `rgba(255, 0, 0, ${opacity})`;
+                        ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+                    }
+                }
+            }
+        }
+
+        function getTemperatureColor(temp) {
+            const clampedTemp = Math.max(-20, Math.min(50, temp));
+            const gradient = (clampedTemp + 20) / 70;
+            const red = Math.min(255, 255 * gradient);
+            const blue = 255 - red;
+            return `rgb(${red}, 0, ${blue})`;
+        }
+
+        toggleMode.addEventListener("click", () => {
+            isDrawingMode = !isDrawingMode;
+            toggleMode.textContent = `Режим: ${isDrawingMode ? "Рисование" : "Заселение"}`;
+            toggleMode.classList.toggle("active", isDrawingMode);
+        });
+
+        toggleTemperatureLayer.addEventListener("click", () => {
+            isTemperatureLayerActive = !isTemperatureLayerActive;
+            toggleTemperatureLayer.textContent = isTemperatureLayerActive
+                ? "Выключить слой температур"
+                : "Включить слой температур";
+            terrainType.innerHTML = isTemperatureLayerActive
+                ? `<option value="increase">Повышение температуры</option>
+                   <option value="decrease">Понижение температуры</option>`
+                : originalTerrainOptions;
+            drawMap();
+        });
+
+        function updateBiomeBasedOnTemperature(cell) {
+            if (cell.biome === "ocean" || cell.biome === "mountain") return;
+            
+            const temp = cell.temperature;
+            if (temp >= 40) cell.biome = "desert";
+            else if (temp >= 30) cell.biome = "steppe";
+            else if (temp >= 20) cell.biome = "plains";
+            else if (temp >= 15) cell.biome = "forest";
+            else if (temp >= 5) cell.biome = "taiga";
+            else if (temp <= -5) cell.biome = "snow";
+        }
+
+        function applyTemperatureChange(startX, startY, size, changeType) {
+            for (let y = startY - size; y <= startY + size; y++) {
+                for (let x = startX - size; x <= startX + size; x++) {
+                    if (x >=0 && x < mapWidth && y >=0 && y < mapHeight) {
+                        const cell = map[y][x];
+                        cell.temperature += changeType === "increase" ? 1 : -1;
+                        cell.temperature = Math.max(-80, Math.min(70, cell.temperature));
+                        updateBiomeBasedOnTemperature(cell);
+                    }
+                }
+            }
+        }
+
+        canvas.addEventListener("mousedown", (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const startX = Math.floor((e.clientX - rect.left) / cellSize);
+            const startY = Math.floor((e.clientY - rect.top) / cellSize);
+            const size = parseInt(brushSize.value);
+
+            if (isTemperatureLayerActive) {
+                const changeType = terrainType.value;
+                const apply = () => applyTemperatureChange(startX, startY, size, changeType);
+                
+                apply();
+                const interval = setInterval(apply, 100);
+                
+                const stop = () => {
+                    clearInterval(interval);
+                    canvas.removeEventListener("mouseup", stop);
+                    canvas.removeEventListener("mouseleave", stop);
+                };
+                
+                canvas.addEventListener("mouseup", stop);
+                canvas.addEventListener("mouseleave", stop);
+            } else if (isDrawingMode) {
+                const biome = terrainType.value;
+                for (let y = startY - size; y <= startY + size; y++) {
+                    for (let x = startX - size; x <= startX + size; x++) {
+                        if (x >=0 && x < mapWidth && y >=0 && y < mapHeight) {
+                            const cell = map[y][x];
+                            cell.biome = biome;
+                            cell.temperature = biomes[biome].baseTemp;
+                        }
+                    }
+                }
+} else {
+    if (startX >=0 && startX < mapWidth && startY >=0 && startY < mapHeight) {
+        const cell = map[startY][startX];
+        if (cell.biome !== 'ocean') {
+            cell.population = Math.max(cell.population, 10);
+        }
+    }
+}
+            drawMap();
+        });
+
+        canvas.addEventListener("mousemove", (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const x = Math.floor((e.clientX - rect.left) / cellSize);
+            const y = Math.floor((e.clientY - rect.top) / cellSize);
+            const cell = map[y]?.[x];
+            if (cell) {
+                cellInfo.textContent = `Ячейка (${x}, ${y}): Биом - ${biomeNames[cell.biome]}, ` +
+                                      `Население - ${cell.population}, Температура - ${cell.temperature}°C`;
+            }
+        });
+
+        function updateOceanInfluence() {
+            const tempChanges = new Map();
+            
+            // Собираем данные обо всех океанах
+            const oceanTemps = new Map();
+            for (let y = 0; y < mapHeight; y++) {
+                for (let x = 0; x < mapWidth; x++) {
+                    if (map[y][x].biome === 'ocean') {
+                        oceanTemps.set(`${x},${y}`, map[y][x].temperature);
+                    }
+                }
+            }
+
+            // Обрабатываем влияние океанов
+            for (let y = 0; y < mapHeight; y++) {
+                for (let x = 0; x < mapWidth; x++) {
+                    const cell = map[y][x];
+                    if (cell.biome === 'ocean') continue;
+
+                    let minOceanTemp = Infinity;
+                    // Ищем минимальную температуру соседних океанов
+                    for (const [dy, dx] of neighbors) {
+                        const ny = y + dy;
+                        const nx = x + dx;
+                        if (ny >=0 && ny < mapHeight && nx >=0 && nx < mapWidth) {
+                            const neighbor = map[ny][nx];
+                            if (neighbor.biome === 'ocean') {
+                                minOceanTemp = Math.min(minOceanTemp, neighbor.temperature);
+                            }
+                        }
+                    }
+                    
+                    if (minOceanTemp !== Infinity) {
+                        // Максимальное охлаждение до (minOceanTemp)
+                        const newTemp = Math.max(
+                            cell.temperature - 2,
+                            minOceanTemp
+                        );
+                        tempChanges.set(`${x},${y}`, newTemp);
+                    }
+                }
+            }
+
+            // Применяем изменения температуры
+            tempChanges.forEach((newTemp, key) => {
+                const [x, y] = key.split(',').map(Number);
+                // Сохраняем ручные изменения, если они ниже охлаждения
+                map[y][x].temperature = Math.min(
+                    map[y][x].temperature, 
+                    newTemp
+                );
+                updateBiomeBasedOnTemperature(map[y][x]);
+            });
+        }
+
+        function processSimulationStep() {
+            updateOceanInfluence();
+
+            for (let y = 0; y < mapHeight; y++) {
+                for (let x = 0; x < mapWidth; x++) {
+                    const cell = map[y][x];
+                    
+                    if (cell.biome === 'ocean') {
+                        cell.population = 0;
+                        continue;
+                    }
+
+                    if (cell.population > 0) {
+                        const biome = biomes[cell.biome];
+
+                        // Рост населения
+                        const growthPercent = Math.random() * (biome.growthRate[1] - biome.growthRate[0]) + biome.growthRate[0];
+                        const growth = Math.floor(cell.population * (growthPercent / 100));
+                        cell.population = Math.min(cell.population + growth, 20000);
+                        
+                        // Убыль населения
+                        let decayPercent = Math.random() * (biome.decayRate[1] - biome.decayRate[0]) + biome.decayRate[0];
+                        
+                        // Температурная убыль
+                        const currentTemp = cell.temperature;
+                        let tempDecay = 0;
+                        if (currentTemp > 45) {
+                            tempDecay = currentTemp - 45;
+                        } else if (currentTemp < -15) {
+                            tempDecay = (-15 - currentTemp);
+                        }
+                        decayPercent += tempDecay;
+                        
+                        const decay = Math.floor(cell.population * (decayPercent / 100));
+                        cell.population = Math.max(cell.population - decay, 0);
+
+                        // Заселение соседей
+                        if (cell.population >= 1000) {
+                            for (const [dy, dx] of neighbors) {
+                                const ny = y + dy;
+                                const nx = x + dx;
+                                if (ny >= 0 && ny < mapHeight && nx >= 0 && nx < mapWidth) {
+                                    const neighbor = map[ny][nx];
+                                    if (neighbor.biome !== 'ocean') {
+                                        neighbor.population = Math.min(neighbor.population + 10, 20000);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        function simulateGrowth(timestamp) {
+            if (!lastTime) lastTime = timestamp;
+            const deltaTime = timestamp - lastTime;
+            lastTime = timestamp;
+            accumulatedTime += deltaTime;
+
+            const speed = parseInt(document.getElementById('timeSpeed').value);
+            const stepDuration = 1000 / speed;
+
+            const steps = Math.floor(accumulatedTime / stepDuration);
+            if (steps > 0) {
+                for (let i = 0; i < steps; i++) {
+                    processSimulationStep();
+                }
+                accumulatedTime -= steps * stepDuration;
+            }
+
+            drawMap();
+            requestAnimationFrame(simulateGrowth);
+        }
+
+        drawMap();
+        requestAnimationFrame(simulateGrowth);
+    </script>
+</body>
+</html>
