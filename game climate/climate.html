@@ -88,6 +88,20 @@ select option:checked {
         outline: none;
         box-shadow: 0 0 0 3px rgba(233, 69, 96, 0.3);
     }
+	
+	select optgroup {
+    font-style: normal;
+    font-weight: bold;
+    color: #e94560;
+    padding: 5px 0;
+    background: rgba(255,255,255,0.05);
+}
+
+select optgroup option {
+    font-weight: normal;
+    color: #fff;
+    padding-left: 20px;
+}
 
     button {
         background: linear-gradient(45deg, #e94560, #ff6b6b);
@@ -190,6 +204,12 @@ select option:checked {
 <body>
     <h1>Симулятор Земли</h1>
     <div class="controls">
+	    <button id="generateWorld">Сгенерировать мир</button>
+    <select id="worldType">
+        <option value="pangea">Пангея</option>
+        <option value="continents">Континенты</option>
+        <option value="islands">Острова</option>
+    </select>
         <label>
             Размер кисти:
             <input type="number" id="brushSize" value="5" min="1" max="50">
@@ -200,34 +220,45 @@ select option:checked {
         </label>
         <button id="toggleMode" class="mode-toggle active">Режим: Рисование</button>
         <button id="toggleTemperatureLayer" class="mode-toggle">Включить слой температур</button>
-		        <select id="terrainType">
-            <option value="ocean">Океан</option>
-            <option value="plains">Луга</option>
-            <option value="steppe">Степь</option>
-            <option value="forest">Лес</option>
-            <option value="taiga">Тайга</option>
-            <option value="jungle">Джунгли</option>
-            <option value="desert">Пустыня</option>
-            <option value="snow">Снег</option>
-            <option value="mountain">Горы</option>
-        </select>
+		<button id="toggleHumidityLayer">Включить слой влажности</button>
+<select id="terrainType">
+    <optgroup label="Водные">
+        <option value="ocean">Океан</option>
+        <option value="coral">Коралловый риф</option>
+    </optgroup>
+    
+    <optgroup label="Равнинные">
+        <option value="plains">Луга</option>
+        <option value="steppe">Степь</option>
+        <option value="savanna">Саванна</option>
+    </optgroup>
+    
+    <optgroup label="Лесные">
+        <option value="forest">Лес</option>
+        <option value="jungle">Джунгли</option>
+        <option value="taiga">Тайга</option>
+        <option value="swamp">Болото</option>
+        <option value="mangrove">Мангры</option>
+    </optgroup>
+    
+    <optgroup label="Холодные">
+        <option value="snow">Снег</option>
+        <option value="tundra">Тундра</option>
+        <option value="alpine">Альпийские луга</option>
+    </optgroup>
+    
+    <optgroup label="Экстремальные">
+        <option value="desert">Пустыня</option>
+        <option value="mountain">Горы</option>
+        <option value="volcanic">Вулканический</option>
+    </optgroup>
+</select>
     </div>
     <canvas id="worldCanvas" width="800" height="600"></canvas>
     <div class="info" id="cellInfo">Выберите ячейку для информации.</div>
+	<script src="biomes.js"></script>
+<script src="states-population.js"></script>
     <script>
-	
-	        // Добавляем русские названия биомов
-        const biomeNames = {
-            ocean: "Океан",
-            plains: "Луга",
-            steppe: "Степь",
-            forest: "Лес",
-            taiga: "Тайга",
-            jungle: "Джунгли",
-            desert: "Пустыня",
-            snow: "Снег",
-            mountain: "Горы"
-        };
 
         const canvas = document.getElementById("worldCanvas");
         const ctx = canvas.getContext("2d");
@@ -237,204 +268,30 @@ select option:checked {
         const toggleMode = document.getElementById("toggleMode");
         const toggleTemperatureLayer = document.getElementById("toggleTemperatureLayer");
         const cellInfo = document.getElementById("cellInfo");
+		
+		// Добавляем переключатель влажности
+const toggleHumidityLayer = document.getElementById("toggleHumidityLayer"); // Добавить в HTML
+let isHumidityLayerActive = false;
 
         const mapWidth = 80;
         const mapHeight = 60;
         const cellSize = 10;
         const neighbors = [[-1,0],[1,0],[0,-1],[0,1],[-1,-1],[-1,1],[1,-1],[1,1]];
 
-        const biomes = {
-            ocean: { 
-                color: "#0000FF", 
-                baseTemp: 15,
-                growthRate: [0, 0],
-                decayRate: [0, 0]
-            },
-            plains: { 
-                color: "#7CFC00", 
-                baseTemp: 20,
-                growthRate: [1, 80],
-                decayRate: [1, 2]
-            },
-            steppe: { 
-                color: "#F4A460", 
-                baseTemp: 25,
-                growthRate: [1, 60],
-                decayRate: [1, 10]
-            },
-            forest: { 
-                color: "#228B22", 
-                baseTemp: 18,
-                growthRate: [1, 60],
-                decayRate: [1, 5]
-            },
-            taiga: { 
-                color: "#2E8B57", 
-                baseTemp: 10,
-                growthRate: [1, 50],
-                decayRate: [5, 20]
-            },
-            jungle: { 
-                color: "#006400", 
-                baseTemp: 28,
-                growthRate: [1, 80],
-                decayRate: [5, 15]
-            },
-            desert: { 
-                color: "#FFD700", 
-                baseTemp: 35,
-                growthRate: [1, 40],
-                decayRate: [1, 30]
-            },
-            snow: { 
-                color: "#FFFFFF", 
-                baseTemp: -5,
-                growthRate: [1, 40],
-                decayRate: [1, 30]
-            },
-            mountain: { 
-                color: "#A9A9A9", 
-                baseTemp: 5,
-                growthRate: [1, 50],
-                decayRate: [10, 20]
-            }
-        };
-
-        const map = Array.from({ length: mapHeight }, () =>
-            Array.from({ length: mapWidth }, () => ({
-                biome: "ocean",
-                population: 0,
-                temperature: biomes.ocean.baseTemp
-            }))
-        );
+const map = Array.from({ length: mapHeight }, () =>
+    Array.from({ length: mapWidth }, () => ({
+        biome: "ocean",
+        population: 0,
+        temperature: biomes.ocean.baseTemp,
+        humidity: biomes.ocean.baseHumidity, // Добавляем влажность
+		elevation: 0 // Добавляем высоту
+    }))
+);
 
         let isDrawingMode = true;
         let isTemperatureLayerActive = false;			
         let lastTime = 0;
         let accumulatedTime = 0;
-		let ships = [];
-let states = [];
-let maxShips = 50; // Добавляем константу
-
-function isCoastal(x, y) {
-    if (map[y][x].biome === 'ocean') return false;
-    for (const [dx, dy] of neighbors) {
-        const nx = x + dx;
-        const ny = y + dy;
-        if (nx >= 0 && nx < mapWidth && ny >= 0 && ny < mapHeight) {
-            if (map[ny][nx].biome === 'ocean') {
-                return true;
-            }
-        }
-    }
-    return false;
-}
-
-function processShips() {
-    // Создание новых кораблей только если меньше максимума
-    if(ships.length < maxShips) {
-        for (let y = 0; y < mapHeight; y++) {
-            for (let x = 0; x < mapWidth; x++) {
-                const cell = map[y][x];
-                if (isCoastal(x, y) && cell.population >= 10000 && Math.random() < 0.1) {
-                    const dir = neighbors[Math.floor(Math.random() * neighbors.length)];
-                    ships.push({ x, y, dx: dir[0], dy: dir[1] });
-                    if(ships.length >= maxShips) break; // Прерываем при достижении максимума
-                }
-            }
-            if(ships.length >= maxShips) break;
-        }
-    }
-
-    // Движение кораблей
-    const shipsToRemove = [];
-    ships.forEach((ship, index) => {
-        let newX = ship.x + ship.dx;
-        let newY = ship.y + ship.dy;
-
-        if (newX < 0 || newX >= mapWidth || newY < 0 || newY >= mapHeight) {
-            shipsToRemove.push(index);
-            return;
-        }
-
-        const targetCell = map[newY][newX];
-        if (targetCell.biome !== 'ocean') {
-            targetCell.population += 10;
-            shipsToRemove.push(index);
-            return;
-        }
-
-        ship.x = newX;
-        ship.y = newY;
-    });
-
-    // Удаление завершивших движение кораблей
-    shipsToRemove.reverse().forEach(index => ships.splice(index, 1));
-}
-
-function isCellInState(x, y) {
-    return states.some(state => state.cells.has(`${x},${y}`));
-}
-
-function processStates() {
-    // Создание новых государств
-    for (let y = 0; y < mapHeight - 1; y++) {
-        for (let x = 0; x < mapWidth - 1; x++) {
-            let total = 0;
-            let canCreate = true;
-            for (let dy = 0; dy <= 1; dy++) {
-                for (let dx = 0; dx <= 1; dx++) {
-                    total += map[y + dy][x + dx].population;
-                    if (isCellInState(x + dx, y + dy)) canCreate = false;
-                }
-            }
-            if (total > 78000 && canCreate && Math.random() < 0.001) {
-                const color = `hsla(${Math.random() * 360}, 70%, 50%, 0.5)`; // Добавляем альфа-канал 0.5
-                const cells = new Set();
-                for (let dy = 0; dy <= 1; dy++) {
-                    for (let dx = 0; dx <= 1; dx++) {
-                        cells.add(`${x + dx},${y + dy}`);
-                    }
-                }
-                states.push({ cells, color });
-            }
-        }
-    }
-
-    // Расширение государств
-    states.forEach(state => {
-        const border = new Set();
-        state.cells.forEach(cellKey => {
-            const [x, y] = cellKey.split(',').map(Number);
-            neighbors.forEach(([dx, dy]) => {
-                const nx = x + dx, ny = y + dy;
-                if (nx >= 0 && nx < mapWidth && ny >= 0 && ny < mapHeight && !isCellInState(nx, ny)) {
-                    border.add(`${nx},${ny}`);
-                }
-            });
-        });
-
-    border.forEach(cellKey => {
-        const [x, y] = cellKey.split(',').map(Number);
-        const cell = map[y][x];
-        
-        let chance = 0;
-        if(cell.population === 0) {
-            chance = 0; // Нулевой шанс для пустых клеток
-        } else if(cell.biome === 'ocean') {
-            chance = 0.01;
-        } else {
-            chance = cell.population < 5000 ? 0.01 :
-                    cell.population < 10000 ? 0.03 :
-                    cell.population < 15000 ? 0.02 : 0.01;
-        }
-        
-        if (Math.random() < chance) {
-            state.cells.add(cellKey);
-        }
-    });
-    });
-}
 
         function drawMap() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -451,6 +308,15 @@ function processStates() {
                         ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
                         ctx.globalAlpha = 1;
                     }
+					
+					            // Слой влажности
+            if (isHumidityLayerActive) {
+                const color = getHumidityColor(cell.humidity);
+                ctx.fillStyle = color;
+                ctx.globalAlpha = 0.5;
+                ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+				ctx.globalAlpha = 1;
+            }
 
                     if (cell.population > 0) {
                         const opacity = Math.min(cell.population / 10000, 1) * 0.5;
@@ -459,6 +325,15 @@ function processStates() {
                     }
                 }
             }
+			
+			    // Подсветка территории государства
+    if (highlightedState) {
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+        highlightedState.cells.forEach(cellKey => {
+            const [x, y] = cellKey.split(',').map(Number);
+            ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+        });
+    }
 			    // Отрисовка государств
     states.forEach(state => {
         ctx.fillStyle = state.color;
@@ -467,20 +342,26 @@ function processStates() {
             ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
         });
     });
-	    // Отрисовка кораблей
-    ctx.fillStyle = 'black';
+    // Отрисовка кораблей с цветом государства
     ships.forEach(ship => {
+        ctx.fillStyle = ship.color;
         ctx.fillRect(ship.x * cellSize, ship.y * cellSize, cellSize, cellSize);
     });
         }
 
-        function getTemperatureColor(temp) {
-            const clampedTemp = Math.max(-20, Math.min(50, temp));
-            const gradient = (clampedTemp + 20) / 70;
-            const red = Math.min(255, 255 * gradient);
-            const blue = 255 - red;
-            return `rgb(${red}, 0, ${blue})`;
-        }
+// Обработчик переключателя влажности
+toggleHumidityLayer.addEventListener("click", () => {
+    isHumidityLayerActive = !isHumidityLayerActive;
+    toggleHumidityLayer.textContent = isHumidityLayerActive
+        ? "Выключить слой влажности"
+        : "Включить слой влажности";
+    terrainType.innerHTML = isHumidityLayerActive
+        ? `<option value="increase">Повысить влажность</option>
+           <option value="decrease">Понизить влажность</option>`
+        : originalTerrainOptions;
+    drawMap();
+});
+
 
         toggleMode.addEventListener("click", () => {
             isDrawingMode = !isDrawingMode;
@@ -499,18 +380,37 @@ function processStates() {
                 : originalTerrainOptions;
             drawMap();
         });
-
-        function updateBiomeBasedOnTemperature(cell) {
-            if (cell.biome === "ocean" || cell.biome === "mountain") return;
-            
-            const temp = cell.temperature;
-            if (temp >= 40) cell.biome = "desert";
-            else if (temp >= 30) cell.biome = "steppe";
-            else if (temp >= 20) cell.biome = "plains";
-            else if (temp >= 15) cell.biome = "forest";
-            else if (temp >= 5) cell.biome = "taiga";
-            else if (temp <= -5) cell.biome = "snow";
+		
+document.getElementById('generateWorld').addEventListener('click', () => {
+    const worldType = document.getElementById('worldType').value;
+    
+    // Сброс карты
+    for (let y = 0; y < mapHeight; y++) {
+        for (let x = 0; x < mapWidth; x++) {
+            map[y][x] = {
+                biome: "ocean",
+                population: 0,
+                temperature: 15,
+                humidity: 100,
+                elevation: 0
+            };
         }
+    }
+    
+    // Вызов генератора
+    worldGenerators[worldType]();
+    
+    // Обновление биомов
+    for (let y = 0; y < mapHeight; y++) {
+        for (let x = 0; x < mapWidth; x++) {
+            updateBiomeBasedOnConditions(map[y][x]);
+        }
+    }
+    
+    drawMap();
+});
+
+
 
         function applyTemperatureChange(startX, startY, size, changeType) {
             for (let y = startY - size; y <= startY + size; y++) {
@@ -519,7 +419,7 @@ function processStates() {
                         const cell = map[y][x];
                         cell.temperature += changeType === "increase" ? 1 : -1;
                         cell.temperature = Math.max(-80, Math.min(70, cell.temperature));
-                        updateBiomeBasedOnTemperature(cell);
+                        updateBiomeBasedOnConditions(cell);
                     }
                 }
             }
@@ -531,7 +431,21 @@ function processStates() {
             const startY = Math.floor((e.clientY - rect.top) / cellSize);
             const size = parseInt(brushSize.value);
 
-            if (isTemperatureLayerActive) {
+    if (isHumidityLayerActive) {
+        const changeType = terrainType.value;
+        const delta = changeType === "increase" ? 10 : -10;
+        
+        for (let y = startY - size; y <= startY + size; y++) {
+            for (let x = startX - size; x <= startX + size; x++) {
+                if (x >=0 && x < mapWidth && y >=0 && y < mapHeight) {
+                    const cell = map[y][x];
+                    cell.humidity = Math.max(0, Math.min(100, cell.humidity + delta));
+                    updateBiomeBasedOnConditions(cell);
+                }
+            }
+        }
+    }
+            else if (isTemperatureLayerActive) {
                 const changeType = terrainType.value;
                 const apply = () => applyTemperatureChange(startX, startY, size, changeType);
                 
@@ -554,6 +468,7 @@ function processStates() {
                             const cell = map[y][x];
                             cell.biome = biome;
                             cell.temperature = biomes[biome].baseTemp;
+							cell.humidity = biomes[biome].baseHumidity;
                         }
                     }
                 }
@@ -573,11 +488,24 @@ function processStates() {
             const x = Math.floor((e.clientX - rect.left) / cellSize);
             const y = Math.floor((e.clientY - rect.top) / cellSize);
             const cell = map[y]?.[x];
-            if (cell) {
-                cellInfo.textContent = `Ячейка (${x}, ${y}): Биом - ${biomeNames[cell.biome]}, ` +
-                                      `Население - ${cell.population}, Температура - ${cell.temperature}°C`;
+			
+			highlightedState = null;
+    if (cell) {
+        let stateInfo = "";
+        states.forEach(state => {
+            if(state.cells.has(`${x},${y}`)) {
+                stateInfo = ` | Государство: Ур.технологий ${state.techLevel} Ресурсы: ${state.resources.toFixed(1)}`;
+				highlightedState = state;
             }
         });
+        
+        cellInfo.textContent = `Ячейка (${x}, ${y}): Биом - ${biomeNames[cell.biome]}, ` +
+                              `Население - ${cell.population}, ` +
+                              `Температура - ${cell.temperature}°C, ` +
+                              `Влажность - ${cell.humidity}%${stateInfo}`;
+    }
+	drawMap(); // Перерисовываем карту при движении мыши
+});
 
         function updateOceanInfluence() {
             const tempChanges = new Map();
@@ -630,12 +558,13 @@ function processStates() {
                     map[y][x].temperature, 
                     newTemp
                 );
-                updateBiomeBasedOnTemperature(map[y][x]);
+                updateBiomeBasedOnConditions(map[y][x]);
             });
         }
 
         function processSimulationStep() {
             updateOceanInfluence();
+			updateHumidityInfluence(); // Добавляем обновление влажности
 
             for (let y = 0; y < mapHeight; y++) {
                 for (let x = 0; x < mapWidth; x++) {
@@ -648,9 +577,13 @@ function processStates() {
 
                     if (cell.population > 0) {
                         const biome = biomes[cell.biome];
+						const state = states.find(s => s.cells.has(`${x},${y}`));
+						const techBonus = state ? 1 + (state.techLevel * 0.1) : 1;						
 
                         // Рост населения
-                        const growthPercent = Math.random() * (biome.growthRate[1] - biome.growthRate[0]) + biome.growthRate[0];
+						// Рост населения с учетом технологий
+						const growthPercent = (Math.random() * (biome.growthRate[1] - biome.growthRate[0]) 
+											+ biome.growthRate[0]) * techBonus;
                         const growth = Math.floor(cell.population * (growthPercent / 100));
                         cell.population = Math.min(cell.population + growth, 20000);
                         
@@ -666,6 +599,11 @@ function processStates() {
                             tempDecay = (-15 - currentTemp);
                         }
                         decayPercent += tempDecay;
+						
+						            // Пример влияния влажности на население
+            if (cell.humidity < 20) {
+                decayPercent += 5; // Дополнительная убыль в сухих районах
+            }
                         
                         const decay = Math.floor(cell.population * (decayPercent / 100));
                         cell.population = Math.max(cell.population - decay, 0);
