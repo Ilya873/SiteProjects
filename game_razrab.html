@@ -1,0 +1,1314 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Петля времени - Игра для программиста</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #2c3e50);
+            color: #ecf0f1;
+            min-height: 100vh;
+            overflow: hidden;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 300px 1fr 300px;
+            grid-template-rows: 80px 1fr 100px;
+            gap: 15px;
+            height: calc(100vh - 40px);
+        }
+        
+        .header {
+            grid-column: 1 / 4;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 15px;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+        }
+        
+        .header h1 {
+            font-size: 24px;
+            color: #3498db;
+            text-shadow: 0 0 10px rgba(52, 152, 219, 0.7);
+        }
+        
+        .indicators {
+            display: flex;
+            gap: 20px;
+            background: rgba(44, 62, 80, 0.9);
+            border-radius: 10px;
+            padding: 10px 20px;
+            font-size: 18px;
+        }
+        
+        .indicator {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .indicator span {
+            font-weight: bold;
+            color: #f1c40f;
+        }
+        
+        .time-section {
+            background: rgba(44, 62, 80, 0.9);
+            border-radius: 10px;
+            padding: 10px;
+            text-align: center;
+            font-size: 18px;
+        }
+        
+        .character-section {
+            grid-row: 2;
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+        }
+        
+        .character {
+            width: 200px;
+            height: 300px;
+            background: #2c3e50;
+            border-radius: 10px;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 20px;
+            border: 3px solid #3498db;
+        }
+        
+        .character img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: filter 0.5s ease;
+        }
+        
+        .stats-section {
+            grid-row: 2;
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 15px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+        }
+        
+        .stat-bar {
+            margin-bottom: 15px;
+        }
+        
+        .stat-bar label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 16px;
+            color: #3498db;
+        }
+        
+        .stat-bar progress {
+            width: 100%;
+            height: 25px;
+            border-radius: 5px;
+            border: 1px solid #2c3e50;
+        }
+        
+        progress::-webkit-progress-bar {
+            background: #2c3e50;
+            border-radius: 5px;
+        }
+        
+        progress::-webkit-progress-value {
+            border-radius: 5px;
+        }
+        
+        .fatigue::-webkit-progress-value { background: #e74c3c; }
+        .motivation::-webkit-progress-value { background: #2ecc71; }
+        .mechanics-progress::-webkit-progress-value { background: #9b59b6; }
+        
+        .value-display {
+            text-align: right;
+            font-size: 14px;
+            margin-top: 3px;
+        }
+        
+        .actions-section {
+            grid-row: 2;
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 15px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+        }
+        
+        .action-group {
+            background: rgba(44, 62, 80, 0.7);
+            border-radius: 10px;
+            padding: 15px;
+        }
+        
+        .action-group h3 {
+            margin-bottom: 10px;
+            color: #3498db;
+            font-size: 18px;
+        }
+        
+        .mechanics-select {
+            width: 100%;
+            padding: 8px;
+            border-radius: 5px;
+            background: #2c3e50;
+            color: white;
+            border: 1px solid #3498db;
+            margin-bottom: 10px;
+        }
+        
+        .mechanics-list {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #3498db;
+            border-radius: 5px;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            margin-top: 10px;
+        }
+        
+        .mechanic-item {
+            padding: 8px;
+            border-bottom: 1px solid rgba(52, 152, 219, 0.3);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .mechanic-item:last-child {
+            border-bottom: none;
+        }
+        
+        .mechanic-name {
+            font-size: 14px;
+            flex: 1;
+        }
+        
+        .mechanic-progress {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 150px;
+        }
+        
+        .mechanic-progress progress {
+            width: 100%;
+            height: 15px;
+        }
+        
+        .mechanic-percent {
+            min-width: 40px;
+            text-align: right;
+            font-size: 13px;
+        }
+        
+        .completed {
+            background: rgba(46, 204, 113, 0.1);
+            border-radius: 5px;
+        }
+        
+        .completed .mechanic-percent {
+            color: #2ecc71;
+            font-weight: bold;
+        }
+        
+        .action-button {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            border: none;
+            border-radius: 5px;
+            background: #3498db;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .action-button:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        .action-button:disabled {
+            background: #7f8c8d;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .action-button.cost {
+            background: #f39c12;
+        }
+        
+        .action-button.cost:hover {
+            background: #e67e22;
+        }
+        
+        .action-button.free {
+            background: #2ecc71;
+        }
+        
+        .action-button.free:hover {
+            background: #27ae60;
+        }
+        
+        .footer {
+            grid-column: 1 / 4;
+            grid-row: 3;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 15px;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+        }
+        
+        .current-mechanic {
+            background: rgba(155, 89, 182, 0.3);
+            padding: 10px 20px;
+            border-radius: 10px;
+            width: 70%;
+        }
+        
+        .current-mechanic h3 {
+            color: #9b59b6;
+            margin-bottom: 5px;
+        }
+        
+        .stocks-button {
+            background: #f1c40f;
+            color: #2c3e50;
+            font-weight: bold;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background: linear-gradient(135deg, #1a2a6c, #2c3e50);
+            padding: 30px;
+            border-radius: 20px;
+            width: 80%;
+            max-width: 800px;
+            text-align: center;
+            box-shadow: 0 0 30px rgba(52, 152, 219, 0.5);
+            position: relative;
+        }
+        
+        .modal h2 {
+            color: #3498db;
+            margin-bottom: 20px;
+            font-size: 28px;
+        }
+        
+        .modal p {
+            margin: 15px 0;
+            font-size: 18px;
+            line-height: 1.6;
+        }
+        
+        .review {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+            text-align: left;
+        }
+        
+        .review-author {
+            color: #f1c40f;
+            font-weight: bold;
+        }
+        
+        .modal-button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            margin-top: 20px;
+            border-radius: 30px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .modal-button:hover {
+            background: #2980b9;
+            transform: scale(1.05);
+        }
+        
+        .stocks-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .stock {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+        }
+        
+        .stock h4 {
+            color: #f1c40f;
+            margin-bottom: 10px;
+        }
+        
+        .stock-price {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 10px 0;
+            color: #2ecc71;
+        }
+        
+        .stock-change {
+            font-size: 14px;
+            color: #e74c3c;
+        }
+        
+        .stock-change.positive {
+            color: #2ecc71;
+        }
+        
+        .stock-input {
+            width: 100%;
+            padding: 8px;
+            border-radius: 5px;
+            background: #2c3e50;
+            color: white;
+            border: 1px solid #3498db;
+            margin: 10px 0;
+        }
+        
+        .portfolio {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+        
+        .portfolio h3 {
+            color: #f1c40f;
+            margin-bottom: 10px;
+        }
+        
+        .character-state {
+            text-align: center;
+            margin-top: 10px;
+            font-weight: bold;
+            color: #3498db;
+        }
+        
+        .chart-container {
+            height: 120px;
+            margin-top: 10px;
+            position: relative;
+        }
+        
+        .chart-title {
+            font-size: 14px;
+            margin-bottom: 5px;
+            color: #3498db;
+        }
+        
+        canvas {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 5px;
+            width: 100%;
+            height: 100px;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        .stock-info {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 5px;
+            font-size: 12px;
+        }
+        
+        /* Scrollbar styling */
+        .mechanics-list::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .mechanics-list::-webkit-scrollbar-track {
+            background: rgba(44, 62, 80, 0.5);
+            border-radius: 4px;
+        }
+        
+        .mechanics-list::-webkit-scrollbar-thumb {
+            background: #3498db;
+            border-radius: 4px;
+        }
+        
+        .mechanics-list::-webkit-scrollbar-thumb:hover {
+            background: #2980b9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>ПЕТЛЯ ВРЕМЕНИ</h1>
+            <div class="indicators">
+                <div class="indicator">Деньги: $<span id="money-indicator">100</span></div>
+                <div class="indicator">Скилл: <span id="skill-indicator">0</span></div>
+                <div class="indicator">Петель: <span id="loop-indicator">0</span></div>
+            </div>
+            <div class="time-section">
+                <div id="day-display">День: 1</div>
+                <div id="time-display">09:00</div>
+            </div>
+        </div>
+        
+        <div class="character-section">
+            <div class="character">
+                <img id="character-img" src="https://img.icons8.com/color/200/000000/developer.png" alt="Программист">
+            </div>
+            <div class="character-state" id="character-state">Состояние: Отдохнувший</div>
+        </div>
+        
+        <div class="stats-section">
+            <div class="action-group">
+                <h3>ПОКАЗАТЕЛИ</h3>
+                <div class="stat-bar">
+                    <label>Усталость</label>
+                    <progress class="fatigue" id="fatigue-bar" value="20" max="100"></progress>
+                    <div class="value-display"><span id="fatigue-value">20</span>%</div>
+                </div>
+                
+                <div class="stat-bar">
+                    <label>Мотивация</label>
+                    <progress class="motivation" id="motivation-bar" value="70" max="100"></progress>
+                    <div class="value-display"><span id="motivation-value">70</span>%</div>
+                </div>
+                
+                <div class="stat-bar">
+                    <label>Завершенность игры</label>
+                    <progress class="mechanics-progress" id="game-progress-bar" value="0" max="100"></progress>
+                    <div class="value-display"><span id="game-progress-value">0</span>%</div>
+                </div>
+            </div>
+            
+            <div class="action-group">
+                <h3>РАЗРАБОТКА МЕХАНИК</h3>
+                <select class="mechanics-select" id="mechanics-select">
+                    <option value="">Выберите механику для разработки</option>
+                    <!-- Механики будут добавлены через JavaScript -->
+                </select>
+                
+                <div class="stat-bar">
+                    <label id="current-mechanic-label">Текущая механика: не выбрана</label>
+                    <progress class="mechanics-progress" id="mechanic-progress-bar" value="0" max="100"></progress>
+                    <div class="value-display"><span id="mechanic-progress-value">0</span>%</div>
+                </div>
+                
+                <div class="mechanics-list" id="mechanics-list">
+                    <!-- Список механик будет генерироваться JavaScript -->
+                </div>
+            </div>
+        </div>
+        
+        <div class="actions-section">
+            <div class="action-group">
+                <h3>ДЕЙСТВИЯ</h3>
+                <button class="action-button" id="sleep-button">Спать (Восст. усталость)</button>
+                <button class="action-button cost" id="cinema-button">Сходить в кино ($20)</button>
+                <button class="action-button cost" id="eat-button">Поесть ($10)</button>
+            </div>
+            
+            <div class="action-group">
+                <h3>ПОВЫШЕНИЕ СКИЛЛА</h3>
+                <button class="action-button cost" id="book-button">Прочитать книгу ($20)</button>
+                <button class="action-button cost" id="course-button">Курс ($5)</button>
+                <button class="action-button free" id="github-button">Найти код на GitHub</button>
+                <button class="action-button free" id="forum-button">Спросить на форуме</button>
+            </div>
+            
+            <div class="action-group">
+                <h3>ИНВЕСТИЦИИ</h3>
+                <button class="action-button stocks-button" id="stocks-button">Биржа акций</button>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <div class="current-mechanic">
+                <h3>ТЕКУЩАЯ МЕХАНИКА</h3>
+                <div id="current-mechanic-name">Не выбрана</div>
+            </div>
+            <div>
+                <button class="action-button" id="pause-button">Пауза</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Модальное окно акций -->
+    <div class="modal" id="stocks-modal">
+        <div class="modal-content">
+            <h2>БИРЖА АКЦИЙ</h2>
+            <p>Курс акций меняется каждый день. Инвестируйте с умом!</p>
+            
+            <div class="stocks-container">
+                <div class="stock">
+                    <h4>GameDev Inc.</h4>
+                    <div class="stock-price" id="stock1-price">$100</div>
+                    <div class="stock-change" id="stock1-change">▲ 5%</div>
+                    <input type="number" min="0" class="stock-input" id="stock1-input" placeholder="Сумма для инвестиции">
+                    <button class="action-button" id="stock1-buy">Купить</button>
+                    
+                    <div class="chart-container">
+                        <div class="chart-title">График цен (7 дней):</div>
+                        <canvas id="stock1-chart"></canvas>
+                        <div class="stock-info">
+                            <span id="stock1-min">Min: $100</span>
+                            <span id="stock1-max">Max: $100</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="stock">
+                    <h4>TechFuture</h4>
+                    <div class="stock-price" id="stock2-price">$75</div>
+                    <div class="stock-change positive" id="stock2-change">▼ 3%</div>
+                    <input type="number" min="0" class="stock-input" id="stock2-input" placeholder="Сумма для инвестиции">
+                    <button class="action-button" id="stock2-buy">Купить</button>
+                    
+                    <div class="chart-container">
+                        <div class="chart-title">График цен (7 дней):</div>
+                        <canvas id="stock2-chart"></canvas>
+                        <div class="stock-info">
+                            <span id="stock2-min">Min: $75</span>
+                            <span id="stock2-max">Max: $75</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="stock">
+                    <h4>CodeMasters</h4>
+                    <div class="stock-price" id="stock3-price">$120</div>
+                    <div class="stock-change" id="stock3-change">▲ 7%</div>
+                    <input type="number" min="0" class="stock-input" id="stock3-input" placeholder="Сумма для инвестиции">
+                    <button class="action-button" id="stock3-buy">Купить</button>
+                    
+                    <div class="chart-container">
+                        <div class="chart-title">График цен (7 дней):</div>
+                        <canvas id="stock3-chart"></canvas>
+                        <div class="stock-info">
+                            <span id="stock3-min">Min: $120</span>
+                            <span id="stock3-max">Max: $120</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="portfolio">
+                <h3>ВАШ ПОРТФЕЛЬ</h3>
+                <div id="portfolio-list">У вас нет акций</div>
+            </div>
+            
+            <button class="modal-button" id="close-stocks">Закрыть</button>
+        </div>
+    </div>
+    
+    <!-- Модальное окно введения -->
+    <div class="modal" id="intro-modal">
+        <div class="modal-content">
+            <h2>ПЕТЛЯ ВРЕМЕНИ</h2>
+            <p>Вы - программист, который должен создать отличную игру за месяц для участия в геймджеме.</p>
+            <p>Если игра получит плохие отзывы, вы вернётесь в начало месяца, но сохраните свой скилл.</p>
+            <p>Вырваться из петли времени можно только заняв первое место в конкурсе!</p>
+            <p>Следите за показателями: усталость, мотивация, завершенность игры и деньги.</p>
+            <p>Удачи! Время пошло...</p>
+            <button class="modal-button pulse" id="start-button">Начать разработку</button>
+        </div>
+    </div>
+    
+    <!-- Модальное окно результатов -->
+    <div class="modal" id="results-modal">
+        <div class="modal-content">
+            <h2>РЕЗУЛЬТАТЫ КОНКУРСА</h2>
+            <div id="review-container"></div>
+            <p id="place-text"></p>
+            <button class="modal-button" id="restart-button">Начать заново</button>
+        </div>
+    </div>
+
+    <script>
+        // Игровые переменные
+        let gameState = {
+            day: 1,
+            hour: 9,
+            minute: 0,
+            fatigue: 20,
+            motivation: 70,
+            money: 100,
+            skill: 0,
+            gameProgress: 0,
+            currentMechanic: null,
+            mechanics: [
+                {name: "Динамическая камера", progress: 0, speed: 1.2, fatigue: 0.3, motivation: -0.2},
+                {name: "Система улучшений", progress: 0, speed: 0.8, fatigue: 0.4, motivation: -0.3},
+                {name: "ИИ противников", progress: 0, speed: 1.5, fatigue: 0.5, motivation: -0.1},
+                {name: "Физика движения", progress: 0, speed: 1.4, fatigue: 0.6, motivation: -0.4},
+                {name: "Система диалогов", progress: 0, speed: 0.9, fatigue: 0.2, motivation: -0.1},
+                {name: "Мультиплеер", progress: 0, speed: 0.7, fatigue: 0.7, motivation: -0.5},
+                {name: "Система квестов", progress: 0, speed: 1.0, fatigue: 0.3, motivation: -0.2},
+                {name: "Инвентарь", progress: 0, speed: 1.3, fatigue: 0.4, motivation: -0.2},
+                {name: "Крафтинг", progress: 0, speed: 1.1, fatigue: 0.5, motivation: -0.3},
+                {name: "Боевая система", progress: 0, speed: 1.6, fatigue: 0.6, motivation: -0.4},
+                {name: "Магазин", progress: 0, speed: 0.9, fatigue: 0.2, motivation: -0.1},
+                {name: "Умения", progress: 0, speed: 1.2, fatigue: 0.3, motivation: -0.2},
+                {name: "Прокачка", progress: 0, speed: 1.0, fatigue: 0.3, motivation: -0.2},
+                {name: "Экономика", progress: 0, speed: 0.8, fatigue: 0.4, motivation: -0.3},
+                {name: "Погодные эффекты", progress: 0, speed: 1.3, fatigue: 0.3, motivation: -0.1},
+                {name: "Смена дня и ночи", progress: 0, speed: 1.1, fatigue: 0.3, motivation: -0.1},
+                {name: "Игровые события", progress: 0, speed: 1.0, fatigue: 0.4, motivation: -0.2},
+                {name: "Мини-карта", progress: 0, speed: 0.9, fatigue: 0.2, motivation: -0.1},
+                {name: "Достижения", progress: 0, speed: 0.8, fatigue: 0.3, motivation: -0.2},
+                {name: "Статистика", progress: 0, speed: 0.7, fatigue: 0.2, motivation: -0.1},
+                {name: "Рейтинг игроков", progress: 0, speed: 0.9, fatigue: 0.3, motivation: -0.2},
+                {name: "Музыка и звуки", progress: 0, speed: 1.2, fatigue: 0.3, motivation: -0.1},
+                {name: "Настройки", progress: 0, speed: 0.8, fatigue: 0.2, motivation: -0.1},
+                {name: "Локализация", progress: 0, speed: 0.7, fatigue: 0.3, motivation: -0.3},
+                {name: "Торговля", progress: 0, speed: 1.0, fatigue: 0.4, motivation: -0.2},
+                {name: "Фракции", progress: 0, speed: 1.1, fatigue: 0.5, motivation: -0.3}
+            ],
+            loopCount: 0,
+            stocks: [
+                {name: "GameDev Inc.", price: 100, history: [], change: 5, owned: 0},
+                {name: "TechFuture", price: 75, history: [], change: -3, owned: 0},
+                {name: "CodeMasters", price: 120, history: [], change: 7, owned: 0}
+            ],
+            actionsUsed: {
+                sleep: false,
+                github: false,
+                forum: false
+            },
+            paused: false
+        };
+        
+        // Элементы интерфейса
+        const dayDisplay = document.getElementById('day-display');
+        const timeDisplay = document.getElementById('time-display');
+        const moneyIndicator = document.getElementById('money-indicator');
+        const skillIndicator = document.getElementById('skill-indicator');
+        const loopIndicator = document.getElementById('loop-indicator');
+        const fatigueBar = document.getElementById('fatigue-bar');
+        const fatigueValue = document.getElementById('fatigue-value');
+        const motivationBar = document.getElementById('motivation-bar');
+        const motivationValue = document.getElementById('motivation-value');
+        const gameProgressBar = document.getElementById('game-progress-bar');
+        const gameProgressValue = document.getElementById('game-progress-value');
+        const mechanicProgressBar = document.getElementById('mechanic-progress-bar');
+        const mechanicProgressValue = document.getElementById('mechanic-progress-value');
+        const currentMechanicLabel = document.getElementById('current-mechanic-label');
+        const currentMechanicName = document.getElementById('current-mechanic-name');
+        const mechanicsSelect = document.getElementById('mechanics-select');
+        const mechanicsList = document.getElementById('mechanics-list');
+        const characterImg = document.getElementById('character-img');
+        const characterState = document.getElementById('character-state');
+        
+        // Модальные окна
+        const introModal = document.getElementById('intro-modal');
+        const resultsModal = document.getElementById('results-modal');
+        const stocksModal = document.getElementById('stocks-modal');
+        
+        // Кнопки
+        const startButton = document.getElementById('start-button');
+        const restartButton = document.getElementById('restart-button');
+        const pauseButton = document.getElementById('pause-button');
+        const sleepButton = document.getElementById('sleep-button');
+        const cinemaButton = document.getElementById('cinema-button');
+        const eatButton = document.getElementById('eat-button');
+        const bookButton = document.getElementById('book-button');
+        const courseButton = document.getElementById('course-button');
+        const githubButton = document.getElementById('github-button');
+        const forumButton = document.getElementById('forum-button');
+        const stocksButton = document.getElementById('stocks-button');
+        const closeStocks = document.getElementById('close-stocks');
+        
+        // Таймер игры
+        let gameTimer;
+        const DAY_DURATION = 30000; // 30 секунд на день
+        const TIME_STEP = 100; // 100 мс обновление
+        
+        // Отзывы для игры
+        const reviews = [
+            "Ужасная игра! Графика на уровне 90-х, геймплей скучный, баги на каждом шагу.",
+            "Очень слабая попытка. Идея интересная, но реализация подкачала.",
+            "Средненько. Есть потенциал, но нужно ещё много работы.",
+            "Неплохо для первого проекта. Заметно, что разработчик старался.",
+            "Хорошая игра! Увлекательный геймплей, интересные механики.",
+            "Отличная работа! Видно, что вложено много усилий и любви.",
+            "Великолепно! Одна из лучших игр на этом геймджеме.",
+            "Шедевр! Захватывающий сюжет, идеальный баланс, прекрасная графика.",
+            "Просто невероятно! Такого уровня полиши я не ожидал от инди-разработчика.",
+            "Лучшая игра за всю историю конкурса! Абсолютный шедевр!"
+        ];
+        
+        // Инициализация игры
+        function initGame() {
+            // Инициализация истории акций
+            gameState.stocks.forEach(stock => {
+                stock.history = [stock.price];
+            });
+            
+            // Заполнение выпадающего списка механик
+            mechanicsSelect.innerHTML = '<option value="">Выберите механику для разработки</option>';
+            gameState.mechanics.forEach((mechanic, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = mechanic.name;
+                mechanicsSelect.appendChild(option);
+            });
+            
+            updateUI();
+            showModal(introModal);
+        }
+        
+        // Запуск игры
+        function startGame() {
+            hideModal(introModal);
+            gameTimer = setInterval(updateGameTime, TIME_STEP);
+        }
+        
+        // Обновление игрового времени
+        function updateGameTime() {
+            if (gameState.paused) return;
+            
+            // Ускоренное время: 1 игровой день = 30 секунд реального времени
+            const minutesPerTick = (60 * TIME_STEP) / (DAY_DURATION / 24);
+            gameState.minute += minutesPerTick;
+            
+            if (gameState.minute >= 60) {
+                gameState.minute = 0;
+                gameState.hour++;
+                
+                // Обновление акций каждый час
+                updateStocks();
+                
+                if (gameState.hour >= 24) {
+                    gameState.hour = 0;
+                    gameState.day++;
+                    dayDisplay.textContent = `День: ${gameState.day}`;
+                    
+                    // Сброс дневных действий
+                    gameState.actionsUsed = {
+                        sleep: false,
+                        github: false,
+                        forum: false
+                    };
+                    
+                    // Проверка конца месяца
+                    if (gameState.day > 30) {
+                        endMonth();
+                        return;
+                    }
+                }
+            }
+            
+            // Обновление времени в интерфейсе
+            const hourStr = Math.floor(gameState.hour).toString().padStart(2, '0');
+            const minStr = Math.floor(gameState.minute).toString().padStart(2, '0');
+            timeDisplay.textContent = `${hourStr}:${minStr}`;
+            
+            // Разработка механики
+            if (gameState.currentMechanic !== null) {
+                developMechanic();
+            }
+            
+            // Пассивное изменение показателей
+            if (gameState.hour >= 8 && gameState.hour <= 23) {
+                gameState.fatigue += 0.1;
+                if (gameState.fatigue > 100) gameState.fatigue = 100;
+                
+                gameState.motivation -= 0.06;
+                if (gameState.motivation < 0) gameState.motivation = 0;
+            }
+            
+            // Обновление интерфейса
+            updateUI();
+        }
+        
+        // Разработка текущей механики
+        function developMechanic() {
+            const mechanic = gameState.mechanics[gameState.currentMechanic];
+            
+            // Скорость разработки зависит от скилла, мотивации и усталости
+            const developmentSpeed = mechanic.speed * (1 + gameState.skill / 100) * 
+                                  (gameState.motivation / 100) * (1 - gameState.fatigue / 200);
+            
+            mechanic.progress += developmentSpeed;
+            
+            // Увеличение усталости и снижение мотивации
+            gameState.fatigue += mechanic.fatigue * 0.2;
+            gameState.motivation += mechanic.motivation * 0.2;
+            
+            // Ограничение показателей
+            if (mechanic.progress > 100) mechanic.progress = 100;
+            if (gameState.fatigue > 100) gameState.fatigue = 100;
+            if (gameState.motivation < 0) gameState.motivation = 0;
+            
+            // Обновление общего прогресса игры
+            updateGameProgress();
+        }
+        
+        // Обновление общего прогресса игры
+        function updateGameProgress() {
+            let totalProgress = 0;
+            gameState.mechanics.forEach(mechanic => {
+                totalProgress += mechanic.progress;
+            });
+            gameState.gameProgress = totalProgress / gameState.mechanics.length;
+        }
+        
+        // Обновление акций
+        function updateStocks() {
+            gameState.stocks.forEach(stock => {
+                // Случайное изменение курса от -10% до +10%
+                const change = (Math.random() * 20 - 10);
+                stock.change = parseFloat(change.toFixed(1));
+                stock.price = parseFloat((stock.price * (1 + change / 100)).toFixed(2));
+                
+                // Добавляем цену в историю (максимум 50 значений)
+                stock.history.push(stock.price);
+                if (stock.history.length > 50) {
+                    stock.history.shift();
+                }
+            });
+        }
+        
+        // Конец месяца - показ результатов
+        function endMonth() {
+            clearInterval(gameTimer);
+            
+            // Определение места в зависимости от прогресса игры
+            const place = Math.max(1, 11 - Math.floor(gameState.gameProgress / 10));
+            const review = reviews[place - 1];
+            
+            // Отображение результатов
+            const reviewContainer = document.getElementById('review-container');
+            reviewContainer.innerHTML = '';
+            
+            const reviewElement = document.createElement('div');
+            reviewElement.className = 'review';
+            reviewElement.innerHTML = `<p>"${review}"</p><p class="review-author">- Игровой критик</p>`;
+            reviewContainer.appendChild(reviewElement);
+            
+            const placeText = document.getElementById('place-text');
+            placeText.textContent = `Ваша игра заняла ${place} место из 10 в конкурсе!`;
+            
+            if (place === 1) {
+                placeText.innerHTML += '<br><br>ПОЗДРАВЛЯЕМ! Вы вырвались из петли времени!';
+            } else {
+                placeText.innerHTML += '<br><br>Вы возвращаетесь в начало месяца...';
+            }
+            
+            showModal(resultsModal);
+        }
+        
+        // Перезапуск месяца (петля времени)
+        function restartMonth() {
+            gameState.day = 1;
+            gameState.hour = 9;
+            gameState.minute = 0;
+            gameState.fatigue = 20;
+            gameState.motivation = 70;
+            gameState.money = 100;
+            gameState.skill = gameState.skill; // Сохраняем скилл
+            gameState.gameProgress = 0;
+            gameState.currentMechanic = null;
+            
+            // Сброс прогресса механик
+            gameState.mechanics.forEach(mechanic => {
+                mechanic.progress = 0;
+            });
+            
+            // Сброс акций
+            gameState.stocks = [
+                {name: "GameDev Inc.", price: 100, history: [100], change: 5, owned: 0},
+                {name: "TechFuture", price: 75, history: [75], change: -3, owned: 0},
+                {name: "CodeMasters", price: 120, history: [120], change: 7, owned: 0}
+            ];
+            
+            // Сброс действий
+            gameState.actionsUsed = {
+                sleep: false,
+                github: false,
+                forum: false
+            };
+            
+            gameState.loopCount++;
+            loopIndicator.textContent = gameState.loopCount;
+            
+            hideModal(resultsModal);
+            updateUI();
+            gameTimer = setInterval(updateGameTime, TIME_STEP);
+        }
+        
+        // Обновление интерфейса
+        function updateUI() {
+            // Обновление времени
+            dayDisplay.textContent = `День: ${gameState.day}`;
+            
+            // Обновление показателей в верхней панели
+            moneyIndicator.textContent = gameState.money;
+            skillIndicator.textContent = gameState.skill;
+            loopIndicator.textContent = gameState.loopCount;
+            
+            // Обновление шкал
+            fatigueBar.value = gameState.fatigue;
+            fatigueValue.textContent = gameState.fatigue.toFixed(0);
+            
+            motivationBar.value = gameState.motivation;
+            motivationValue.textContent = gameState.motivation.toFixed(0);
+            
+            gameProgressBar.value = gameState.gameProgress;
+            gameProgressValue.textContent = gameState.gameProgress.toFixed(1);
+            
+            // Обновление текущей механики
+            if (gameState.currentMechanic !== null) {
+                const mechanic = gameState.mechanics[gameState.currentMechanic];
+                currentMechanicLabel.textContent = `Текущая механика: ${mechanic.name}`;
+                currentMechanicName.textContent = mechanic.name;
+                mechanicProgressBar.value = mechanic.progress;
+                mechanicProgressValue.textContent = mechanic.progress.toFixed(1);
+            } else {
+                currentMechanicLabel.textContent = 'Текущая механика: не выбрана';
+                currentMechanicName.textContent = 'Не выбрана';
+                mechanicProgressBar.value = 0;
+                mechanicProgressValue.textContent = '0';
+            }
+            
+            // Обновление списка механик
+            updateMechanicsList();
+            
+            // Обновление состояния персонажа
+            updateCharacterState();
+            
+            // Обновление доступности кнопок
+            sleepButton.disabled = gameState.actionsUsed.sleep;
+            githubButton.disabled = gameState.actionsUsed.github;
+            forumButton.disabled = gameState.actionsUsed.forum;
+            cinemaButton.disabled = gameState.money < 20;
+            eatButton.disabled = gameState.money < 10;
+            bookButton.disabled = gameState.money < 20;
+            courseButton.disabled = gameState.money < 5;
+        }
+        
+        // Обновление списка механик
+        function updateMechanicsList() {
+            mechanicsList.innerHTML = '';
+            
+            gameState.mechanics.forEach((mechanic, index) => {
+                const item = document.createElement('div');
+                item.className = `mechanic-item ${mechanic.progress === 100 ? 'completed' : ''}`;
+                
+                const name = document.createElement('div');
+                name.className = 'mechanic-name';
+                name.textContent = mechanic.name;
+                
+                const progressContainer = document.createElement('div');
+                progressContainer.className = 'mechanic-progress';
+                
+                const progress = document.createElement('progress');
+                progress.value = mechanic.progress;
+                progress.max = 100;
+                
+                const percent = document.createElement('div');
+                percent.className = 'mechanic-percent';
+                percent.textContent = `${mechanic.progress.toFixed(1)}%`;
+                
+                progressContainer.appendChild(progress);
+                progressContainer.appendChild(percent);
+                
+                item.appendChild(name);
+                item.appendChild(progressContainer);
+                mechanicsList.appendChild(item);
+            });
+        }
+        
+        // Обновление состояния персонажа
+        function updateCharacterState() {
+            let stateText = "";
+            let filter = '';
+            
+            if (gameState.fatigue < 30) {
+                stateText = "Отдохнувший";
+                filter = 'none';
+            } else if (gameState.fatigue < 50) {
+                stateText = "Слегка уставший";
+                filter = 'hue-rotate(20deg)';
+            } else if (gameState.fatigue < 70) {
+                stateText = "Усталый";
+                filter = 'hue-rotate(40deg) saturate(120%)';
+            } else if (gameState.fatigue < 90) {
+                stateText = "Сильно уставший";
+                filter = 'hue-rotate(60deg) saturate(150%)';
+            } else {
+                stateText = "Измождённый";
+                filter = 'hue-rotate(80deg) saturate(200%) brightness(80%)';
+            }
+            
+            characterState.textContent = `Состояние: ${stateText}`;
+            characterImg.style.filter = filter;
+        }
+        
+        // Покупка акций
+        function buyStock(stockIndex, amount) {
+            const stock = gameState.stocks[stockIndex];
+            const cost = amount;
+            
+            if (gameState.money >= cost) {
+                gameState.money -= cost;
+                stock.owned += amount / stock.price;
+                updateStocksUI();
+                updateUI();
+            } else {
+                alert("Недостаточно денег!");
+            }
+        }
+        
+        // Обновление интерфейса акций
+        function updateStocksUI() {
+            for (let i = 0; i < 3; i++) {
+                const stock = gameState.stocks[i];
+                document.getElementById(`stock${i+1}-price`).textContent = `$${stock.price.toFixed(2)}`;
+                document.getElementById(`stock${i+1}-change`).textContent = 
+                    `${stock.change > 0 ? '▲' : '▼'} ${Math.abs(stock.change).toFixed(1)}%`;
+                document.getElementById(`stock${i+1}-change`).className = 
+                    `stock-change ${stock.change > 0 ? '' : 'positive'}`;
+                
+                // Обновляем min/max цены
+                const minPrice = Math.min(...stock.history).toFixed(2);
+                const maxPrice = Math.max(...stock.history).toFixed(2);
+                document.getElementById(`stock${i+1}-min`).textContent = `Min: $${minPrice}`;
+                document.getElementById(`stock${i+1}-max`).textContent = `Max: $${maxPrice}`;
+                
+                // Рисуем график
+                drawStockChart(i, stock.history);
+            }
+            
+            const portfolioList = document.getElementById('portfolio-list');
+            portfolioList.innerHTML = '';
+            
+            let hasStocks = false;
+            gameState.stocks.forEach((stock, index) => {
+                if (stock.owned > 0) {
+                    hasStocks = true;
+                    const stockElement = document.createElement('div');
+                    stockElement.textContent = `${stock.name}: ${stock.owned.toFixed(2)} акций ($${(stock.owned * stock.price).toFixed(2)})`;
+                    portfolioList.appendChild(stockElement);
+                }
+            });
+            
+            if (!hasStocks) {
+                portfolioList.textContent = "У вас нет акций";
+            }
+        }
+        
+        // Рисование графика акций
+        function drawStockChart(stockIndex, history) {
+            const canvas = document.getElementById(`stock${stockIndex+1}-chart`);
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width;
+            const height = canvas.height;
+            
+            // Очистка
+            ctx.clearRect(0, 0, width, height);
+            
+            if (history.length < 2) return;
+            
+            // Находим min и max для масштабирования
+            const minVal = Math.min(...history);
+            const maxVal = Math.max(...history);
+            const range = maxVal - minVal || 1;
+            
+            // Рисуем график
+            ctx.beginPath();
+            ctx.strokeStyle = stockIndex === 0 ? '#3498db' : stockIndex === 1 ? '#e74c3c' : '#2ecc71';
+            ctx.lineWidth = 2;
+            
+            history.forEach((value, i) => {
+                const x = (i / (history.length - 1)) * width;
+                const y = height - ((value - minVal) / range) * height;
+                
+                if (i === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            });
+            
+            ctx.stroke();
+        }
+        
+        // Показ модального окна
+        function showModal(modal) {
+            modal.style.display = 'flex';
+            gameState.paused = true;
+        }
+        
+        // Скрытие модального окна
+        function hideModal(modal) {
+            modal.style.display = 'none';
+            gameState.paused = false;
+        }
+        
+        // Обработчики событий
+        startButton.addEventListener('click', startGame);
+        restartButton.addEventListener('click', restartMonth);
+        
+        pauseButton.addEventListener('click', () => {
+            gameState.paused = !gameState.paused;
+            pauseButton.textContent = gameState.paused ? "Продолжить" : "Пауза";
+        });
+        
+        // Выбор механики
+        mechanicsSelect.addEventListener('change', function() {
+            if (this.value === "") {
+                gameState.currentMechanic = null;
+            } else {
+                gameState.currentMechanic = parseInt(this.value);
+            }
+            updateUI();
+        });
+        
+        // Действия
+        sleepButton.addEventListener('click', function() {
+            gameState.fatigue = Math.max(0, gameState.fatigue - 60);
+            gameState.motivation = Math.min(100, gameState.motivation + 10);
+            gameState.actionsUsed.sleep = true;
+            updateUI();
+        });
+        
+        cinemaButton.addEventListener('click', function() {
+            if (gameState.money >= 20) {
+                gameState.money -= 20;
+                gameState.fatigue = Math.max(0, gameState.fatigue - 30);
+                gameState.motivation = Math.min(100, gameState.motivation + 25);
+                updateUI();
+            }
+        });
+        
+        eatButton.addEventListener('click', function() {
+            if (gameState.money >= 10) {
+                gameState.money -= 10;
+                gameState.fatigue = Math.max(0, gameState.fatigue - 15);
+                updateUI();
+            }
+        });
+        
+        bookButton.addEventListener('click', function() {
+            if (gameState.money >= 20) {
+                gameState.money -= 20;
+                gameState.skill += 50;
+                updateUI();
+            }
+        });
+        
+        courseButton.addEventListener('click', function() {
+            if (gameState.money >= 5) {
+                gameState.money -= 5;
+                gameState.skill += 30;
+                updateUI();
+            }
+        });
+        
+        githubButton.addEventListener('click', function() {
+            gameState.skill += 10;
+            gameState.actionsUsed.github = true;
+            updateUI();
+        });
+        
+        forumButton.addEventListener('click', function() {
+            gameState.skill += 10;
+            gameState.actionsUsed.forum = true;
+            updateUI();
+        });
+        
+        // Работа с акциями
+        stocksButton.addEventListener('click', function() {
+            updateStocksUI();
+            showModal(stocksModal);
+        });
+        
+        closeStocks.addEventListener('click', function() {
+            hideModal(stocksModal);
+        });
+        
+        document.getElementById('stock1-buy').addEventListener('click', function() {
+            const amount = parseFloat(document.getElementById('stock1-input').value);
+            if (amount > 0) buyStock(0, amount);
+        });
+        
+        document.getElementById('stock2-buy').addEventListener('click', function() {
+            const amount = parseFloat(document.getElementById('stock2-input').value);
+            if (amount > 0) buyStock(1, amount);
+        });
+        
+        document.getElementById('stock3-buy').addEventListener('click', function() {
+            const amount = parseFloat(document.getElementById('stock3-input').value);
+            if (amount > 0) buyStock(2, amount);
+        });
+        
+        // Запуск игры
+        initGame();
+    </script>
+</body>
+</html>
