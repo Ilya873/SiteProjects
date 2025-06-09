@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Петля времени - Игра для программиста</title>
     <style>
+        /* Стили остаются без изменений */
         * {
             box-sizing: border-box;
             margin: 0;
@@ -282,6 +283,14 @@
         
         .action-button.free:hover {
             background: #27ae60;
+        }
+        
+        .action-button.skip {
+            background: #9b59b6;
+        }
+        
+        .action-button.skip:hover {
+            background: #8e44ad;
         }
         
         .footer {
@@ -568,6 +577,7 @@
             <div class="action-group">
                 <h3>ДЕЙСТВИЯ</h3>
                 <button class="action-button" id="sleep-button">Спать (Восст. усталость)</button>
+                <button class="action-button skip" id="skip-day-button">Пропустить день</button>
                 <button class="action-button cost" id="cinema-button">Сходить в кино ($20)</button>
                 <button class="action-button cost" id="eat-button">Поесть ($10)</button>
             </div>
@@ -608,8 +618,10 @@
                     <h4>GameDev Inc.</h4>
                     <div class="stock-price" id="stock1-price">$100</div>
                     <div class="stock-change" id="stock1-change">▲ 5%</div>
-                    <input type="number" min="0" class="stock-input" id="stock1-input" placeholder="Сумма для инвестиции">
+                    <input type="number" min="0" class="stock-input" id="stock1-buy-input" placeholder="Сумма для инвестиции">
                     <button class="action-button" id="stock1-buy">Купить</button>
+                    <input type="number" min="0" class="stock-input" id="stock1-sell-input" placeholder="Сумма для продажи">
+                    <button class="action-button" id="stock1-sell">Продать</button>
                     
                     <div class="chart-container">
                         <div class="chart-title">График цен (7 дней):</div>
@@ -625,8 +637,10 @@
                     <h4>TechFuture</h4>
                     <div class="stock-price" id="stock2-price">$75</div>
                     <div class="stock-change positive" id="stock2-change">▼ 3%</div>
-                    <input type="number" min="0" class="stock-input" id="stock2-input" placeholder="Сумма для инвестиции">
+                    <input type="number" min="0" class="stock-input" id="stock2-buy-input" placeholder="Сумма для инвестиции">
                     <button class="action-button" id="stock2-buy">Купить</button>
+                    <input type="number" min="0" class="stock-input" id="stock2-sell-input" placeholder="Сумма для продажи">
+                    <button class="action-button" id="stock2-sell">Продать</button>
                     
                     <div class="chart-container">
                         <div class="chart-title">График цен (7 дней):</div>
@@ -642,8 +656,10 @@
                     <h4>CodeMasters</h4>
                     <div class="stock-price" id="stock3-price">$120</div>
                     <div class="stock-change" id="stock3-change">▲ 7%</div>
-                    <input type="number" min="0" class="stock-input" id="stock3-input" placeholder="Сумма для инвестиции">
+                    <input type="number" min="0" class="stock-input" id="stock3-buy-input" placeholder="Сумма для инвестиции">
                     <button class="action-button" id="stock3-buy">Купить</button>
+                    <input type="number" min="0" class="stock-input" id="stock3-sell-input" placeholder="Сумма для продажи">
+                    <button class="action-button" id="stock3-sell">Продать</button>
                     
                     <div class="chart-container">
                         <div class="chart-title">График цен (7 дней):</div>
@@ -689,6 +705,33 @@
     </div>
 
     <script>
+        // Фиксированные паттерны для акций на 30 дней
+const STOCK_PATTERNS = [
+    // GameDev Inc. - Падение → Резкий рост → Стабильный рост
+    [-4.2, -2.8, -3.5, 1.2, -5.1, -1.7, 0.8, 
+     -3.9, -6.3, 23.4, // Резкий рост в конце фазы падения
+     2.1, -1.5, 3.8, 4.2, -0.9, 2.7, 
+     5.3, 1.8, -2.1, 3.5, 4.9, -1.2, 
+     2.3, 6.1, 3.2, -0.7, 4.4, 5.7, 
+     1.5, 3.9],
+    
+    // TechFuture - Рост → Резкое падение → Восстановление
+    [3.5, 5.1, 2.3, -1.2, 4.7, 6.3, 1.8, 
+     7.2, 4.5, -18.6, // Резкое падение в середине фазы роста
+     2.7, -3.1, 5.9, 3.3, -2.5, 4.1, 
+     -4.2, -6.8, -3.5, -1.2, 0.8, -2.7, 
+     -5.1, -3.9, 1.5, -4.3, -2.1, 0.7, 
+     -3.8, -1.5],
+    
+    // CodeMasters - Падение → Плавный переход → Рост с резким скачком
+    [-5.3, -2.7, -4.1, 0.9, -6.2, -3.5, 1.2,
+     -4.8, -2.1, -0.7, 2.5, -1.8, 3.1, 1.7,
+     4.3, 15.8, // Резкий рост в начале фазы роста
+     2.9, -0.5, 5.7, 3.8, 6.2, 4.1, 
+     8.3, 2.4, 5.9, 1.2, 7.1, 3.5, 
+     6.2, 4.1]
+];
+
         // Игровые переменные
         let gameState = {
             day: 1,
@@ -730,9 +773,9 @@
             ],
             loopCount: 0,
             stocks: [
-                {name: "GameDev Inc.", price: 100, history: [], change: 5, owned: 0},
-                {name: "TechFuture", price: 75, history: [], change: -3, owned: 0},
-                {name: "CodeMasters", price: 120, history: [], change: 7, owned: 0}
+                {name: "GameDev Inc.", price: 100, history: [], change: STOCK_PATTERNS[0][0], owned: 0},
+                {name: "TechFuture", price: 75, history: [], change: STOCK_PATTERNS[1][0], owned: 0},
+                {name: "CodeMasters", price: 120, history: [], change: STOCK_PATTERNS[2][0], owned: 0}
             ],
             actionsUsed: {
                 sleep: false,
@@ -773,6 +816,7 @@
         const restartButton = document.getElementById('restart-button');
         const pauseButton = document.getElementById('pause-button');
         const sleepButton = document.getElementById('sleep-button');
+        const skipDayButton = document.getElementById('skip-day-button');
         const cinemaButton = document.getElementById('cinema-button');
         const eatButton = document.getElementById('eat-button');
         const bookButton = document.getElementById('book-button');
@@ -787,27 +831,22 @@
         const DAY_DURATION = 30000; // 30 секунд на день
         const TIME_STEP = 100; // 100 мс обновление
         
-        // Отзывы для игры
+        // Отзывы для игры с привязкой к прогрессу
         const reviews = [
-            "Ужасная игра! Графика на уровне 90-х, геймплей скучный, баги на каждом шагу.",
-            "Очень слабая попытка. Идея интересная, но реализация подкачала.",
-            "Средненько. Есть потенциал, но нужно ещё много работы.",
-            "Неплохо для первого проекта. Заметно, что разработчик старался.",
-            "Хорошая игра! Увлекательный геймплей, интересные механики.",
-            "Отличная работа! Видно, что вложено много усилий и любви.",
-            "Великолепно! Одна из лучших игр на этом геймджеме.",
-            "Шедевр! Захватывающий сюжет, идеальный баланс, прекрасная графика.",
-            "Просто невероятно! Такого уровня полиши я не ожидал от инди-разработчика.",
-            "Лучшая игра за всю историю конкурса! Абсолютный шедевр!"
+            {min: 0, max: 10, text: "Ужасная игра! Графика на уровне 90-х, геймплей скучный, баги на каждом шагу."},
+            {min: 11, max: 20, text: "Очень слабая попытка. Идея интересная, но реализация подкачала."},
+            {min: 21, max: 40, text: "Средненько. Есть потенциал, но нужно ещё много работы."},
+            {min: 41, max: 60, text: "Неплохо для первого проекта. Заметно, что разработчик старался."},
+            {min: 61, max: 70, text: "Хорошая игра! Увлекательный геймплей, интересные механики."},
+            {min: 71, max: 80, text: "Отличная работа! Видно, что вложено много усилий и любви."},
+            {min: 81, max: 90, text: "Великолепно! Одна из лучших игр на этом геймджеме."},
+            {min: 91, max: 95, text: "Шедевр! Захватывающий сюжет, идеальный баланс, прекрасная графика."},
+            {min: 96, max: 99, text: "Просто невероятно! Такого уровня полиши я не ожидал от инди-разработчика."},
+            {min: 100, max: 100, text: "Лучшая игра за всю историю конкурса! Абсолютный шедевр!"}
         ];
         
         // Инициализация игры
         function initGame() {
-            // Инициализация истории акций
-            gameState.stocks.forEach(stock => {
-                stock.history = [stock.price];
-            });
-            
             // Заполнение выпадающего списка механик
             mechanicsSelect.innerHTML = '<option value="">Выберите механику для разработки</option>';
             gameState.mechanics.forEach((mechanic, index) => {
@@ -815,6 +854,15 @@
                 option.value = index;
                 option.textContent = mechanic.name;
                 mechanicsSelect.appendChild(option);
+            });
+            
+            // Инициализация истории акций
+            gameState.stocks.forEach((stock, index) => {
+                stock.history = [stock.price];
+                // Добавляем начальные значения для графика
+                for (let i = 0; i < 7; i++) {
+                    stock.history.push(stock.price);
+                }
             });
             
             updateUI();
@@ -827,9 +875,21 @@
             gameTimer = setInterval(updateGameTime, TIME_STEP);
         }
         
+        // Проверка конца месяца
+        function checkEndMonth() {
+            if (gameState.day > 30) {
+                endMonth();
+                return true;
+            }
+            return false;
+        }
+        
         // Обновление игрового времени
         function updateGameTime() {
             if (gameState.paused) return;
+            
+            // Проверка конца месяца перед обновлением
+            if (checkEndMonth()) return;
             
             // Ускоренное время: 1 игровой день = 30 секунд реального времени
             const minutesPerTick = (60 * TIME_STEP) / (DAY_DURATION / 24);
@@ -839,13 +899,13 @@
                 gameState.minute = 0;
                 gameState.hour++;
                 
-                // Обновление акций каждый час
-                updateStocks();
-                
                 if (gameState.hour >= 24) {
                     gameState.hour = 0;
                     gameState.day++;
                     dayDisplay.textContent = `День: ${gameState.day}`;
+                    
+                    // Обновление акций при смене дня
+                    updateStocks();
                     
                     // Сброс дневных действий
                     gameState.actionsUsed = {
@@ -855,10 +915,7 @@
                     };
                     
                     // Проверка конца месяца
-                    if (gameState.day > 30) {
-                        endMonth();
-                        return;
-                    }
+                    if (checkEndMonth()) return;
                 }
             }
             
@@ -874,15 +931,37 @@
             
             // Пассивное изменение показателей
             if (gameState.hour >= 8 && gameState.hour <= 23) {
-                gameState.fatigue += 0.1;
+                // Усталость копится в 2 раза быстрее
+                gameState.fatigue += 0.2;
                 if (gameState.fatigue > 100) gameState.fatigue = 100;
                 
                 gameState.motivation -= 0.06;
                 if (gameState.motivation < 0) gameState.motivation = 0;
             }
             
+            // Проверка конца месяца после обновления
+            checkEndMonth();
+            
             // Обновление интерфейса
             updateUI();
+        }
+        
+        // Обновление акций (вызывается только при смене дня)
+        function updateStocks() {
+            gameState.stocks.forEach((stock, index) => {
+                if (STOCK_PATTERNS[index] && gameState.day <= 30) {
+                    // Берем изменение из предопределенного паттерна
+                    const dailyChange = STOCK_PATTERNS[index][gameState.day - 1];
+                    stock.change = dailyChange;
+                    stock.price = parseFloat((stock.price * (1 + dailyChange / 100)).toFixed(2));
+                    
+                    // Сохраняем историю для отображения на графике
+                    stock.history.push(stock.price);
+                    if (stock.history.length > 50) {
+                        stock.history.shift();
+                    }
+                }
+            });
         }
         
         // Разработка текущей механики
@@ -890,8 +969,14 @@
             const mechanic = gameState.mechanics[gameState.currentMechanic];
             
             // Скорость разработки зависит от скилла, мотивации и усталости
-            const developmentSpeed = mechanic.speed * (1 + gameState.skill / 100) * 
-                                  (gameState.motivation / 100) * (1 - gameState.fatigue / 200);
+            const baseSpeed = mechanic.speed * (1 + gameState.skill / 100) * 
+                                  (gameState.motivation / 100);
+            
+            // Усталость в 3 раза сильнее влияет на разработку
+            const fatigueImpact = 1 - (gameState.fatigue * 3) / 200;
+            const fatigueFactor = Math.max(0.1, fatigueImpact);
+            
+            const developmentSpeed = baseSpeed * fatigueFactor;
             
             mechanic.progress += developmentSpeed;
             
@@ -917,29 +1002,21 @@
             gameState.gameProgress = totalProgress / gameState.mechanics.length;
         }
         
-        // Обновление акций
-        function updateStocks() {
-            gameState.stocks.forEach(stock => {
-                // Случайное изменение курса от -10% до +10%
-                const change = (Math.random() * 20 - 10);
-                stock.change = parseFloat(change.toFixed(1));
-                stock.price = parseFloat((stock.price * (1 + change / 100)).toFixed(2));
-                
-                // Добавляем цену в историю (максимум 50 значений)
-                stock.history.push(stock.price);
-                if (stock.history.length > 50) {
-                    stock.history.shift();
-                }
-            });
-        }
-        
         // Конец месяца - показ результатов
         function endMonth() {
             clearInterval(gameTimer);
             
             // Определение места в зависимости от прогресса игры
             const place = Math.max(1, 11 - Math.floor(gameState.gameProgress / 10));
-            const review = reviews[place - 1];
+            
+            // Выбор отзыва в зависимости от прогресса
+            let reviewText = "";
+            for (const review of reviews) {
+                if (gameState.gameProgress >= review.min && gameState.gameProgress <= review.max) {
+                    reviewText = review.text;
+                    break;
+                }
+            }
             
             // Отображение результатов
             const reviewContainer = document.getElementById('review-container');
@@ -947,7 +1024,7 @@
             
             const reviewElement = document.createElement('div');
             reviewElement.className = 'review';
-            reviewElement.innerHTML = `<p>"${review}"</p><p class="review-author">- Игровой критик</p>`;
+            reviewElement.innerHTML = `<p>"${reviewText}"</p><p class="review-author">- Игровой критик</p>`;
             reviewContainer.appendChild(reviewElement);
             
             const placeText = document.getElementById('place-text');
@@ -979,12 +1056,19 @@
                 mechanic.progress = 0;
             });
             
-            // Сброс акций
+            // Сброс акций к начальным значениям
             gameState.stocks = [
-                {name: "GameDev Inc.", price: 100, history: [100], change: 5, owned: 0},
-                {name: "TechFuture", price: 75, history: [75], change: -3, owned: 0},
-                {name: "CodeMasters", price: 120, history: [120], change: 7, owned: 0}
+                {name: "GameDev Inc.", price: 100, history: [100], change: STOCK_PATTERNS[0][0], owned: 0},
+                {name: "TechFuture", price: 75, history: [75], change: STOCK_PATTERNS[1][0], owned: 0},
+                {name: "CodeMasters", price: 120, history: [120], change: STOCK_PATTERNS[2][0], owned: 0}
             ];
+            
+            // Добавляем начальные значения для графиков
+            gameState.stocks.forEach((stock, index) => {
+                for (let i = 0; i < 7; i++) {
+                    stock.history.push(stock.price);
+                }
+            });
             
             // Сброс действий
             gameState.actionsUsed = {
@@ -1049,6 +1133,14 @@
             eatButton.disabled = gameState.money < 10;
             bookButton.disabled = gameState.money < 20;
             courseButton.disabled = gameState.money < 5;
+            
+            // Обновление кнопки паузы
+            updatePauseButton();
+        }
+        
+        // Обновление текста кнопки паузы
+        function updatePauseButton() {
+            pauseButton.textContent = gameState.paused ? "Продолжить" : "Пауза";
         }
         
         // Обновление списка механик
@@ -1121,6 +1213,21 @@
                 updateUI();
             } else {
                 alert("Недостаточно денег!");
+            }
+        }
+        
+        // Продажа акций
+        function sellStock(stockIndex, amount) {
+            const stock = gameState.stocks[stockIndex];
+            const sharesToSell = amount / stock.price;
+            
+            if (sharesToSell <= stock.owned) {
+                gameState.money += amount;
+                stock.owned -= sharesToSell;
+                updateStocksUI();
+                updateUI();
+            } else {
+                alert("У вас недостаточно акций для продажи!");
             }
         }
         
@@ -1202,12 +1309,14 @@
         function showModal(modal) {
             modal.style.display = 'flex';
             gameState.paused = true;
+            updatePauseButton();
         }
         
         // Скрытие модального окна
         function hideModal(modal) {
             modal.style.display = 'none';
             gameState.paused = false;
+            updatePauseButton();
         }
         
         // Обработчики событий
@@ -1216,24 +1325,69 @@
         
         pauseButton.addEventListener('click', () => {
             gameState.paused = !gameState.paused;
-            pauseButton.textContent = gameState.paused ? "Продолжить" : "Пауза";
+            updatePauseButton();
         });
         
         // Выбор механики
         mechanicsSelect.addEventListener('change', function() {
+            const prevMechanic = gameState.currentMechanic;
             if (this.value === "") {
                 gameState.currentMechanic = null;
             } else {
-                gameState.currentMechanic = parseInt(this.value);
+                const newMechanicIndex = parseInt(this.value);
+                
+                // Бонус мотивации при переключении на другую механику
+                if (prevMechanic !== null && prevMechanic !== newMechanicIndex) {
+                    const mechanic = gameState.mechanics[newMechanicIndex];
+                    if (mechanic.progress < 100) {
+                        gameState.motivation = Math.min(100, gameState.motivation + 5);
+                    }
+                }
+                
+                gameState.currentMechanic = newMechanicIndex;
             }
             updateUI();
         });
         
         // Действия
         sleepButton.addEventListener('click', function() {
+            // Уменьшаем усталость и добавляем мотивацию
             gameState.fatigue = Math.max(0, gameState.fatigue - 60);
-            gameState.motivation = Math.min(100, gameState.motivation + 10);
+            gameState.motivation = Math.min(100, gameState.motivation + 20); // Увеличено до 20%
             gameState.actionsUsed.sleep = true;
+
+            // Добавляем 8 часов
+            gameState.hour += 8;
+            if (gameState.hour >= 24) {
+                gameState.hour -= 24;
+                gameState.day++;
+                dayDisplay.textContent = `День: ${gameState.day}`;
+                
+                // Обновление акций при смене дня
+                updateStocks();
+            }
+            
+            // Проверка конца месяца
+            if (checkEndMonth()) return;
+
+            updateUI();
+        });
+        
+        skipDayButton.addEventListener('click', function() {
+            // Пропускаем день
+            gameState.day++;
+            dayDisplay.textContent = `День: ${gameState.day}`;
+            
+            // Обновление акций при смене дня
+            updateStocks();
+            
+            // Уменьшаем усталость и добавляем мотивацию
+            gameState.fatigue = Math.max(0, gameState.fatigue - 40);
+            gameState.motivation = Math.min(100, gameState.motivation + 15);
+            
+            // Проверка конца месяца
+            if (checkEndMonth()) return;
+            
             updateUI();
         });
         
@@ -1292,19 +1446,35 @@
             hideModal(stocksModal);
         });
         
+        // Обработчики покупки/продажи акций
         document.getElementById('stock1-buy').addEventListener('click', function() {
-            const amount = parseFloat(document.getElementById('stock1-input').value);
+            const amount = parseFloat(document.getElementById('stock1-buy-input').value);
             if (amount > 0) buyStock(0, amount);
         });
         
+        document.getElementById('stock1-sell').addEventListener('click', function() {
+            const amount = parseFloat(document.getElementById('stock1-sell-input').value);
+            if (amount > 0) sellStock(0, amount);
+        });
+        
         document.getElementById('stock2-buy').addEventListener('click', function() {
-            const amount = parseFloat(document.getElementById('stock2-input').value);
+            const amount = parseFloat(document.getElementById('stock2-buy-input').value);
             if (amount > 0) buyStock(1, amount);
         });
         
+        document.getElementById('stock2-sell').addEventListener('click', function() {
+            const amount = parseFloat(document.getElementById('stock2-sell-input').value);
+            if (amount > 0) sellStock(1, amount);
+        });
+        
         document.getElementById('stock3-buy').addEventListener('click', function() {
-            const amount = parseFloat(document.getElementById('stock3-input').value);
+            const amount = parseFloat(document.getElementById('stock3-buy-input').value);
             if (amount > 0) buyStock(2, amount);
+        });
+        
+        document.getElementById('stock3-sell').addEventListener('click', function() {
+            const amount = parseFloat(document.getElementById('stock3-sell-input').value);
+            if (amount > 0) sellStock(2, amount);
         });
         
         // Запуск игры
