@@ -262,12 +262,13 @@
             box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
         }
         
-        .action-button:disabled {
-            background: #7f8c8d;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
+.action-button:disabled {
+    background: #7f8c8d !important;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
         
         .action-button.cost {
             background: #f39c12;
@@ -578,16 +579,16 @@
                 <h3>ДЕЙСТВИЯ</h3>
                 <button class="action-button" id="sleep-button">Спать (Восст. усталость)</button>
                 <button class="action-button skip" id="skip-day-button">Пропустить день</button>
-                <button class="action-button cost" id="cinema-button">Сходить в кино ($20)</button>
-                <button class="action-button cost" id="eat-button">Поесть ($10)</button>
+                <button class="action-button cost" id="cinema-button">Сходить в кино ($10)</button>
+                <button class="action-button cost" id="eat-button">Поесть ($5)</button>
             </div>
             
             <div class="action-group">
                 <h3>ПОВЫШЕНИЕ СКИЛЛА</h3>
-                <button class="action-button cost" id="book-button">Прочитать книгу ($20)</button>
-                <button class="action-button cost" id="course-button">Курс ($5)</button>
-                <button class="action-button free" id="github-button">Найти код на GitHub</button>
-                <button class="action-button free" id="forum-button">Спросить на форуме</button>
+                <button class="action-button cost" id="book-button">+50 Прочитать книгу ($20)</button>
+                <button class="action-button cost" id="course-button">+10 Курс ($5)</button>
+                <button class="action-button free" id="github-button">+5 Найти код на GitHub</button>
+                <button class="action-button free" id="forum-button">+5 Спросить на форуме</button>
             </div>
             
             <div class="action-group">
@@ -703,6 +704,7 @@
             <button class="modal-button" id="restart-button">Начать заново</button>
         </div>
     </div>
+<audio id="backgroundMusic" loop></audio>
 
     <script>
         // Фиксированные паттерны для акций на 30 дней
@@ -976,7 +978,7 @@ const STOCK_PATTERNS = [
             const fatigueImpact = 1 - (gameState.fatigue * 3) / 200;
             const fatigueFactor = Math.max(0.1, fatigueImpact);
             
-            const developmentSpeed = baseSpeed * fatigueFactor;
+            const developmentSpeed = baseSpeed * fatigueFactor * 0.1;
             
             mechanic.progress += developmentSpeed;
             
@@ -1175,31 +1177,140 @@ const STOCK_PATTERNS = [
             });
         }
         
-        // Обновление состояния персонажа
-        function updateCharacterState() {
-            let stateText = "";
-            let filter = '';
-            
-            if (gameState.fatigue < 30) {
-                stateText = "Отдохнувший";
-                filter = 'none';
-            } else if (gameState.fatigue < 50) {
-                stateText = "Слегка уставший";
-                filter = 'hue-rotate(20deg)';
-            } else if (gameState.fatigue < 70) {
-                stateText = "Усталый";
-                filter = 'hue-rotate(40deg) saturate(120%)';
-            } else if (gameState.fatigue < 90) {
-                stateText = "Сильно уставший";
-                filter = 'hue-rotate(60deg) saturate(150%)';
-            } else {
-                stateText = "Измождённый";
-                filter = 'hue-rotate(80deg) saturate(200%) brightness(80%)';
-            }
-            
-            characterState.textContent = `Состояние: ${stateText}`;
-            characterImg.style.filter = filter;
-        }
+
+// -------------------- Конфигурация --------------------
+// Пути фоновых треков:
+const musicTracks = [
+  'music/track1.mp3',
+  'music/track2.mp3'
+];
+// Конфигурация звуков состояний:
+const stateConfig = {
+  "Измождённый": "music/dead.mp3"
+  // можно добавить другие состояния при необходимости
+};
+
+// -------------------- Глобальные переменные --------------------
+const backgroundMusic = document.getElementById('backgroundMusic');
+let currentTrack = null;
+let bgInitialized = false;
+
+// Audio для фоновой музыки:
+const bgAudio = new Audio();
+bgAudio.loop = false; // ручное переключение
+bgAudio.volume = 0.5;
+
+// Audio объекты для звуков состояний:
+const stateAudios = {};
+let currentStateAudio = null;
+let currentStateName = null; // для отслеживания текущего состояния
+
+// -------------------- Инициализация аудио-объектов --------------------
+function initStateAudios() {
+  for (const [state, url] of Object.entries(stateConfig)) {
+    const a = new Audio(url);
+    a.loop = true;       // loop=true, чтобы звук повторялся пока играет
+    a.volume = 1.0;
+    stateAudios[state] = a;
+  }
+}
+
+function initBackgroundAudio() {
+  bgAudio.addEventListener('ended', () => {
+    playRandomBackgroundTrack();
+  });
+}
+
+// -------------------- Фоновая музыка --------------------
+function getRandomTrack() {
+  if (musicTracks.length === 0) return null;
+  if (musicTracks.length === 1) return musicTracks[0];
+  const avail = musicTracks.filter(t => t !== currentTrack);
+  const idx = Math.floor(Math.random() * avail.length);
+  return avail[idx];
+}
+
+function playRandomBackgroundTrack() {
+  const track = getRandomTrack();
+  if (!track) return;
+  currentTrack = track;
+  bgAudio.src = track;
+  bgAudio.currentTime = 0;
+  bgAudio.play().catch(e => console.log('Ошибка воспроизведения фона:', e));
+}
+
+// -------------------- Звуки состояний --------------------
+function changeStateSound(newState) {
+  // Если состояние не изменилось, ничего не делаем:
+  if (currentStateName === newState) {
+    return;
+  }
+  // Останавливаем предыдущий звук состояния, если был:
+  if (currentStateAudio) {
+    currentStateAudio.pause();
+    currentStateAudio.currentTime = 0;
+    currentStateAudio = null;
+  }
+  currentStateName = newState;
+
+  // Запускаем новый, если он настроен:
+  const audio = stateAudios[newState];
+  if (audio) {
+    currentStateAudio = audio;
+    audio.play().catch(e => console.log('Ошибка воспроизведения state sound:', e));
+  }
+}
+
+// -------------------- Интеграция с игрой --------------------
+// Пример: при изменении gameState.fatigue вызывается updateCharacterState()
+function updateCharacterState() {
+  let stateText;
+  if (gameState.fatigue < 30) {
+    stateText = "Отдохнувший";
+  } else if (gameState.fatigue < 50) {
+    stateText = "Слегка уставший";
+  } else if (gameState.fatigue < 70) {
+    stateText = "Усталый";
+  } else if (gameState.fatigue < 90) {
+    stateText = "Сильно уставший";
+  } else {
+    stateText = "Измождённый";
+  }
+
+  // Обновляем UI:
+  characterState.textContent = `Состояние: ${stateText}`;
+  const imgSrc = {
+    "Отдохнувший": "img/dev_rest.gif",
+    "Слегка уставший": "img/dev_okay.gif",
+    "Усталый": "img/dev_tired.gif",
+    "Сильно уставший": "img/dev_exhausted.gif",
+    "Измождённый": "img/dev_dead.gif"
+  }[stateText];
+  if (imgSrc && !characterImg.src.endsWith(imgSrc)) {
+    characterImg.src = imgSrc;
+  }
+
+  // Запуск/остановка звука состояния:
+  changeStateSound(stateText);
+}
+
+// -------------------- Автовоспроизведение по клику --------------------
+function initAudioOnFirstInteraction() {
+  if (bgInitialized) return;
+  bgInitialized = true;
+  initStateAudios();
+  initBackgroundAudio();
+  playRandomBackgroundTrack();
+  updateCharacterState();
+}
+
+// Привязка к кнопке старта или первому клику:
+startButton.addEventListener('click', () => {
+  initAudioOnFirstInteraction();
+}, { once: true });
+// Либо: document.addEventListener('click', initAudioOnFirstInteraction, { once: true });
+
+
         
         // Покупка акций
         function buyStock(stockIndex, amount) {
@@ -1373,27 +1484,31 @@ const STOCK_PATTERNS = [
             updateUI();
         });
         
-        skipDayButton.addEventListener('click', function() {
-            // Пропускаем день
-            gameState.day++;
-            dayDisplay.textContent = `День: ${gameState.day}`;
-            
-            // Обновление акций при смене дня
-            updateStocks();
-            
-            // Уменьшаем усталость и добавляем мотивацию
-            gameState.fatigue = Math.max(0, gameState.fatigue - 40);
-            gameState.motivation = Math.min(100, gameState.motivation + 15);
-            
-            // Проверка конца месяца
-            if (checkEndMonth()) return;
-            
-            updateUI();
-        });
+skipDayButton.addEventListener('click', function() {
+    gameState.day++;
+    dayDisplay.textContent = `День: ${gameState.day}`;
+    
+    updateStocks();
+    
+    // Сброс дневных действий
+    gameState.actionsUsed = {
+        sleep: false,
+        github: false,
+        forum: false
+    };
+    
+    gameState.fatigue = Math.max(0, gameState.fatigue - 40);
+    gameState.motivation = Math.min(100, gameState.motivation + 15);
+    
+    if (checkEndMonth()) return;
+    
+    updateUI();
+});
+
         
         cinemaButton.addEventListener('click', function() {
-            if (gameState.money >= 20) {
-                gameState.money -= 20;
+            if (gameState.money >= 10) {
+                gameState.money -= 10;
                 gameState.fatigue = Math.max(0, gameState.fatigue - 30);
                 gameState.motivation = Math.min(100, gameState.motivation + 25);
                 updateUI();
@@ -1401,8 +1516,8 @@ const STOCK_PATTERNS = [
         });
         
         eatButton.addEventListener('click', function() {
-            if (gameState.money >= 10) {
-                gameState.money -= 10;
+            if (gameState.money >= 5) {
+                gameState.money -= 5;
                 gameState.fatigue = Math.max(0, gameState.fatigue - 15);
                 updateUI();
             }
@@ -1419,19 +1534,19 @@ const STOCK_PATTERNS = [
         courseButton.addEventListener('click', function() {
             if (gameState.money >= 5) {
                 gameState.money -= 5;
-                gameState.skill += 30;
+                gameState.skill += 10;
                 updateUI();
             }
         });
         
         githubButton.addEventListener('click', function() {
-            gameState.skill += 10;
+            gameState.skill += 5;
             gameState.actionsUsed.github = true;
             updateUI();
         });
         
         forumButton.addEventListener('click', function() {
-            gameState.skill += 10;
+            gameState.skill += 5;
             gameState.actionsUsed.forum = true;
             updateUI();
         });
