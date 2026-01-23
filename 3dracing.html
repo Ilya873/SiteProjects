@@ -1,0 +1,1740 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏎️ Ultimate 3D Racing</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { overflow: hidden; font-family: 'Segoe UI', Arial, sans-serif; background: #000; }
+        #gameCanvas { display: block; }
+        
+        #loadingScreen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 2000; color: white;
+        }
+        #loadingScreen h1 { font-size: 48px; color: #00ff88; margin-bottom: 30px; }
+        #loadingBar { width: 300px; height: 20px; background: #333; border-radius: 10px; overflow: hidden; }
+        #loadingFill { height: 100%; width: 0%; background: linear-gradient(90deg, #00ff88, #00aaff); transition: width 0.3s; }
+        #loadingText { margin-top: 15px; color: #888; }
+        
+        #speedometer {
+            position: fixed; bottom: 30px; right: 30px; width: 180px; height: 180px;
+            background: rgba(0,0,0,0.8); border-radius: 50%; border: 4px solid #00ff88;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            box-shadow: 0 0 30px rgba(0,255,136,0.3);
+        }
+        #speed { font-size: 42px; font-weight: bold; color: #00ff88; text-shadow: 0 0 20px #00ff88; }
+        #speedLabel { color: #888; font-size: 14px; }
+        
+        #position {
+            position: fixed; top: 20px; left: 20px;
+            background: rgba(0,0,0,0.8); padding: 15px 25px; border-radius: 15px; border: 2px solid #ffaa00;
+        }
+        #position h2 { font-size: 32px; color: #ffaa00; text-shadow: 0 0 20px #ffaa00; }
+        #lap { font-size: 16px; color: #aaa; margin-top: 5px; }
+        
+        #minimap {
+            position: fixed; bottom: 30px; left: 30px; width: 180px; height: 180px;
+            background: rgba(0,0,0,0.8); border-radius: 10px; border: 2px solid #444;
+        }
+        #minimapCanvas { width: 100%; height: 100%; }
+        
+        #countdown {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            font-size: 150px; font-weight: bold; color: #ff4444;
+            text-shadow: 0 0 50px #ff4444; display: none; z-index: 200;
+        }
+        
+        #leaderboard {
+            position: fixed; top: 20px; right: 20px;
+            background: rgba(0,0,0,0.8); padding: 15px; border-radius: 10px; border: 2px solid #666;
+            color: white; min-width: 160px;
+        }
+        #leaderboard h3 { color: #ffaa00; margin-bottom: 10px; font-size: 14px; }
+        .leader-entry { padding: 4px 0; display: flex; justify-content: space-between; font-size: 13px; }
+        .leader-entry.player { color: #00ff88; font-weight: bold; }
+        
+        #controls {
+            position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%);
+            background: rgba(0,0,0,0.7); padding: 8px 15px; border-radius: 8px;
+            color: #888; font-size: 11px;
+        }
+        
+        #message {
+            position: fixed; top: 35%; left: 50%; transform: translate(-50%, -50%);
+            font-size: 48px; font-weight: bold; color: #00ff88;
+            text-shadow: 0 0 30px #00ff88; display: none; text-align: center; z-index: 150;
+        }
+        
+        #startScreen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            display: none; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 1000;
+        }
+        #startScreen h1 { font-size: 64px; color: #00ff88; text-shadow: 0 0 50px #00ff88; margin-bottom: 20px; }
+        #startScreen p { color: #888; margin-bottom: 30px; font-size: 18px; }
+        
+        .car-select { display: flex; gap: 20px; margin: 20px 0; }
+        .car-option {
+            width: 140px; height: 90px; background: rgba(255,255,255,0.1);
+            border-radius: 15px; cursor: pointer; border: 3px solid transparent;
+            transition: all 0.3s; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; color: white;
+        }
+        .car-option:hover { border-color: #00ff88; transform: scale(1.05); }
+        .car-option.selected { border-color: #00ff88; background: rgba(0,255,136,0.2); }
+        .car-option .car-icon { font-size: 36px; margin-bottom: 5px; }
+        
+        #startBtn {
+            padding: 18px 50px; font-size: 22px;
+            background: linear-gradient(135deg, #00ff88, #00cc6a);
+            border: none; border-radius: 50px; color: #000; font-weight: bold;
+            cursor: pointer; transition: all 0.3s;
+            box-shadow: 0 10px 40px rgba(0,255,136,0.4);
+        }
+        #startBtn:hover { transform: scale(1.1); box-shadow: 0 15px 50px rgba(0,255,136,0.6); }
+        
+        #nitroBar {
+            position: fixed; bottom: 230px; right: 55px;
+            width: 16px; height: 120px; background: rgba(0,0,0,0.7);
+            border-radius: 8px; border: 2px solid #00aaff; overflow: hidden;
+        }
+        #nitroFill {
+            position: absolute; bottom: 0; width: 100%; height: 100%;
+            background: linear-gradient(to top, #00aaff, #00ffff); transition: height 0.1s;
+        }
+        #nitroLabel { position: fixed; bottom: 355px; right: 45px; color: #00aaff; font-size: 11px; font-weight: bold; }
+        
+        #gear {
+            position: fixed; bottom: 100px; right: 75px;
+            font-size: 28px; color: #ffaa00; font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div id="loadingScreen">
+        <h1>🏎️ TURBO RACING</h1>
+        <div id="loadingBar"><div id="loadingFill"></div></div>
+        <div id="loadingText">Загрузка моделей...</div>
+    </div>
+
+    <div id="startScreen">
+        <h1>🏎️ TURBO RACING</h1>
+        <p>Выберите машину и начните гонку!</p>
+        <div class="car-select">
+            <div class="car-option selected" data-car="sport" data-color="0xff4444">
+                <div class="car-icon">🏎️</div>
+                <div>Спорткар</div>
+            </div>
+            <div class="car-option" data-car="muscle" data-color="0x4444ff">
+                <div class="car-icon">🚗</div>
+                <div>Маслкар</div>
+            </div>
+            <div class="car-option" data-car="super" data-color="0xffaa00">
+                <div class="car-icon">🚙</div>
+                <div>Суперкар</div>
+            </div>
+        </div>
+        <button id="startBtn">СТАРТ</button>
+    </div>
+    
+    <div id="position">
+        <h2>1st</h2>
+        <div id="lap">Круг: 1/3</div>
+    </div>
+    
+    <div id="speedometer">
+        <div id="speed">0</div>
+        <div id="speedLabel">км/ч</div>
+    </div>
+    
+    <div id="gear">N</div>
+    
+    <div id="nitroLabel">NITRO</div>
+    <div id="nitroBar"><div id="nitroFill"></div></div>
+    
+    <div id="leaderboard">
+        <h3>🏆 Позиции</h3>
+        <div id="leaderList"></div>
+    </div>
+    
+    <div id="minimap"><canvas id="minimapCanvas"></canvas></div>
+    
+    <div id="countdown">3</div>
+    <div id="message"></div>
+    
+    <div id="controls">WASD/Стрелки - управление | SHIFT - нитро | ПРОБЕЛ - тормоз | R - респавн</div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.134.0/examples/js/loaders/GLTFLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.134.0/examples/js/loaders/DRACOLoader.js"></script>
+    <script>
+        // ============ КОНФИГУРАЦИЯ ============
+        const CONFIG = {
+            trackWidth: 28,
+            maxSpeed: 2.8,
+            acceleration: 0.035,
+            braking: 0.06,
+            friction: 0.008,
+            turnSpeed: 0.055,       // Базовая скорость поворота
+            maxTurnSpeed: 0.09,     // Максимальная скорость поворота
+            nitroBoost: 1.6,
+            nitroMax: 100,
+            nitroDrain: 0.7,
+            nitroRegen: 0.2,
+            botCount: 5,
+            totalLaps: 3,
+            gravity: 0.02
+        };
+
+        // ============ ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ============
+        let scene, camera, renderer;
+        let playerCar, cars = [];
+        let trackPoints = [];
+        let checkpoints = [];
+        let keys = {};
+        let gameStarted = false;
+        let raceStarted = false;
+        let selectedCarColor = 0xff4444;
+        let obstacles = [];
+        let loadedModels = {};
+        let modelsToLoad = 0;
+        let modelsLoaded = 0;
+
+        // ============ ЗАГРУЗЧИКИ МОДЕЛЕЙ ============
+        const gltfLoader = new THREE.GLTFLoader();
+        
+        // Источники бесплатных моделей
+        const MODEL_URLS = {
+            // Машины с poly.pizza и других источников
+            car1: 'https://vazxmixjsiawhamofees.supabase.co/storage/v1/object/public/models/car-police/model.gltf',
+            car2: 'https://vazxmixjsiawhamofees.supabase.co/storage/v1/object/public/models/car-taxi/model.gltf',
+            car3: 'https://vazxmixjsiawhamofees.supabase.co/storage/v1/object/public/models/truck/model.gltf',
+            
+            // Деревья
+            tree1: 'https://vazxmixjsiawhamofees.supabase.co/storage/v1/object/public/models/tree-beech/model.gltf',
+            tree2: 'https://vazxmixjsiawhamofees.supabase.co/storage/v1/object/public/models/tree-lime/model.gltf',
+            
+            // Здания
+            building1: 'https://vazxmixjsiawhamofees.supabase.co/storage/v1/object/public/models/building-house/model.gltf',
+            building2: 'https://vazxmixjsiawhamofees.supabase.co/storage/v1/object/public/models/building-skyscraper/model.gltf',
+            
+            // Другие объекты
+            barrier: 'https://vazxmixjsiawhamofees.supabase.co/storage/v1/object/public/models/barrier/model.gltf',
+            rock: 'https://vazxmixjsiawhamofees.supabase.co/storage/v1/object/public/models/rock-tall/model.gltf'
+        };
+
+        // Fallback модели (если основные не загрузятся)
+        const BACKUP_URLS = {
+            car: 'https://threejs.org/examples/models/gltf/ferrari.glb',
+            tree: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Box/glTF/Box.gltf'
+        };
+
+        // ============ ИНИЦИАЛИЗАЦИЯ ============
+        function init() {
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x87CEEB);
+            scene.fog = new THREE.FogExp2(0x87CEEB, 0.003);
+
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 2000);
+            
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            renderer.outputEncoding = THREE.sRGBEncoding;
+            renderer.toneMapping = THREE.ACESFilmicToneMapping;
+            renderer.toneMappingExposure = 1.2;
+            document.body.appendChild(renderer.domElement);
+
+            setupLighting();
+            createGround();
+            createTrack();
+            createSky();
+            
+            // Загружаем модели
+            loadAllModels().then(() => {
+                createEnvironment();
+                setupMinimap();
+                hideLoading();
+            });
+
+            window.addEventListener('resize', onWindowResize);
+            window.addEventListener('keydown', handleKeyDown);
+            window.addEventListener('keyup', handleKeyUp);
+        }
+
+        function handleKeyDown(e) {
+            keys[e.code] = true;
+            keys[e.key.toLowerCase()] = true;
+            // Предотвращаем скролл страницы
+            if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code)) {
+                e.preventDefault();
+            }
+        }
+
+        function handleKeyUp(e) {
+            keys[e.code] = false;
+            keys[e.key.toLowerCase()] = false;
+        }
+
+        function setupLighting() {
+            // Ambient
+            const ambient = new THREE.AmbientLight(0xffffff, 0.5);
+            scene.add(ambient);
+
+            // Hemisphere
+            const hemi = new THREE.HemisphereLight(0x87CEEB, 0x228B22, 0.4);
+            scene.add(hemi);
+
+            // Sun
+            const sun = new THREE.DirectionalLight(0xfffaf0, 1.2);
+            sun.position.set(100, 150, 100);
+            sun.castShadow = true;
+            sun.shadow.mapSize.width = 4096;
+            sun.shadow.mapSize.height = 4096;
+            sun.shadow.camera.near = 10;
+            sun.shadow.camera.far = 500;
+            sun.shadow.camera.left = -200;
+            sun.shadow.camera.right = 200;
+            sun.shadow.camera.top = 200;
+            sun.shadow.camera.bottom = -200;
+            sun.shadow.bias = -0.0001;
+            scene.add(sun);
+        }
+
+        // ============ ЗАГРУЗКА МОДЕЛЕЙ ============
+        async function loadAllModels() {
+            const modelKeys = Object.keys(MODEL_URLS);
+            modelsToLoad = modelKeys.length;
+            
+            const promises = modelKeys.map(key => loadModel(key, MODEL_URLS[key]));
+            
+            await Promise.allSettled(promises);
+            
+            console.log('Все модели обработаны:', Object.keys(loadedModels));
+        }
+
+        function loadModel(name, url) {
+            return new Promise((resolve) => {
+                gltfLoader.load(
+                    url,
+                    (gltf) => {
+                        loadedModels[name] = gltf.scene;
+                        modelsLoaded++;
+                        updateLoadingProgress();
+                        console.log(`Загружена модель: ${name}`);
+                        resolve(true);
+                    },
+                    (progress) => {
+                        // Прогресс загрузки
+                    },
+                    (error) => {
+                        console.warn(`Не удалось загрузить ${name}, используем fallback`);
+                        modelsLoaded++;
+                        updateLoadingProgress();
+                        resolve(false);
+                    }
+                );
+            });
+        }
+
+        function updateLoadingProgress() {
+            const progress = (modelsLoaded / modelsToLoad) * 100;
+            document.getElementById('loadingFill').style.width = progress + '%';
+            document.getElementById('loadingText').textContent = 
+                `Загрузка моделей... ${modelsLoaded}/${modelsToLoad}`;
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingScreen').style.display = 'none';
+            document.getElementById('startScreen').style.display = 'flex';
+        }
+
+        // ============ СОЗДАНИЕ МИРА ============
+        function createGround() {
+            // Основная земля
+            const groundGeometry = new THREE.PlaneGeometry(2000, 2000, 100, 100);
+            
+            // Добавляем небольшие неровности
+            const positions = groundGeometry.attributes.position.array;
+            for (let i = 2; i < positions.length; i += 3) {
+                positions[i] += (Math.random() - 0.5) * 0.5;
+            }
+            groundGeometry.computeVertexNormals();
+            
+            const groundMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0x3d8c40,
+                roughness: 0.9,
+                metalness: 0
+            });
+            
+            const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+            ground.rotation.x = -Math.PI / 2;
+            ground.receiveShadow = true;
+            scene.add(ground);
+
+            // Текстурированные патчи травы
+            for (let i = 0; i < 300; i++) {
+                const patch = new THREE.Mesh(
+                    new THREE.CircleGeometry(Math.random() * 5 + 2, 8),
+                    new THREE.MeshStandardMaterial({ 
+                        color: new THREE.Color().setHSL(0.3, 0.5 + Math.random() * 0.3, 0.25 + Math.random() * 0.15)
+                    })
+                );
+                patch.rotation.x = -Math.PI / 2;
+                patch.position.set(
+                    (Math.random() - 0.5) * 1500,
+                    0.02,
+                    (Math.random() - 0.5) * 1500
+                );
+                patch.receiveShadow = true;
+                scene.add(patch);
+            }
+        }
+
+        function createTrack() {
+            // Создаём интересную трассу
+            const numPoints = 32;
+            const baseRadius = 150;
+            
+            for (let i = 0; i < numPoints; i++) {
+                const angle = (i / numPoints) * Math.PI * 2;
+                // Сложная форма трассы
+                const radiusVariation = 
+                    Math.sin(angle * 2) * 40 + 
+                    Math.cos(angle * 3) * 25 +
+                    Math.sin(angle * 5) * 15;
+                const radius = baseRadius + radiusVariation;
+                
+                trackPoints.push({
+                    x: Math.cos(angle) * radius,
+                    z: Math.sin(angle) * radius,
+                    angle: angle + Math.PI / 2
+                });
+            }
+
+            // Создаём сегменты дороги
+            const trackGroup = new THREE.Group();
+            
+            for (let i = 0; i < trackPoints.length; i++) {
+                const current = trackPoints[i];
+                const next = trackPoints[(i + 1) % trackPoints.length];
+                
+                const dx = next.x - current.x;
+                const dz = next.z - current.z;
+                const length = Math.sqrt(dx * dx + dz * dz);
+                const angle = Math.atan2(dz, dx);
+                
+                // Асфальт
+                const roadGeometry = new THREE.PlaneGeometry(length + 1, CONFIG.trackWidth);
+                const roadMaterial = new THREE.MeshStandardMaterial({ 
+                    color: 0x333333,
+                    roughness: 0.8
+                });
+                const road = new THREE.Mesh(roadGeometry, roadMaterial);
+                road.rotation.x = -Math.PI / 2;
+                road.rotation.z = -angle;
+                road.position.set((current.x + next.x) / 2, 0.05, (current.z + next.z) / 2);
+                road.receiveShadow = true;
+                trackGroup.add(road);
+                
+                // Бордюры (красно-белые)
+                for (let side = -1; side <= 1; side += 2) {
+                    const curbGeometry = new THREE.PlaneGeometry(length + 1, 1.5);
+                    const curbCanvas = document.createElement('canvas');
+                    curbCanvas.width = 64;
+                    curbCanvas.height = 8;
+                    const ctx = curbCanvas.getContext('2d');
+                    for (let c = 0; c < 8; c++) {
+                        ctx.fillStyle = c % 2 === 0 ? '#ff0000' : '#ffffff';
+                        ctx.fillRect(c * 8, 0, 8, 8);
+                    }
+                    const curbTexture = new THREE.CanvasTexture(curbCanvas);
+                    curbTexture.wrapS = THREE.RepeatWrapping;
+                    curbTexture.repeat.x = length / 3;
+                    
+                    const curb = new THREE.Mesh(curbGeometry, new THREE.MeshStandardMaterial({ 
+                        map: curbTexture 
+                    }));
+                    curb.rotation.x = -Math.PI / 2;
+                    curb.rotation.z = -angle;
+                    
+                    const perpX = -Math.sin(angle) * (CONFIG.trackWidth / 2 + 0.5) * side;
+                    const perpZ = Math.cos(angle) * (CONFIG.trackWidth / 2 + 0.5) * side;
+                    curb.position.set(
+                        (current.x + next.x) / 2 + perpX,
+                        0.06,
+                        (current.z + next.z) / 2 + perpZ
+                    );
+                    trackGroup.add(curb);
+                }
+                
+                // Чекпоинты
+                if (i % 4 === 0) {
+                    checkpoints.push({ x: current.x, z: current.z, passed: false });
+                }
+            }
+            
+            scene.add(trackGroup);
+            
+            // Разметка
+            createRoadMarkings();
+            
+            // Стартовая линия
+            createStartFinish();
+        }
+
+        function createRoadMarkings() {
+            // Центральная пунктирная линия
+            for (let i = 0; i < trackPoints.length; i++) {
+                if (i % 2 === 0) {
+                    const current = trackPoints[i];
+                    const next = trackPoints[(i + 1) % trackPoints.length];
+                    
+                    const markGeometry = new THREE.PlaneGeometry(3, 0.3);
+                    const markMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
+                    const mark = new THREE.Mesh(markGeometry, markMaterial);
+                    mark.rotation.x = -Math.PI / 2;
+                    mark.rotation.z = -Math.atan2(next.z - current.z, next.x - current.x);
+                    mark.position.set(current.x, 0.07, current.z);
+                    scene.add(mark);
+                }
+            }
+        }
+
+        function createStartFinish() {
+            const start = trackPoints[0];
+            const next = trackPoints[1];
+            const angle = Math.atan2(next.z - start.z, next.x - start.x);
+            
+            // Стартовая черта (шахматный узор)
+            const startGeometry = new THREE.PlaneGeometry(CONFIG.trackWidth, 5);
+            const startCanvas = document.createElement('canvas');
+            startCanvas.width = 256;
+            startCanvas.height = 64;
+            const ctx = startCanvas.getContext('2d');
+            const sq = 16;
+            for (let x = 0; x < 16; x++) {
+                for (let y = 0; y < 4; y++) {
+                    ctx.fillStyle = (x + y) % 2 === 0 ? '#fff' : '#000';
+                    ctx.fillRect(x * sq, y * sq, sq, sq);
+                }
+            }
+            const startTexture = new THREE.CanvasTexture(startCanvas);
+            
+            const startLine = new THREE.Mesh(startGeometry, new THREE.MeshBasicMaterial({ map: startTexture }));
+            startLine.rotation.x = -Math.PI / 2;
+            startLine.rotation.z = -angle;
+            startLine.position.set(start.x, 0.08, start.z);
+            scene.add(startLine);
+            
+            // Арка старта
+            const archGroup = new THREE.Group();
+            
+            // Колонны
+            for (let side = -1; side <= 1; side += 2) {
+                const pillarGeometry = new THREE.BoxGeometry(1, 12, 1);
+                const pillarMaterial = new THREE.MeshStandardMaterial({ color: 0xdd0000 });
+                const pillar = new THREE.Mesh(pillarGeometry, pillarMaterial);
+                pillar.position.set(side * (CONFIG.trackWidth / 2 + 2), 6, 0);
+                pillar.castShadow = true;
+                archGroup.add(pillar);
+            }
+            
+            // Перекладина
+            const beamGeometry = new THREE.BoxGeometry(CONFIG.trackWidth + 6, 2, 1.5);
+            const beamMaterial = new THREE.MeshStandardMaterial({ color: 0xdd0000 });
+            const beam = new THREE.Mesh(beamGeometry, beamMaterial);
+            beam.position.y = 11;
+            beam.castShadow = true;
+            archGroup.add(beam);
+            
+            // Надпись
+            const bannerCanvas = document.createElement('canvas');
+            bannerCanvas.width = 512;
+            bannerCanvas.height = 64;
+            const bctx = bannerCanvas.getContext('2d');
+            bctx.fillStyle = '#222';
+            bctx.fillRect(0, 0, 512, 64);
+            bctx.fillStyle = '#fff';
+            bctx.font = 'bold 36px Arial';
+            bctx.textAlign = 'center';
+            bctx.fillText('START / FINISH', 256, 45);
+            
+            const bannerTexture = new THREE.CanvasTexture(bannerCanvas);
+            const banner = new THREE.Mesh(
+                new THREE.PlaneGeometry(CONFIG.trackWidth + 4, 3),
+                new THREE.MeshBasicMaterial({ map: bannerTexture })
+            );
+            banner.position.y = 11;
+            banner.position.z = 0.8;
+            archGroup.add(banner);
+            
+            archGroup.position.set(start.x, 0, start.z);
+            archGroup.rotation.y = angle + Math.PI / 2;
+            scene.add(archGroup);
+        }
+
+        function createEnvironment() {
+            // Деревья
+            createTrees();
+            
+            // Здания
+            createBuildings();
+            
+            // Барьеры вдоль трассы
+            createBarriers();
+            
+            // Рекламные щиты
+            createBillboards();
+            
+            // Трибуны
+            createGrandstands();
+        }
+
+        function createTrees() {
+            for (let i = 0; i < 150; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const distance = 200 + Math.random() * 300;
+                const x = Math.cos(angle) * distance;
+                const z = Math.sin(angle) * distance;
+                
+                // Проверяем что не на трассе
+                let onTrack = false;
+                for (const point of trackPoints) {
+                    const dx = x - point.x;
+                    const dz = z - point.z;
+                    if (Math.sqrt(dx * dx + dz * dz) < CONFIG.trackWidth + 15) {
+                        onTrack = true;
+                        break;
+                    }
+                }
+                
+                if (!onTrack) {
+                    let tree;
+                    const treeType = Math.random();
+                    
+                    if (loadedModels.tree1 && treeType < 0.5) {
+                        tree = loadedModels.tree1.clone();
+                        tree.scale.setScalar(2 + Math.random());
+                    } else if (loadedModels.tree2 && treeType >= 0.5) {
+                        tree = loadedModels.tree2.clone();
+                        tree.scale.setScalar(2 + Math.random());
+                    } else {
+                        tree = createFallbackTree();
+                    }
+                    
+                    tree.position.set(x, 0, z);
+                    tree.rotation.y = Math.random() * Math.PI * 2;
+                    tree.traverse(child => {
+                        if (child.isMesh) {
+                            child.castShadow = true;
+                            child.receiveShadow = true;
+                        }
+                    });
+                    
+                    tree.userData = { isTree: true, radius: 2 };
+                    scene.add(tree);
+                    obstacles.push(tree);
+                }
+            }
+        }
+
+        function createFallbackTree() {
+            const group = new THREE.Group();
+            
+            // Ствол
+            const trunk = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.4, 0.6, 5, 8),
+                new THREE.MeshStandardMaterial({ color: 0x4a3728 })
+            );
+            trunk.position.y = 2.5;
+            trunk.castShadow = true;
+            group.add(trunk);
+            
+            // Крона
+            for (let i = 0; i < 3; i++) {
+                const foliage = new THREE.Mesh(
+                    new THREE.ConeGeometry(3.5 - i * 0.8, 4, 8),
+                    new THREE.MeshStandardMaterial({ 
+                        color: new THREE.Color().setHSL(0.3, 0.6, 0.25 + i * 0.05)
+                    })
+                );
+                foliage.position.y = 5 + i * 2;
+                foliage.castShadow = true;
+                group.add(foliage);
+            }
+            
+            return group;
+        }
+
+        function createBuildings() {
+            const buildingPositions = [
+                { x: 0, z: 0, scale: 1.5 },
+                { x: 60, z: -50, scale: 1.2 },
+                { x: -70, z: 40, scale: 1.8 },
+                { x: 40, z: 60, scale: 1 },
+                { x: -50, z: -70, scale: 1.3 }
+            ];
+            
+            buildingPositions.forEach((pos, i) => {
+                let building;
+                
+                if (loadedModels.building1 && i % 2 === 0) {
+                    building = loadedModels.building1.clone();
+                    building.scale.setScalar(3 * pos.scale);
+                } else if (loadedModels.building2) {
+                    building = loadedModels.building2.clone();
+                    building.scale.setScalar(2 * pos.scale);
+                } else {
+                    building = createFallbackBuilding();
+                    building.scale.setScalar(pos.scale);
+                }
+                
+                building.position.set(pos.x, 0, pos.z);
+                building.traverse(child => {
+                    if (child.isMesh) {
+                        child.castShadow = true;
+                        child.receiveShadow = true;
+                    }
+                });
+                
+                scene.add(building);
+            });
+        }
+
+        function createFallbackBuilding() {
+            const group = new THREE.Group();
+            
+            const height = 20 + Math.random() * 30;
+            const width = 10 + Math.random() * 10;
+            
+            const building = new THREE.Mesh(
+                new THREE.BoxGeometry(width, height, width),
+                new THREE.MeshStandardMaterial({ 
+                    color: new THREE.Color().setHSL(0, 0, 0.4 + Math.random() * 0.3)
+                })
+            );
+            building.position.y = height / 2;
+            building.castShadow = true;
+            group.add(building);
+            
+            // Окна
+            const windowMat = new THREE.MeshBasicMaterial({ color: 0xffffaa });
+            for (let floor = 0; floor < height / 4; floor++) {
+                for (let w = 0; w < 3; w++) {
+                    const win = new THREE.Mesh(
+                        new THREE.PlaneGeometry(1.5, 2),
+                        windowMat
+                    );
+                    win.position.set((w - 1) * 3, floor * 4 + 3, width / 2 + 0.01);
+                    group.add(win);
+                }
+            }
+            
+            return group;
+        }
+
+        function createBarriers() {
+            for (let i = 0; i < trackPoints.length; i += 2) {
+                const point = trackPoints[i];
+                const next = trackPoints[(i + 1) % trackPoints.length];
+                
+                const dx = next.x - point.x;
+                const dz = next.z - point.z;
+                const len = Math.sqrt(dx * dx + dz * dz);
+                const angle = Math.atan2(dz, dx);
+                const perpX = -Math.sin(angle);
+                const perpZ = Math.cos(angle);
+                
+                for (let side = -1; side <= 1; side += 2) {
+                    let barrier;
+                    
+                    if (loadedModels.barrier) {
+                        barrier = loadedModels.barrier.clone();
+                        barrier.scale.setScalar(1.5);
+                    } else {
+                        barrier = createFallbackBarrier();
+                    }
+                    
+                    barrier.position.set(
+                        point.x + perpX * (CONFIG.trackWidth / 2 + 3) * side,
+                        0,
+                        point.z + perpZ * (CONFIG.trackWidth / 2 + 3) * side
+                    );
+                    barrier.rotation.y = angle;
+                    barrier.userData = { isBarrier: true, radius: 2 };
+                    
+                    barrier.traverse(child => {
+                        if (child.isMesh) child.castShadow = true;
+                    });
+                    
+                    scene.add(barrier);
+                    obstacles.push(barrier);
+                }
+            }
+        }
+
+        function createFallbackBarrier() {
+            const group = new THREE.Group();
+            
+            const barrier = new THREE.Mesh(
+                new THREE.BoxGeometry(5, 1.2, 0.5),
+                new THREE.MeshStandardMaterial({ color: 0xff0000 })
+            );
+            barrier.position.y = 0.6;
+            group.add(barrier);
+            
+            const stripe = new THREE.Mesh(
+                new THREE.BoxGeometry(5, 0.4, 0.52),
+                new THREE.MeshStandardMaterial({ color: 0xffffff })
+            );
+            stripe.position.y = 0.8;
+            group.add(stripe);
+            
+            return group;
+        }
+
+        function createBillboards() {
+            const ads = ['TURBO RACING', 'NITRO BOOST', 'SPEED KING', 'FAST LAP', 'POLE POSITION'];
+            const colors = ['#ff4444', '#4444ff', '#44ff44', '#ffaa00', '#ff44ff'];
+            
+            for (let i = 0; i < 6; i++) {
+                const idx = Math.floor(i * trackPoints.length / 6);
+                const point = trackPoints[idx];
+                const next = trackPoints[(idx + 1) % trackPoints.length];
+                
+                const angle = Math.atan2(next.z - point.z, next.x - point.x);
+                const perpX = -Math.sin(angle);
+                const perpZ = Math.cos(angle);
+                
+                const group = new THREE.Group();
+                
+                // Столбы
+                for (let p = -1; p <= 1; p += 2) {
+                    const post = new THREE.Mesh(
+                        new THREE.CylinderGeometry(0.2, 0.2, 6, 8),
+                        new THREE.MeshStandardMaterial({ color: 0x444444 })
+                    );
+                    post.position.set(p * 5, 3, 0);
+                    group.add(post);
+                }
+                
+                // Щит
+                const canvas = document.createElement('canvas');
+                canvas.width = 512;
+                canvas.height = 128;
+                const ctx = canvas.getContext('2d');
+                ctx.fillStyle = colors[i % colors.length];
+                ctx.fillRect(0, 0, 512, 128);
+                ctx.fillStyle = '#fff';
+                ctx.font = 'bold 48px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(ads[i % ads.length], 256, 80);
+                
+                const billboard = new THREE.Mesh(
+                    new THREE.PlaneGeometry(12, 4),
+                    new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(canvas) })
+                );
+                billboard.position.y = 5;
+                group.add(billboard);
+                
+                group.position.set(
+                    point.x + perpX * (CONFIG.trackWidth / 2 + 10),
+                    0,
+                    point.z + perpZ * (CONFIG.trackWidth / 2 + 10)
+                );
+                group.rotation.y = angle + Math.PI / 2;
+                
+                scene.add(group);
+            }
+        }
+
+        function createGrandstands() {
+            for (let i = 0; i < 3; i++) {
+                const angle = (i / 3) * Math.PI * 2 + 0.5;
+                const dist = 200;
+                
+                const group = new THREE.Group();
+                
+                // Основание
+                const base = new THREE.Mesh(
+                    new THREE.BoxGeometry(40, 10, 15),
+                    new THREE.MeshStandardMaterial({ color: 0x666666 })
+                );
+                base.position.set(0, 5, 0);
+                base.castShadow = true;
+                group.add(base);
+                
+                // Сиденья
+                for (let row = 0; row < 5; row++) {
+                    for (let seat = 0; seat < 20; seat++) {
+                        const seatMesh = new THREE.Mesh(
+                            new THREE.BoxGeometry(1.8, 0.5, 0.5),
+                            new THREE.MeshStandardMaterial({ 
+                                color: (seat + row) % 2 === 0 ? 0xff4444 : 0x4444ff
+                            })
+                        );
+                        seatMesh.position.set((seat - 9.5) * 2, 2 + row * 1.8, -5 + row * 2);
+                        group.add(seatMesh);
+                    }
+                }
+                
+                // Крыша
+                const roof = new THREE.Mesh(
+                    new THREE.BoxGeometry(42, 0.5, 18),
+                    new THREE.MeshStandardMaterial({ color: 0x333333 })
+                );
+                roof.position.set(0, 15, 2);
+                roof.castShadow = true;
+                group.add(roof);
+                
+                group.position.set(
+                    Math.cos(angle) * dist,
+                    0,
+                    Math.sin(angle) * dist
+                );
+                group.rotation.y = angle + Math.PI;
+                
+                scene.add(group);
+            }
+        }
+
+        function createSky() {
+            // Небесный купол
+            const skyGeometry = new THREE.SphereGeometry(800, 32, 32);
+            const skyMaterial = new THREE.MeshBasicMaterial({
+                color: 0x87CEEB,
+                side: THREE.BackSide
+            });
+            const sky = new THREE.Mesh(skyGeometry, skyMaterial);
+            scene.add(sky);
+            
+            // Облака
+            for (let i = 0; i < 25; i++) {
+                const cloud = createCloud();
+                cloud.position.set(
+                    (Math.random() - 0.5) * 1000,
+                    100 + Math.random() * 80,
+                    (Math.random() - 0.5) * 1000
+                );
+                scene.add(cloud);
+            }
+        }
+
+        function createCloud() {
+            const group = new THREE.Group();
+            const mat = new THREE.MeshBasicMaterial({ 
+                color: 0xffffff, 
+                transparent: true, 
+                opacity: 0.9 
+            });
+            
+            for (let i = 0; i < 6; i++) {
+                const puff = new THREE.Mesh(
+                    new THREE.SphereGeometry(8 + Math.random() * 8, 8, 8),
+                    mat
+                );
+                puff.position.set(
+                    (Math.random() - 0.5) * 25,
+                    (Math.random() - 0.5) * 8,
+                    (Math.random() - 0.5) * 15
+                );
+                puff.scale.y = 0.6;
+                group.add(puff);
+            }
+            
+            return group;
+        }
+
+        // ============ СОЗДАНИЕ МАШИН ============
+        function createCar(color, isPlayer = false) {
+            const group = new THREE.Group();
+            
+            group.userData = {
+                isPlayer: isPlayer,
+                speed: 0,
+                angle: 0,
+                checkpoint: 0,
+                lap: 1,
+                finished: false,
+                trackIndex: 0,
+                wheelRotation: 0,
+                steerAngle: 0,
+                wheels: [],
+                nitro: CONFIG.nitroMax,
+                radius: 2.5,
+                velocity: { x: 0, z: 0 },
+                angularVelocity: 0,
+                drifting: false,
+                botId: 0,
+                skillLevel: 0.85
+            };
+            
+            // Попробуем использовать загруженную модель
+            let useLoadedModel = false;
+            
+            if (!isPlayer && loadedModels.car1) {
+                // Для ботов используем загруженные модели если есть
+                const carModels = ['car1', 'car2', 'car3'].filter(k => loadedModels[k]);
+                if (carModels.length > 0) {
+                    const modelKey = carModels[cars.length % carModels.length];
+                    const model = loadedModels[modelKey].clone();
+                    model.scale.setScalar(1.5);
+                    model.traverse(child => {
+                        if (child.isMesh) {
+                            child.castShadow = true;
+                            child.receiveShadow = true;
+                        }
+                    });
+                    group.add(model);
+                    useLoadedModel = true;
+                }
+            }
+            
+            if (!useLoadedModel) {
+                // Создаём детальную машину из примитивов
+                createDetailedCar(group, color, isPlayer);
+            }
+            
+            return group;
+        }
+
+        function createDetailedCar(group, color, isPlayer) {
+            const bodyColor = new THREE.Color(color);
+            
+            // Основной кузов
+            const bodyShape = new THREE.Shape();
+            bodyShape.moveTo(-1, 0);
+            bodyShape.lineTo(-1, 0.5);
+            bodyShape.lineTo(-0.8, 0.8);
+            bodyShape.lineTo(0.8, 0.8);
+            bodyShape.lineTo(1, 0.5);
+            bodyShape.lineTo(1, 0);
+            bodyShape.lineTo(-1, 0);
+            
+            const bodyGeometry = new THREE.ExtrudeGeometry(bodyShape, {
+                steps: 1,
+                depth: 4,
+                bevelEnabled: false
+            });
+            
+            const bodyMaterial = new THREE.MeshStandardMaterial({
+                color: bodyColor,
+                metalness: 0.9,
+                roughness: 0.2
+            });
+            
+            const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
+            body.rotation.x = Math.PI / 2;
+            body.position.set(0, 0.4, -2);
+            body.castShadow = true;
+            group.add(body);
+            
+            // Кабина
+            const cabinGeometry = new THREE.BoxGeometry(1.6, 0.7, 1.8);
+            const cabinMaterial = new THREE.MeshStandardMaterial({
+                color: 0x111111,
+                metalness: 0.3,
+                roughness: 0.7
+            });
+            const cabin = new THREE.Mesh(cabinGeometry, cabinMaterial);
+            cabin.position.set(0, 1.1, -0.3);
+            cabin.castShadow = true;
+            group.add(cabin);
+            
+            // Стёкла
+            const glassMaterial = new THREE.MeshStandardMaterial({
+                color: 0x88ccff,
+                transparent: true,
+                opacity: 0.6,
+                metalness: 0.9,
+                roughness: 0.1
+            });
+            
+            // Лобовое стекло
+            const windshield = new THREE.Mesh(
+                new THREE.PlaneGeometry(1.5, 0.6),
+                glassMaterial
+            );
+            windshield.position.set(0, 1.15, 0.7);
+            windshield.rotation.x = -0.4;
+            group.add(windshield);
+            
+            // Заднее стекло
+            const rearGlass = new THREE.Mesh(
+                new THREE.PlaneGeometry(1.5, 0.5),
+                glassMaterial
+            );
+            rearGlass.position.set(0, 1.15, -1.3);
+            rearGlass.rotation.x = 0.4;
+            group.add(rearGlass);
+            
+            // Капот
+            const hood = new THREE.Mesh(
+                new THREE.BoxGeometry(1.8, 0.15, 1.3),
+                new THREE.MeshStandardMaterial({ color: bodyColor, metalness: 0.9, roughness: 0.2 })
+            );
+            hood.position.set(0, 1, 1.5);
+            group.add(hood);
+            
+            // Воздухозаборник
+            const scoop = new THREE.Mesh(
+                new THREE.BoxGeometry(0.5, 0.2, 0.4),
+                new THREE.MeshStandardMaterial({ color: 0x111111 })
+            );
+            scoop.position.set(0, 1.15, 1.4);
+            group.add(scoop);
+            
+            // Спойлер
+            const spoilerWing = new THREE.Mesh(
+                new THREE.BoxGeometry(1.8, 0.08, 0.4),
+                new THREE.MeshStandardMaterial({ color: 0x111111 })
+            );
+            spoilerWing.position.set(0, 1.4, -1.9);
+            group.add(spoilerWing);
+            
+            // Стойки спойлера
+            for (let s = -1; s <= 1; s += 2) {
+                const support = new THREE.Mesh(
+                    new THREE.BoxGeometry(0.08, 0.35, 0.08),
+                    new THREE.MeshStandardMaterial({ color: 0x111111 })
+                );
+                support.position.set(s * 0.7, 1.2, -1.9);
+                group.add(support);
+            }
+            
+            // Фары
+            const headlightMat = new THREE.MeshStandardMaterial({
+                color: 0xffffee,
+                emissive: 0xffffaa,
+                emissiveIntensity: 0.5
+            });
+            for (let s = -1; s <= 1; s += 2) {
+                const headlight = new THREE.Mesh(
+                    new THREE.CircleGeometry(0.15, 16),
+                    headlightMat
+                );
+                headlight.position.set(s * 0.6, 0.55, 2.01);
+                group.add(headlight);
+            }
+            
+            // Задние фары
+            const taillightMat = new THREE.MeshStandardMaterial({
+                color: 0xff0000,
+                emissive: 0xff0000,
+                emissiveIntensity: 0.5
+            });
+            for (let s = -1; s <= 1; s += 2) {
+                const taillight = new THREE.Mesh(
+                    new THREE.BoxGeometry(0.25, 0.12, 0.05),
+                    taillightMat
+                );
+                taillight.position.set(s * 0.7, 0.55, -2.01);
+                group.add(taillight);
+            }
+            
+            // Колёса
+            const wheelPositions = [
+                { x: -1, z: 1.4, front: true },
+                { x: 1, z: 1.4, front: true },
+                { x: -1, z: -1.4, front: false },
+                { x: 1, z: -1.4, front: false }
+            ];
+            
+            wheelPositions.forEach(pos => {
+                const wheelGroup = new THREE.Group();
+                wheelGroup.position.set(pos.x, 0.35, pos.z);
+                
+                // Шина
+                const tire = new THREE.Mesh(
+                    new THREE.TorusGeometry(0.35, 0.12, 16, 32),
+                    new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.9 })
+                );
+                tire.rotation.y = Math.PI / 2;
+                tire.castShadow = true;
+                wheelGroup.add(tire);
+                
+                // Диск
+                const rim = new THREE.Mesh(
+                    new THREE.CylinderGeometry(0.25, 0.25, 0.15, 16),
+                    new THREE.MeshStandardMaterial({ color: 0xcccccc, metalness: 0.9, roughness: 0.1 })
+                );
+                rim.rotation.z = Math.PI / 2;
+                wheelGroup.add(rim);
+                
+                // Спицы
+                for (let sp = 0; sp < 5; sp++) {
+                    const spoke = new THREE.Mesh(
+                        new THREE.BoxGeometry(0.16, 0.04, 0.3),
+                        new THREE.MeshStandardMaterial({ color: 0xaaaaaa, metalness: 0.8 })
+                    );
+                    spoke.rotation.x = (sp / 5) * Math.PI * 2;
+                    wheelGroup.add(spoke);
+                }
+                
+                wheelGroup.userData = { isFront: pos.front };
+                group.userData.wheels.push(wheelGroup);
+                group.add(wheelGroup);
+            });
+            
+            // Выхлопные трубы
+            for (let s = -1; s <= 1; s += 2) {
+                const exhaust = new THREE.Mesh(
+                    new THREE.CylinderGeometry(0.07, 0.09, 0.3, 8),
+                    new THREE.MeshStandardMaterial({ color: 0x444444, metalness: 0.9 })
+                );
+                exhaust.rotation.x = Math.PI / 2;
+                exhaust.position.set(s * 0.35, 0.25, -2.15);
+                group.add(exhaust);
+            }
+            
+            // Номер для игрока
+            if (isPlayer) {
+                const numberCanvas = document.createElement('canvas');
+                numberCanvas.width = 64;
+                numberCanvas.height = 64;
+                const ctx = numberCanvas.getContext('2d');
+                ctx.fillStyle = '#fff';
+                ctx.beginPath();
+                ctx.arc(32, 32, 28, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = '#000';
+                ctx.font = 'bold 40px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('1', 32, 46);
+                
+                const numberDecal = new THREE.Mesh(
+                    new THREE.PlaneGeometry(0.5, 0.5),
+                    new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(numberCanvas), transparent: true })
+                );
+                numberDecal.position.set(1.01, 0.7, 0);
+                numberDecal.rotation.y = Math.PI / 2;
+                group.add(numberDecal);
+            }
+        }
+
+        // ============ ИГРОВАЯ ЛОГИКА ============
+        function startRace() {
+            document.getElementById('startScreen').style.display = 'none';
+            gameStarted = true;
+            
+            // Игрок
+            playerCar = createCar(selectedCarColor, true);
+            playerCar.position.set(trackPoints[0].x, 0, trackPoints[0].z);
+            playerCar.userData.angle = trackPoints[0].angle;
+            playerCar.rotation.y = trackPoints[0].angle;
+            scene.add(playerCar);
+            cars.push(playerCar);
+            
+            // Боты
+            const botColors = [0x4444ff, 0x44ff44, 0xffaa00, 0xff44ff, 0x44ffff, 0xff8800];
+            for (let i = 0; i < CONFIG.botCount; i++) {
+                const botCar = createCar(botColors[i % botColors.length], false);
+                const offsetX = ((i % 2) - 0.5) * 8;
+                botCar.position.set(
+                    trackPoints[0].x + offsetX,
+                    0,
+                    trackPoints[0].z - (i + 1) * 7
+                );
+                botCar.userData.angle = trackPoints[0].angle;
+                botCar.rotation.y = trackPoints[0].angle;
+                botCar.userData.trackIndex = 0;
+                botCar.userData.botId = i + 1;
+                botCar.userData.skillLevel = 0.75 + Math.random() * 0.2;
+                scene.add(botCar);
+                cars.push(botCar);
+            }
+            
+            countdown();
+        }
+
+        function countdown() {
+            const el = document.getElementById('countdown');
+            let count = 3;
+            
+            el.style.display = 'block';
+            el.textContent = count;
+            
+            const interval = setInterval(() => {
+                count--;
+                if (count > 0) {
+                    el.textContent = count;
+                    el.style.color = count === 1 ? '#ffaa00' : '#ff4444';
+                } else if (count === 0) {
+                    el.textContent = 'GO!';
+                    el.style.color = '#00ff88';
+                } else {
+                    el.style.display = 'none';
+                    raceStarted = true;
+                    clearInterval(interval);
+                }
+            }, 1000);
+        }
+
+        function updatePlayer() {
+            if (!raceStarted || !playerCar || playerCar.userData.finished) return;
+            
+            const data = playerCar.userData;
+            let accelerating = false;
+            let braking = false;
+            let turning = 0;
+            let usingNitro = false;
+            let handbrake = false;
+            
+            // Ввод с клавиатуры (оба раскладки + стрелки)
+            if (keys['KeyW'] || keys['ArrowUp'] || keys['w'] || keys['ц']) accelerating = true;
+            if (keys['KeyS'] || keys['ArrowDown'] || keys['s'] || keys['ы']) braking = true;
+            if (keys['KeyA'] || keys['ArrowLeft'] || keys['a'] || keys['ф']) turning = 1;
+            if (keys['KeyD'] || keys['ArrowRight'] || keys['d'] || keys['в']) turning = -1;
+            if (keys['ShiftLeft'] || keys['ShiftRight'] || keys['Shift']) usingNitro = true;
+            if (keys['Space'] || keys[' ']) handbrake = true;
+            if (keys['KeyR'] || keys['r'] || keys['к']) resetCarToTrack(playerCar);
+            
+            // Нитро
+            let maxSpeed = CONFIG.maxSpeed;
+            if (usingNitro && data.nitro > 0 && data.speed > 0.3) {
+                maxSpeed *= CONFIG.nitroBoost;
+                data.nitro = Math.max(0, data.nitro - CONFIG.nitroDrain);
+            } else {
+                data.nitro = Math.min(CONFIG.nitroMax, data.nitro + CONFIG.nitroRegen);
+            }
+            
+            // Ускорение и торможение
+            if (accelerating) {
+                data.speed += CONFIG.acceleration;
+            }
+            if (braking) {
+                data.speed -= CONFIG.braking;
+            }
+            if (handbrake) {
+                data.speed *= 0.95;
+                data.drifting = data.speed > 1;
+            } else {
+                data.drifting = false;
+            }
+            
+            // Трение
+            if (!accelerating && !braking) {
+                data.speed *= (1 - CONFIG.friction);
+            }
+            
+            // Ограничение скорости
+            data.speed = Math.max(-0.5, Math.min(maxSpeed, data.speed));
+            
+            // ПОВОРОТ - ИСПРАВЛЕННЫЙ И БЫСТРЫЙ
+            if (Math.abs(data.speed) > 0.05) {
+                // Скорость поворота зависит от скорости движения, но не слишком сильно
+                const speedFactor = Math.min(1, Math.abs(data.speed) / 1.5);
+                // Базовый поворот + бонус на средних скоростях
+                const turnMultiplier = 0.6 + speedFactor * 0.4;
+                
+                // На очень высокой скорости поворот чуть меньше
+                const highSpeedPenalty = data.speed > 2 ? 0.8 : 1;
+                
+                // Дрифт усиливает поворот
+                const driftBonus = data.drifting ? 1.5 : 1;
+                
+                const turnAmount = turning * CONFIG.turnSpeed * turnMultiplier * highSpeedPenalty * driftBonus * 
+                    (data.speed > 0 ? 1 : -1); // Инверсия при движении назад
+                
+                data.angle += turnAmount;
+                data.steerAngle = turning * 0.4;
+            } else {
+                data.steerAngle *= 0.8;
+            }
+            
+            // Движение
+            const moveX = Math.sin(data.angle) * data.speed;
+            const moveZ = Math.cos(data.angle) * data.speed;
+            
+            playerCar.position.x += moveX;
+            playerCar.position.z += moveZ;
+            playerCar.rotation.y = data.angle;
+            
+            // Анимация колёс
+            updateWheels(playerCar);
+            
+            // UI
+            document.getElementById('nitroFill').style.height = data.nitro + '%';
+            document.getElementById('speed').textContent = Math.round(Math.abs(data.speed) * 120);
+            document.getElementById('lap').textContent = `Круг: ${data.lap}/${CONFIG.totalLaps}`;
+            document.getElementById('gear').textContent = data.speed < 0 ? 'R' : 
+                data.speed < 0.1 ? 'N' : Math.min(6, Math.floor(data.speed / 0.4) + 1);
+            
+            // Проверки
+            checkCollisions(playerCar);
+            checkCheckpoints(playerCar);
+        }
+
+        function updateWheels(car) {
+            const data = car.userData;
+            data.wheelRotation += data.speed * 0.3;
+            
+            data.wheels.forEach(wheel => {
+                // Вращение колеса (вокруг оси X для движения вперёд)
+                // Находим шину (первый torus)
+                wheel.children.forEach(child => {
+                    if (child.geometry && child.geometry.type === 'TorusGeometry') {
+                        // Колесо уже повёрнуто по Y на 90°, поэтому вращаем по Z
+                        child.rotation.z = data.wheelRotation;
+                    }
+                });
+                
+                // Поворот передних колёс
+                if (wheel.userData.isFront) {
+                    wheel.rotation.y = data.steerAngle;
+                }
+            });
+        }
+
+        function updateBots() {
+            if (!raceStarted) return;
+            
+            cars.forEach(car => {
+                if (car.userData.isPlayer || car.userData.finished) return;
+                
+                const data = car.userData;
+                const skill = data.skillLevel;
+                
+                // Цель - следующая точка трассы
+                const targetIdx = data.trackIndex;
+                const target = trackPoints[targetIdx];
+                
+                // Расстояние до цели
+                const dx = target.x - car.position.x;
+                const dz = target.z - car.position.z;
+                const dist = Math.sqrt(dx * dx + dz * dz);
+                
+                // Переход к следующей точке
+                if (dist < 20) {
+                    data.trackIndex = (data.trackIndex + 1) % trackPoints.length;
+                }
+                
+                // Целевой угол
+                const targetAngle = Math.atan2(dx, dz);
+                let angleDiff = targetAngle - data.angle;
+                
+                // Нормализация угла
+                while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
+                while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
+                
+                // Поворот бота - тоже быстрый!
+                const turnSpeed = CONFIG.turnSpeed * 1.2 * skill;
+                if (Math.abs(angleDiff) > 0.02) {
+                    data.angle += Math.sign(angleDiff) * Math.min(Math.abs(angleDiff), turnSpeed);
+                    data.steerAngle = Math.sign(angleDiff) * 0.3;
+                } else {
+                    data.steerAngle *= 0.9;
+                }
+                
+                // Скорость - замедление в поворотах
+                const cornerFactor = 1 - Math.min(0.5, Math.abs(angleDiff) * 0.5);
+                const targetSpeed = CONFIG.maxSpeed * 0.9 * skill * cornerFactor;
+                
+                if (data.speed < targetSpeed) {
+                    data.speed += CONFIG.acceleration * skill;
+                } else {
+                    data.speed -= CONFIG.friction * 3;
+                }
+                
+                data.speed = Math.max(0.4, Math.min(CONFIG.maxSpeed * skill, data.speed));
+                
+                // Небольшая случайность
+                data.angle += (Math.random() - 0.5) * 0.01;
+                
+                // Движение
+                car.position.x += Math.sin(data.angle) * data.speed;
+                car.position.z += Math.cos(data.angle) * data.speed;
+                car.rotation.y = data.angle;
+                
+                // Колёса
+                updateWheels(car);
+                
+                // Коллизии
+                checkCollisions(car);
+                
+                // Чекпоинты
+                checkCheckpoints(car);
+            });
+        }
+
+        function checkCollisions(car) {
+            const pos = car.position;
+            const radius = car.userData.radius;
+            
+            // С другими машинами
+            cars.forEach(other => {
+                if (other === car) return;
+                
+                const dx = other.position.x - pos.x;
+                const dz = other.position.z - pos.z;
+                const dist = Math.sqrt(dx * dx + dz * dz);
+                const minDist = radius + other.userData.radius;
+                
+                if (dist < minDist && dist > 0.01) {
+                    const overlap = minDist - dist;
+                    const pushX = (dx / dist) * overlap * 0.6;
+                    const pushZ = (dz / dist) * overlap * 0.6;
+                    
+                    car.position.x -= pushX;
+                    car.position.z -= pushZ;
+                    other.position.x += pushX * 0.5;
+                    other.position.z += pushZ * 0.5;
+                    
+                    car.userData.speed *= 0.85;
+                    other.userData.speed *= 0.9;
+                }
+            });
+            
+            // С препятствиями
+            obstacles.forEach(obs => {
+                if (!obs.userData) return;
+                
+                const dx = obs.position.x - pos.x;
+                const dz = obs.position.z - pos.z;
+                const dist = Math.sqrt(dx * dx + dz * dz);
+                const minDist = radius + (obs.userData.radius || 2);
+                
+                if (dist < minDist && dist > 0.01) {
+                    const overlap = minDist - dist;
+                    car.position.x -= (dx / dist) * overlap;
+                    car.position.z -= (dz / dist) * overlap;
+                    car.userData.speed *= 0.6;
+                }
+            });
+            
+            // Проверка на трассе
+            let onTrack = false;
+            let closestDist = Infinity;
+            
+            for (const pt of trackPoints) {
+                const d = Math.sqrt((pt.x - pos.x) ** 2 + (pt.z - pos.z) ** 2);
+                if (d < closestDist) closestDist = d;
+                if (d < CONFIG.trackWidth * 0.8) onTrack = true;
+            }
+            
+            // Замедление вне трассы
+            if (!onTrack) {
+                car.userData.speed *= 0.97;
+            }
+            
+            // Слишком далеко - респавн
+            if (closestDist > CONFIG.trackWidth * 4) {
+                resetCarToTrack(car);
+            }
+        }
+
+        function resetCarToTrack(car) {
+            let closestIdx = 0;
+            let closestDist = Infinity;
+            
+            trackPoints.forEach((pt, i) => {
+                const d = Math.sqrt((pt.x - car.position.x) ** 2 + (pt.z - car.position.z) ** 2);
+                if (d < closestDist) {
+                    closestDist = d;
+                    closestIdx = i;
+                }
+            });
+            
+            const pt = trackPoints[closestIdx];
+            car.position.set(pt.x, 0, pt.z);
+            car.userData.angle = pt.angle;
+            car.rotation.y = pt.angle;
+            car.userData.speed = 0.5;
+            car.userData.trackIndex = closestIdx;
+        }
+
+        function checkCheckpoints(car) {
+            const data = car.userData;
+            const cp = checkpoints[data.checkpoint];
+            if (!cp) return;
+            
+            const dx = cp.x - car.position.x;
+            const dz = cp.z - car.position.z;
+            const dist = Math.sqrt(dx * dx + dz * dz);
+            
+            if (dist < CONFIG.trackWidth * 2) {
+                data.checkpoint++;
+                
+                if (data.checkpoint >= checkpoints.length) {
+                    data.checkpoint = 0;
+                    data.lap++;
+                    
+                    if (data.lap > CONFIG.totalLaps) {
+                        data.finished = true;
+                        data.finishTime = Date.now();
+                        
+                        if (data.isPlayer) {
+                            const pos = getPosition(car);
+                            showMessage(pos === 1 ? '🏆 ПОБЕДА!' : `Финиш: ${pos} место`);
+                        }
+                    } else if (data.isPlayer) {
+                        showMessage(`Круг ${data.lap}/${CONFIG.totalLaps}`);
+                    }
+                }
+            }
+        }
+
+        function getPosition(car) {
+            const progress = car.userData.lap * 1000 + car.userData.checkpoint * 10;
+            let pos = 1;
+            
+            cars.forEach(c => {
+                const p = c.userData.lap * 1000 + c.userData.checkpoint * 10;
+                if (p > progress) pos++;
+            });
+            
+            return pos;
+        }
+
+        function updateCamera() {
+            if (!playerCar) return;
+            
+            const data = playerCar.userData;
+            const dist = 14;
+            const height = 6;
+            
+            const targetX = playerCar.position.x - Math.sin(data.angle) * dist;
+            const targetZ = playerCar.position.z - Math.cos(data.angle) * dist;
+            
+            camera.position.x += (targetX - camera.position.x) * 0.08;
+            camera.position.z += (targetZ - camera.position.z) * 0.08;
+            camera.position.y += (height - camera.position.y) * 0.08;
+            
+            camera.lookAt(
+                playerCar.position.x + Math.sin(data.angle) * 5,
+                1.5,
+                playerCar.position.z + Math.cos(data.angle) * 5
+            );
+        }
+
+        function updateLeaderboard() {
+            if (!cars.length) return;
+            
+            const sorted = [...cars].sort((a, b) => {
+                const pa = a.userData.lap * 1000 + a.userData.checkpoint;
+                const pb = b.userData.lap * 1000 + b.userData.checkpoint;
+                return pb - pa;
+            });
+            
+            const list = document.getElementById('leaderList');
+            list.innerHTML = sorted.map((car, i) => `
+                <div class="leader-entry${car.userData.isPlayer ? ' player' : ''}">
+                    <span>${i + 1}. ${car.userData.isPlayer ? 'ВЫ' : 'Бот ' + car.userData.botId}</span>
+                    <span>К${car.userData.lap}</span>
+                </div>
+            `).join('');
+            
+            const playerPos = sorted.findIndex(c => c.userData.isPlayer) + 1;
+            const posTexts = ['1st', '2nd', '3rd', '4th', '5th', '6th'];
+            document.querySelector('#position h2').textContent = posTexts[playerPos - 1] || playerPos + 'th';
+        }
+
+        // ============ МИНИКАРТА ============
+        let minimapCtx;
+        
+        function setupMinimap() {
+            const canvas = document.getElementById('minimapCanvas');
+            canvas.width = 180;
+            canvas.height = 180;
+            minimapCtx = canvas.getContext('2d');
+        }
+
+        function updateMinimap() {
+            if (!minimapCtx || !cars.length) return;
+            
+            const ctx = minimapCtx;
+            const size = 180;
+            const scale = 0.55;
+            
+            ctx.fillStyle = 'rgba(0,0,0,0.9)';
+            ctx.fillRect(0, 0, size, size);
+            
+            // Трасса
+            ctx.strokeStyle = '#555';
+            ctx.lineWidth = 5;
+            ctx.beginPath();
+            trackPoints.forEach((pt, i) => {
+                const x = size / 2 + pt.x * scale;
+                const y = size / 2 + pt.z * scale;
+                i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+            });
+            ctx.closePath();
+            ctx.stroke();
+            
+            // Машины
+            cars.forEach(car => {
+                const x = size / 2 + car.position.x * scale;
+                const y = size / 2 + car.position.z * scale;
+                
+                ctx.fillStyle = car.userData.isPlayer ? '#00ff88' : '#ff4444';
+                ctx.beginPath();
+                ctx.arc(x, y, car.userData.isPlayer ? 5 : 3, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Направление игрока
+                if (car.userData.isPlayer) {
+                    ctx.strokeStyle = '#00ff88';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.moveTo(x, y);
+                    ctx.lineTo(
+                        x + Math.sin(car.userData.angle) * 10,
+                        y + Math.cos(car.userData.angle) * 10
+                    );
+                    ctx.stroke();
+                }
+            });
+        }
+
+        function showMessage(text) {
+            const msg = document.getElementById('message');
+            msg.textContent = text;
+            msg.style.display = 'block';
+            setTimeout(() => msg.style.display = 'none', 2000);
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        // ============ ГЛАВНЫЙ ЦИКЛ ============
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            if (gameStarted) {
+                updatePlayer();
+                updateBots();
+                updateCamera();
+                updateLeaderboard();
+                updateMinimap();
+            }
+            
+            renderer.render(scene, camera);
+        }
+
+        // ============ СОБЫТИЯ ============
+        document.querySelectorAll('.car-option').forEach(opt => {
+            opt.addEventListener('click', () => {
+                document.querySelectorAll('.car-option').forEach(o => o.classList.remove('selected'));
+                opt.classList.add('selected');
+                selectedCarColor = parseInt(opt.dataset.color);
+            });
+        });
+
+        document.getElementById('startBtn').addEventListener('click', startRace);
+
+        // Старт
+        init();
+        animate();
+    </script>
+</body>
+</html>
