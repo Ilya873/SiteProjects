@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Змейка</title>
+    <link rel="stylesheet" href="style_snake.css"> <!-- Подключаем ваш CSS-файл -->
+</head>
+<body>
+    <div class="game-container">
+        <div class="canvas-container">
+            <canvas id="snakeCanvas" width="640" height="480"></canvas>
+        </div>
+        <div class="button-container">
+            <button id="increaseSnakes">Увеличить чужих змеек</button>
+            <button id="decreaseSnakes">Уменьшить чужих змеек</button>
+            <button id="increaseFood">Увеличить количество еды</button>
+            <button id="decreaseFood">Уменьшить количество еды</button>
+            <button id="restartGame">Рестарт</button>
+        </div>
+        <div class="info-container">
+            <p>Чужие змейки: <span id="snakeCount">4</span></p>
+            <p>Количество еды: <span id="foodCount">3</span></p>
+        </div>
+    </div>
+    <script src="snake.js"></script> <!-- Подключаем ваш JavaScript-код -->
+</body>
+</html>

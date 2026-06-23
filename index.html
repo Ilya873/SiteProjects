@@ -1,36 +1,1308 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
+    <script>document.documentElement.classList.add('js');</script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Главная страница</title>
-    <link rel="stylesheet" href="style_main.css"> <!-- Подключаем ваш CSS-файл -->
+    <meta name="description" content="Ilya873 — инди-разработчик игр. Hearth & Shadow уже в Steam. Игры на itch.io, GameJolt, Gamin, веб-прототипы и эксперименты.">
+    <meta name="theme-color" content="#1a0a2e">
+    <meta property="og:title" content="Ilya873 — Инди-разработчик">
+    <meta property="og:description" content="Соло-инди-разработчик. Hearth & Shadow уже в Steam — 100% положительных отзывов.">
+    <meta property="og:image" content="img/hearth_shadow_header.jpg">
+    <meta property="og:type" content="website">
+    <title>Ilya873 — Инди-разработчик игр</title>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="style_main.css?v=12">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="container">
-        <div class="sidebar">
-            <h1>Главная страница</h1>
-            <ul class="nav">
-                <li><a href="TicTacToe.html">Крестики-Нолики</a></li>
-                <li><a href="paint.html">Рисовалка</a></li>
-                <li><a href="game_ball.html">Игрушка на КОД</a></li>
-                <li><a href="snake.html">Змейка+</a></li>
-                <li><a href="sound_generator.html">Генератор звуков</a></li>
-		<li><a href="game_shooter/game_shooter.html">Мини-игра Шутер</a></li>
-		<li><a href="hahki/hahki.html">Шашки</a></li>
-		<li><a href="gameUSSR/gameUSSR.html">Мини-игра Правитель СССР</a></li>
-		<li><a href="game climate/climate.html">Симулятор Земли</a></li>
-		<li><a href="gamespace.html">Игра для ТГ</a></li>
-                <li><a href="https://ilya873.itch.io/great-empires">Great Empires (Web)</a></li>
-            </ul>
+    <div class="bg-grid"></div>
+    <div class="bg-glow"></div>
+    <div class="bg-aurora" aria-hidden="true"></div>
+    <canvas class="bg-field" aria-hidden="true"></canvas>
+    <div class="bg-noise" aria-hidden="true"></div>
+    <div class="cursor-glow" aria-hidden="true"></div>
+
+    <header class="site-header">
+        <a href="#top" class="logo">
+            <span class="logo-mark">
+                <img src="img/avatar.png" width="38" height="38" alt="" decoding="async">
+            </span>
+            <span class="logo-text">Ilya873</span>
+        </a>
+        <nav class="nav-main">
+            <a href="#featured">Steam</a>
+            <a href="#games">Игры</a>
+            <a href="#commissioned">На заказ</a>
+            <a href="#jams">Джемы</a>
+            <a href="#prototypes">Прототипы</a>
+            <a href="#about">Обо мне</a>
+            <a href="#contact">Контакты</a>
+        </nav>
+        <button class="nav-toggle" aria-label="Меню" aria-expanded="false">
+            <span></span><span></span><span></span>
+        </button>
+        <div class="scroll-progress" aria-hidden="true"></div>
+    </header>
+
+    <main id="top">
+        <section class="hero">
+            <div class="hero-inner">
+                <span class="hero-tag">
+                    <img class="ava-sm" src="img/avatar.png" width="26" height="26" alt="" loading="eager" decoding="async">
+                    Ilya873 · Indie game dev
+                </span>
+                <h1 class="hero-title">
+                    Привет, я <span class="grad">Ilya873</span>.<br>
+                    Делаю <span class="hero-rotator">
+                        <span class="word active">атмосферные</span>
+                        <span class="word">сюжетные</span>
+                        <span class="word">необычные</span>
+                        <span class="word">экспериментальные</span>
+                    </span><br>инди-игры.
+                </h1>
+                <p class="hero-sub">
+                    Более <strong>15 игр</strong> на itch.io, GameJolt и Gamin. Моя карточная стратегия
+                    <strong>Hearth &amp; Shadow</strong> уже&nbsp;вышла в&nbsp;Steam и&nbsp;собрала <strong>положительные отзывы</strong>.
+                </p>
+                <div class="hero-cta">
+                    <a class="btn btn-primary" href="#featured">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12 0a12 12 0 1 0 0 24 12 12 0 0 0 0-24zM7 17l3-3-3-3v6zm6-9h4v2h-4V8zm0 4h4v2h-4v-2z"/></svg>
+                        Главный проект
+                    </a>
+                    <a class="btn btn-ghost" href="#games">
+                        Все игры →
+                    </a>
+                </div>
+                <div class="hero-stats">
+                    <div class="stat"><span class="stat-num" data-count="15" data-suffix="+">15+</span><span class="stat-lab">игр</span></div>
+                    <div class="stat"><span class="stat-num" data-count="5">5</span><span class="stat-lab">платформ</span></div>
+                    <div class="stat"><span class="stat-num" data-count="12">12</span><span class="stat-lab">джемов</span></div>
+                    <div class="stat"><span class="stat-num" data-count="1">1</span><span class="stat-lab">релиз в Steam</span></div>
+                </div>
+            </div>
+            <div class="hero-art">
+                <div class="orbs" aria-hidden="true">
+                    <div class="orb orb-1"></div>
+                    <div class="orb orb-2"></div>
+                    <div class="orb orb-3"></div>
+                </div>
+                <div class="card-stack" role="button" tabindex="0" aria-label="Перемешать колоду карт">
+                    <div class="card-wrap cw1"><div class="floating-card c1"></div></div>
+                    <div class="card-wrap cw3"><div class="floating-card c3"></div></div>
+                    <div class="card-wrap cw2"><div class="floating-card c2"><span class="card-sheen" aria-hidden="true"></span></div></div>
+                </div>
+                <span class="card-hint" aria-hidden="true">нажми — раздать</span>
+            </div>
+        </section>
+
+        <section id="featured" class="featured">
+            <div class="section-head">
+                <span class="kicker">/ Featured · вышла в Steam</span>
+                <h2>Hearth &amp; Shadow — мой релиз в&nbsp;Steam</h2>
+                <p class="section-sub">Карточная стратегия о&nbsp;строительстве поселений и&nbsp;обороне от&nbsp;монстров. Уже доступна, издатель — OPG&nbsp;EUPHORE.</p>
+            </div>
+            <article class="featured-card">
+                <div class="featured-cover">
+                    <img src="img/hs_capsule.jpg"
+                         alt="Hearth &amp; Shadow — ключевой арт игры в Steam"
+                         width="616" height="353" loading="lazy" decoding="async">
+                    <canvas class="ember-canvas" aria-hidden="true"></canvas>
+                    <span class="badge badge-released"><span class="dot"></span>RELEASED</span>
+                </div>
+                <div class="featured-body">
+                    <div class="fb-main">
+                        <div class="featured-meta">
+                            <span class="tag tag-strat">Strategy</span>
+                            <span class="tag">Card Game</span>
+                            <span class="tag">Deck-building</span>
+                            <span class="tag">Indie</span>
+                            <span class="tag">Singleplayer</span>
+                        </div>
+                        <h3>Hearth &amp; Shadow</h3>
+                        <div class="release-meta">
+                            <span class="rm-item"><svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor"><path d="M7 2v2H5a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-2V2h-2v2H9V2H7zm12 7v10H5V9h14z"/></svg>Вышла 28 мая 2026</span>
+                            <span class="rm-sep">·</span>
+                            <span class="rm-item">Разработчик <strong>Ilya873</strong></span>
+                            <span class="rm-sep">·</span>
+                            <span class="rm-item">Издатель <strong>OPG EUPHORE</strong></span>
+                        </div>
+                        <p>
+                            Стройте поселение, открывайте новые здания и форпосты, прокачивайте их
+                            и комбинируйте карты, чтобы прокормить жителей и отбить нашествие монстров.
+                            Десятки комбинаций и собственная «книга рецептов» — каждая партия складывается по-своему.
+                        </p>
+                        <div class="featured-feats">
+                            <span>♠ Deck-building</span>
+                            <span>⚔ Тактика</span>
+                            <span>🏰 Поселения</span>
+                            <span>📜 Книга рецептов</span>
+                        </div>
+                    </div>
+                    <div class="fb-side">
+                        <div class="featured-rating" data-score="100">
+                            <div class="rating-top">
+                                <span class="rating-label">Положительные</span>
+                                <span class="rating-score"><span class="rs-num">100</span><span class="rs-pct">%</span></span>
+                            </div>
+                            <div class="rating-bar"><span class="rating-fill"></span></div>
+                            <div class="rating-pips" aria-hidden="true">
+                                <span class="pip" style="--idx:0"></span><span class="pip" style="--idx:1"></span><span class="pip" style="--idx:2"></span><span class="pip" style="--idx:3"></span><span class="pip" style="--idx:4"></span><span class="pip" style="--idx:5"></span><span class="pip" style="--idx:6"></span><span class="pip" style="--idx:7"></span><span class="pip" style="--idx:8"></span><span class="pip" style="--idx:9"></span><span class="pip" style="--idx:10"></span><span class="pip" style="--idx:11"></span>
+                            </div>
+                            <span class="rating-count">13 из 13 обзоров — положительные</span>
+                        </div>
+                        <div class="featured-cta">
+                            <a class="btn btn-steam-play" href="https://store.steampowered.com/app/4373690/Hearth__Shadow/" target="_blank" rel="noopener">
+                                <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M11.979 0C5.678 0 .511 4.86.022 11.037l6.432 2.658c.545-.371 1.203-.59 1.912-.59.063 0 .125.004.188.006l2.861-4.142V8.91c0-2.495 2.028-4.524 4.524-4.524 2.494 0 4.524 2.031 4.524 4.527s-2.03 4.525-4.524 4.525h-.105l-4.076 2.911c0 .052.004.105.004.159 0 1.875-1.515 3.396-3.39 3.396-1.635 0-3.016-1.173-3.331-2.727L.436 15.27C1.862 20.307 6.486 24 11.979 24c6.627 0 11.999-5.373 11.999-12S18.605 0 11.979 0zM7.54 18.21l-1.473-.61c.262.543.714.999 1.314 1.25 1.297.539 2.793-.076 3.332-1.375.263-.63.264-1.319.005-1.949s-.75-1.121-1.377-1.383c-.624-.26-1.29-.249-1.878-.03l1.523.63c.956.4 1.409 1.5 1.009 2.455-.397.957-1.497 1.41-2.454 1.012H7.54zm11.415-9.303c0-1.662-1.353-3.015-3.015-3.015-1.665 0-3.015 1.353-3.015 3.015 0 1.665 1.35 3.015 3.015 3.015 1.663 0 3.015-1.35 3.015-3.015zm-5.273-.005c0-1.252 1.013-2.266 2.265-2.266 1.249 0 2.266 1.014 2.266 2.266 0 1.251-1.017 2.265-2.266 2.265-1.253 0-2.265-1.014-2.265-2.265z"/></svg>
+                                Играть в Steam
+                            </a>
+                            <span class="featured-price">2,09&nbsp;€</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="featured-media">
+                    <div class="featured-shots" role="group" aria-label="Трейлер и скриншоты Hearth &amp; Shadow">
+                        <button class="shot shot-video" type="button" data-type="video"
+                                data-hls="https://video.akamai.steamstatic.com/store_trailers/4373690/488999003/169fb3134c9befe16e35363b4d4c624edddabb33/1780008821/hls_264_master.m3u8?t=1780009687"
+                                data-steam="https://store.steampowered.com/app/4373690/Hearth__Shadow/"
+                                aria-label="Смотреть трейлер">
+                            <img src="img/hs_trailer_poster.jpg?v=12" alt="Трейлер Hearth & Shadow" loading="lazy" decoding="async">
+                            <span class="shot-play" aria-hidden="true"></span>
+                            <span class="shot-tag" aria-hidden="true">Трейлер</span>
+                        </button>
+                        <button class="shot" type="button" data-type="image" data-full="img/hs_shot1.jpg" aria-label="Открыть скриншот 1"><img src="img/hs_shot1.jpg" alt="Скриншот Hearth & Shadow 1" loading="lazy" decoding="async"></button>
+                        <button class="shot" type="button" data-type="image" data-full="img/hs_shot2.jpg" aria-label="Открыть скриншот 2"><img src="img/hs_shot2.jpg" alt="Скриншот Hearth & Shadow 2" loading="lazy" decoding="async"></button>
+                        <button class="shot" type="button" data-type="image" data-full="img/hs_shot3.jpg" aria-label="Открыть скриншот 3"><img src="img/hs_shot3.jpg" alt="Скриншот Hearth & Shadow 3" loading="lazy" decoding="async"></button>
+                        <button class="shot" type="button" data-type="image" data-full="img/hs_shot4.jpg" aria-label="Открыть скриншот 4"><img src="img/hs_shot4.jpg" alt="Скриншот Hearth & Shadow 4" loading="lazy" decoding="async"></button>
+                        <button class="shot" type="button" data-type="image" data-full="img/hs_shot5.jpg" aria-label="Открыть скриншот 5"><img src="img/hs_shot5.jpg" alt="Скриншот Hearth & Shadow 5" loading="lazy" decoding="async"></button>
+                        <button class="shot" type="button" data-type="image" data-full="img/hs_shot6.jpg" aria-label="Открыть скриншот 6"><img src="img/hs_shot6.jpg" alt="Скриншот Hearth & Shadow 6" loading="lazy" decoding="async"></button>
+                        <button class="shot" type="button" data-type="image" data-full="img/hs_shot7.jpg" aria-label="Открыть скриншот 7"><img src="img/hs_shot7.jpg" alt="Скриншот Hearth & Shadow 7" loading="lazy" decoding="async"></button>
+                        <button class="shot" type="button" data-type="image" data-full="img/hs_shot8.jpg" aria-label="Открыть скриншот 8"><img src="img/hs_shot8.jpg" alt="Скриншот Hearth & Shadow 8" loading="lazy" decoding="async"></button>
+                        <button class="shot" type="button" data-type="image" data-full="img/hs_shot9.jpg" aria-label="Открыть скриншот 9"><img src="img/hs_shot9.jpg" alt="Скриншот Hearth & Shadow 9" loading="lazy" decoding="async"></button>
+                        <button class="shot" type="button" data-type="image" data-full="img/hs_shot10.jpg" aria-label="Открыть скриншот 10"><img src="img/hs_shot10.jpg" alt="Скриншот Hearth & Shadow 10" loading="lazy" decoding="async"></button>
+                        <button class="shot" type="button" data-type="image" data-full="img/hs_shot11.jpg" aria-label="Открыть скриншот 11"><img src="img/hs_shot11.jpg" alt="Скриншот Hearth & Shadow 11" loading="lazy" decoding="async"></button>
+                        <button class="shot" type="button" data-type="image" data-full="img/hs_shot12.jpg" aria-label="Открыть скриншот 12"><img src="img/hs_shot12.jpg" alt="Скриншот Hearth & Shadow 12" loading="lazy" decoding="async"></button>
+                    </div>
+                    <button class="media-nav media-prev" type="button" aria-label="Прокрутить назад" hidden>‹</button>
+                    <button class="media-nav media-next" type="button" aria-label="Прокрутить вперёд">›</button>
+                </div>
+            </article>
+        </section>
+
+        <section id="games" class="games">
+            <div class="section-head">
+                <span class="kicker">/ Каталог игр</span>
+                <h2>15 игр на разных платформах</h2>
+                <p class="section-sub">Каждая — отдельная история, жанр и эксперимент. От детектива в киберпанке до симулятора микромира.</p>
+            </div>
+
+            <div class="filter-bar">
+                <button class="chip active" data-filter="all">Все</button>
+                <button class="chip" data-filter="strategy">Стратегия</button>
+                <button class="chip" data-filter="rpg">RPG</button>
+                <button class="chip" data-filter="adventure">Приключение</button>
+                <button class="chip" data-filter="puzzle">Головоломка</button>
+                <button class="chip" data-filter="action">Экшен</button>
+                <button class="chip" data-filter="sim">Симулятор</button>
+            </div>
+
+            <div class="games-grid">
+                <article class="game-card" data-cat="strategy">
+                    <div class="game-cover">
+                        <img src="img/hs_capsule.jpg" alt="Hearth &amp; Shadow" loading="lazy">
+                    </div>
+                    <div class="game-body">
+                        <h3>Hearth &amp; Shadow</h3>
+                        <p>Карточная стратегия про строительство поселений и&nbsp;оборону от&nbsp;монстров. Мой релиз в&nbsp;Steam — с&nbsp;положительными отзывами.</p>
+                        <div class="game-meta">
+                            <span class="tag tag-strat">Strategy</span>
+                            <span class="tag">Card Game</span>
+                            <span class="tag">Steam</span>
+                        </div>
+                        <a class="game-link" href="https://store.steampowered.com/app/4373690/Hearth__Shadow/" target="_blank" rel="noopener">Открыть в Steam →</a>
+                    </div>
+                </article>
+
+                <article class="game-card" data-cat="adventure">
+                    <div class="game-cover">
+                        <img src="https://img.itch.zone/aW1hZ2UvMzI5NDM2My8xOTY2NzE3OS5wbmc=/794x1000/F7PgQj.png" alt="Cyber Panopticon" loading="lazy">
+                    </div>
+                    <div class="game-body">
+                        <h3>Cyber Panopticon</h3>
+                        <p>Детектив-расследование в открытом мире киберпанк-будущего 2060 года. Детектив Маркус идёт по следу кибер-убийцы.</p>
+                        <div class="game-meta">
+                            <span class="tag tag-adv">Adventure</span>
+                            <span class="tag">Unity</span>
+                            <span class="tag">Windows</span>
+                        </div>
+                        <a class="game-link" href="https://ilya873.itch.io/cyber-panopticon" target="_blank" rel="noopener">Открыть на itch.io →</a>
+                    </div>
+                </article>
+
+                <article class="game-card" data-cat="strategy">
+                    <div class="game-cover">
+                        <img src="https://img.itch.zone/aW1hZ2UvMzI1MzQ0MS8xOTQyNTQwMS5qcGc=/794x1000/tJeQ8%2F.jpg" alt="Glory to the Robots: Factory" loading="lazy">
+                    </div>
+                    <div class="game-body">
+                        <h3>Glory to the Robots: Factory</h3>
+                        <p>2647 год. Стройте завод роботов на собственной планете, отбивайтесь от пиратов и захватывайте ресурсные планеты.</p>
+                        <div class="game-meta">
+                            <span class="tag tag-strat">Strategy</span>
+                            <span class="tag">Tycoon</span>
+                            <span class="tag">Windows</span>
+                        </div>
+                        <a class="game-link" href="https://ilya873.itch.io/glory-to-the-robots-factory" target="_blank" rel="noopener">Открыть на itch.io →</a>
+                    </div>
+                </article>
+
+                <article class="game-card" data-cat="puzzle">
+                    <div class="game-cover">
+                        <img src="https://img.itch.zone/aW1hZ2UvMzI3MDQ2NC8xOTUyMDg5NS5qcGc=/794x1000/GGHx%2Bl.jpg" alt="Judge the Sound" loading="lazy">
+                    </div>
+                    <div class="game-body">
+                        <h3>Judge the Sound</h3>
+                        <p>Игровая викторина, где нужно судить музыку по разным категориям и побеждать музыкальных боссов.</p>
+                        <div class="game-meta">
+                            <span class="tag tag-puz">Puzzle</span>
+                            <span class="tag">Music</span>
+                            <span class="tag">Browser</span>
+                        </div>
+                        <a class="game-link" href="https://ilya873.itch.io/judge-the-sound" target="_blank" rel="noopener">Играть в браузере →</a>
+                    </div>
+                </article>
+
+                <article class="game-card" data-cat="puzzle">
+                    <div class="game-cover">
+                        <img src="https://img.itch.zone/aW1hZ2UvMzI2NzA0Ni8xOTUwMjk0Mi5wbmc=/794x1000/AEurwp.png" alt="Fall into the Abyss" loading="lazy">
+                    </div>
+                    <div class="game-body">
+                        <h3>Fall into the Abyss</h3>
+                        <p>Управляйте падающим шаром, доберитесь до центра Земли, собирая кристаллы и обходя смертельные ловушки.</p>
+                        <div class="game-meta">
+                            <span class="tag tag-puz">Puzzle</span>
+                            <span class="tag">Action</span>
+                            <span class="tag">Browser</span>
+                        </div>
+                        <a class="game-link" href="https://ilya873.itch.io/fall-into-the-abyss" target="_blank" rel="noopener">Играть в браузере →</a>
+                    </div>
+                </article>
+
+                <article class="game-card" data-cat="rpg">
+                    <div class="game-cover">
+                        <img src="https://img.itch.zone/aW1hZ2UvMzE2NTA0NC8xODkwMTMxNy5qcGc=/794x1000/qxOY8M.jpg" alt="Delicious Blood" loading="lazy">
+                    </div>
+                    <div class="game-body">
+                        <h3>Delicious Blood</h3>
+                        <p>1148 год. Велес защищает мир от нашествия вампиров. RPG с исследованием, диалогами и торговлей.</p>
+                        <div class="game-meta">
+                            <span class="tag tag-rpg">RPG</span>
+                            <span class="tag">JRPG</span>
+                            <span class="tag">Browser</span>
+                        </div>
+                        <a class="game-link" href="https://ilya873.itch.io/delicious-blood" target="_blank" rel="noopener">Играть в браузере →</a>
+                    </div>
+                </article>
+
+                <article class="game-card" data-cat="puzzle">
+                    <div class="game-cover">
+                        <img src="https://img.itch.zone/aW1hZ2UvMjUzNzk2NC8xNTA5Nzk0NC5wbmc=/794x1000/N1mYbd.png" alt="NOplatformer" loading="lazy">
+                    </div>
+                    <div class="game-body">
+                        <h3>NOplatformer</h3>
+                        <p>Пародия на платформер. Помогите человечку добраться до финиша, используя все доступные инструменты.</p>
+                        <div class="game-meta">
+                            <span class="tag tag-puz">Puzzle</span>
+                            <span class="tag">Parody</span>
+                            <span class="tag">Browser</span>
+                        </div>
+                        <a class="game-link" href="https://ilya873.itch.io/noplatformer" target="_blank" rel="noopener">Играть в браузере →</a>
+                    </div>
+                </article>
+
+                <article class="game-card" data-cat="adventure">
+                    <div class="game-cover">
+                        <img src="https://img.itch.zone/aW1hZ2UvMTM1MTkxNC83ODY5NDI1LnBuZw==/794x1000/wgisU0.png" alt="The Rescue" loading="lazy">
+                    </div>
+                    <div class="game-body">
+                        <h3>The Rescue</h3>
+                        <p>Атмосферный арт-проект с трагической историей. 2D-приключение с акцентом на сторителлинг и тайну.</p>
+                        <div class="game-meta">
+                            <span class="tag tag-adv">Art</span>
+                            <span class="tag">Story</span>
+                            <span class="tag">Browser</span>
+                        </div>
+                        <a class="game-link" href="https://ilya873.itch.io/the-rescue" target="_blank" rel="noopener">Играть в браузере →</a>
+                    </div>
+                </article>
+
+                <article class="game-card" data-cat="action">
+                    <div class="game-cover">
+                        <img src="https://img.itch.zone/aW1hZ2UvMTEzMzM3MS82NTY4NDg1LmpwZWc=/794x1000/wl%2BPQz.jpeg" alt="Antivirus Minako" loading="lazy">
+                    </div>
+                    <div class="game-body">
+                        <h3>Antivirus Minako</h3>
+                        <p>Вы — ИИ-антивирус Минако. Уничтожьте вирус, угрожающий запустить ядерные ракеты, в этом 3D-шутере.</p>
+                        <div class="game-meta">
+                            <span class="tag tag-act">Shooter</span>
+                            <span class="tag">3D</span>
+                            <span class="tag">Browser</span>
+                        </div>
+                        <a class="game-link" href="https://ilya873.itch.io/antivirus-minako" target="_blank" rel="noopener">Играть в браузере →</a>
+                    </div>
+                </article>
+
+                <article class="game-card" data-cat="sim">
+                    <div class="game-cover">
+                        <img src="https://img.itch.zone/aW1hZ2UvMTEzMjQzNi82NTYxNjA1LmpwZWc=/794x1000/8Ljhyu.jpeg" alt="Politic Control" loading="lazy">
+                    </div>
+                    <div class="game-body">
+                        <h3>Politic Control</h3>
+                        <p>Симулятор божества — управляйте странами на своей или реальной карте мира. Дипломатия, армия, экономика.</p>
+                        <div class="game-meta">
+                            <span class="tag tag-sim">Simulator</span>
+                            <span class="tag">Strategy</span>
+                            <span class="tag">Browser</span>
+                        </div>
+                        <a class="game-link" href="https://ilya873.itch.io/politic-control" target="_blank" rel="noopener">Играть в браузере →</a>
+                    </div>
+                </article>
+
+                <article class="game-card" data-cat="rpg">
+                    <div class="game-cover">
+                        <img src="https://img.itch.zone/aW1hZ2UvMTEzMTQxMS82NTU0ODI0LnBuZw==/794x1000/xiM5JA.png" alt="Brian's Story" loading="lazy">
+                    </div>
+                    <div class="game-body">
+                        <h3>Brian's Story</h3>
+                        <p>Земли Альянса захвачены чёрными магами. Брайану предстоит освободить их от тёмной тирании в этой Adventure-RPG.</p>
+                        <div class="game-meta">
+                            <span class="tag tag-rpg">RPG</span>
+                            <span class="tag">Fantasy</span>
+                            <span class="tag">Browser</span>
+                        </div>
+                        <a class="game-link" href="https://ilya873.itch.io/brians-story" target="_blank" rel="noopener">Играть в браузере →</a>
+                    </div>
+                </article>
+
+                <article class="game-card" data-cat="adventure">
+                    <div class="game-cover">
+                        <img src="https://img.itch.zone/aW1hZ2UvNTgzMjI5LzMwNzQxMjEuanBn/794x1000/7zwgZ3.jpg" alt="Gods of All" loading="lazy">
+                    </div>
+                    <div class="game-body">
+                        <h3>Gods of All</h3>
+                        <p>3D-приключение, вдохновлённое мифологией коми-пермяков. Сыграйте за Омеля — одного из двух высших божеств.</p>
+                        <div class="game-meta">
+                            <span class="tag tag-adv">Adventure</span>
+                            <span class="tag">3D</span>
+                            <span class="tag">Mythology</span>
+                        </div>
+                        <a class="game-link" href="https://ilya873.itch.io/gods-of-all" target="_blank" rel="noopener">Открыть на itch.io →</a>
+                    </div>
+                </article>
+
+                <article class="game-card" data-cat="strategy">
+                    <div class="game-cover">
+                        <img src="https://img.itch.zone/aW1hZ2UvNDY4MTI5LzIzOTE2NDgucG5n/794x1000/zbF%2Fqw.png" alt="Microworld" loading="lazy">
+                    </div>
+                    <div class="game-body">
+                        <h3>Microworld</h3>
+                        <p>Стратегия-песочница: командуйте микроорганизмами, прокачивайте ДНК и уничтожайте конкурентов в микромире.</p>
+                        <div class="game-meta">
+                            <span class="tag tag-strat">Strategy</span>
+                            <span class="tag">Sandbox</span>
+                            <span class="tag">Browser</span>
+                        </div>
+                        <a class="game-link" href="https://ilya873.itch.io/microworld" target="_blank" rel="noopener">Играть в браузере →</a>
+                    </div>
+                </article>
+
+                <article class="game-card" data-cat="sim">
+                    <div class="game-cover">
+                        <img src="https://img.itch.zone/aW1hZ2UvMzA3MjYyLzE1MDgzNDcuanBn/794x1000/D6SJCh.jpg" alt="World of Blocks 3" loading="lazy">
+                    </div>
+                    <div class="game-body">
+                        <h3>World of Blocks 3: New World</h3>
+                        <p>Онлайн-песочница: огромный мир с климатическими зонами, тонной блоков, монстров и мультиплеером.</p>
+                        <div class="game-meta">
+                            <span class="tag tag-sim">Sandbox</span>
+                            <span class="tag">3D</span>
+                            <span class="tag">Online</span>
+                        </div>
+                        <a class="game-link" href="https://ilya873.itch.io/world-of-blocks-3-new-world-online" target="_blank" rel="noopener">Открыть на itch.io →</a>
+                    </div>
+                </article>
+
+                <article class="game-card" data-cat="strategy">
+                    <div class="game-cover game-cover-fallback">
+                        <div class="cover-text">GREAT<br>EMPIRES</div>
+                        <span class="badge badge-wip">WIP</span>
+                    </div>
+                    <div class="game-body">
+                        <h3>Great Empires</h3>
+                        <p>Прототип большой стратегии в активной разработке. Веб-версия доступна для тестирования и фидбэка.</p>
+                        <div class="game-meta">
+                            <span class="tag tag-strat">Strategy</span>
+                            <span class="tag">Prototype</span>
+                            <span class="tag">Browser</span>
+                        </div>
+                        <a class="game-link" href="https://ilya873.itch.io/great-empires" target="_blank" rel="noopener">Играть прототип →</a>
+                    </div>
+                </article>
+            </div>
+
+            <div class="games-cta">
+                <p>Это ещё не все. На <a href="https://gamin.me/users/ilya873" target="_blank" rel="noopener">Gamin</a> лежат игры с джемов «Гаминатор», «КОД» и «WHAT?IF», а на <a href="https://gamejolt.com/@Ilya873/games" target="_blank" rel="noopener">GameJolt</a> — больше архивных проектов.</p>
+            </div>
+        </section>
+
+        <section id="commissioned" class="commissioned">
+            <div class="section-head">
+                <span class="kicker">/ Коммерческая работа</span>
+                <h2>Игры на заказ / проданные</h2>
+                <p class="section-sub">Игры, которые я&nbsp;сделал на&nbsp;заказ или продал издателям — вышли в&nbsp;Steam, Яндекс&nbsp;Играх и&nbsp;VK&nbsp;Play.</p>
+            </div>
+            <div class="commission-grid">
+                <article class="commission-card">
+                    <div class="commission-cover">
+                        <img src="https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2466660/header.jpg?t=1687944392" alt="Village &amp; Monsters" loading="lazy">
+                        <span class="store-pill store-steam">Steam · VK Play</span>
+                    </div>
+                    <div class="commission-body">
+                        <h3>Village &amp; Monsters</h3>
+                        <p>Карточная стратегия о&nbsp;развитии поселения: монстры нападают на&nbsp;деревню, а&nbsp;вирус сдерживает их. Доведите население до&nbsp;100&nbsp;человек.</p>
+                        <div class="commission-tags">
+                            <span class="tag tag-strat">Стратегия</span>
+                            <span class="tag">Карточная</span>
+                            <span class="tag">Симулятор</span>
+                        </div>
+                        <div class="commission-links">
+                            <a class="game-link" href="https://store.steampowered.com/app/2466660/Village__Monsters/" target="_blank" rel="noopener">Steam →</a>
+                            <a class="game-link" href="https://vkplay.ru/play/game/village-and-monsters-33768/" target="_blank" rel="noopener">VK Play →</a>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="commission-card">
+                    <div class="commission-cover">
+                        <img src="https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/4464540/686144ae6da50ea884faa329f43404caecbadda6/header.jpg?t=1775202792" alt="NEON DRIFT ULTRA" loading="lazy">
+                        <span class="store-pill store-steam">Steam</span>
+                    </div>
+                    <div class="commission-body">
+                        <h3>NEON DRIFT ULTRA</h3>
+                        <p>Адреналиновая гоночная аркада, где душа классического советского автопрома встречается с&nbsp;ослепительной эстетикой вебпанка.</p>
+                        <div class="commission-tags">
+                            <span class="tag tag-act">Гонки</span>
+                            <span class="tag">Аркада</span>
+                            <span class="tag">Экшен</span>
+                        </div>
+                        <div class="commission-links">
+                            <a class="game-link" href="https://store.steampowered.com/app/4464540/NEON_DRIFT_ULTRA/" target="_blank" rel="noopener">Открыть в Steam →</a>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="commission-card">
+                    <div class="commission-cover">
+                        <img src="https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/4298510/05ad51e9bb6088caa43c1574e36d62dce8cce97c/header.jpg?t=1773667697" alt="Wasteland with Robots" loading="lazy">
+                        <span class="store-pill store-steam">Steam</span>
+                    </div>
+                    <div class="commission-body">
+                        <h3>Wasteland with Robots</h3>
+                        <p>Постапокалипсис под куполом роботов: прорвитесь наружу, найдите ковчег и&nbsp;спасите оставшихся в&nbsp;живых.</p>
+                        <div class="commission-tags">
+                            <span class="tag tag-act">Экшен</span>
+                            <span class="tag tag-adv">Приключение</span>
+                            <span class="tag">Симулятор</span>
+                        </div>
+                        <div class="commission-links">
+                            <a class="game-link" href="https://store.steampowered.com/app/4298510/Wasteland_with_Robots/" target="_blank" rel="noopener">Открыть в Steam →</a>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="commission-card">
+                    <div class="commission-cover">
+                        <img src="https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2232380/header.jpg?t=1671177740" alt="Glory to the Robots!" loading="lazy">
+                        <span class="store-pill store-steam">Steam</span>
+                    </div>
+                    <div class="commission-body">
+                        <h3>Glory to the Robots!</h3>
+                        <p>Менеджмент-стратегия: постройте завод роботов на&nbsp;другой планете, добывайте ресурсы и&nbsp;тестируйте роботов на&nbsp;разных мирах.</p>
+                        <div class="commission-tags">
+                            <span class="tag tag-strat">Стратегия</span>
+                            <span class="tag">Симулятор</span>
+                            <span class="tag">Менеджмент</span>
+                        </div>
+                        <div class="commission-links">
+                            <a class="game-link" href="https://store.steampowered.com/app/2232380/Glory_to_the_Robots/" target="_blank" rel="noopener">Открыть в Steam →</a>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="commission-card">
+                    <div class="commission-cover">
+                        <img src="https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/4674970/9a1c3e3e3d660cae544b09b6c75cbe392854a722/header.jpg?t=1781543869" alt="Cheese Stack" loading="lazy">
+                        <span class="store-pill store-steam">Steam</span>
+                    </div>
+                    <div class="commission-body">
+                        <h3>Cheese Stack</h3>
+                        <p>Уютная головоломка: складывайте падающие кусочки сыра в&nbsp;идеальные ряды. Аппетитная графика, задорная музыка и&nbsp;таблица рекордов.</p>
+                        <div class="commission-tags">
+                            <span class="tag tag-puz">Головоломка</span>
+                            <span class="tag">Казуальная</span>
+                            <span class="tag">Инди</span>
+                        </div>
+                        <div class="commission-links">
+                            <a class="game-link" href="https://store.steampowered.com/app/4674970/Cheese_Stack/" target="_blank" rel="noopener">Открыть в Steam →</a>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="commission-card">
+                    <div class="commission-cover">
+                        <img src="https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2312360/header.jpg?t=1677835483" alt="THE ABYSS" loading="lazy">
+                        <span class="store-pill store-steam">Steam</span>
+                    </div>
+                    <div class="commission-body">
+                        <h3>THE ABYSS</h3>
+                        <p>2D-головоломка про спуск: набирайте нужное количество очков и&nbsp;выбирайте верные пути, чтобы пройти каждый уровень.</p>
+                        <div class="commission-tags">
+                            <span class="tag tag-puz">Головоломка</span>
+                            <span class="tag tag-adv">Приключение</span>
+                        </div>
+                        <div class="commission-links">
+                            <a class="game-link" href="https://store.steampowered.com/app/2312360/THE_ABYSS/" target="_blank" rel="noopener">Открыть в Steam →</a>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="commission-card">
+                    <div class="commission-cover">
+                        <img src="https://static.games.yandex.net/opengraph/c04383d7c830770c42bd07aaa48bedbf997d6f0de6cead72a16326e742fa20ee.png?v=1782086400000" alt="Stacking Heroes" loading="lazy">
+                        <span class="store-pill store-yandex">Яндекс Игры</span>
+                    </div>
+                    <div class="commission-body">
+                        <h3>Stacking Heroes</h3>
+                        <p>Бесконечный аркадный раннер на&nbsp;внимание: герой-ниндзя бежит вперёд с&nbsp;паркуром, а&nbsp;игрок вовремя кликает, чтобы прыгать с&nbsp;блоками и&nbsp;обходить препятствия.</p>
+                        <div class="commission-tags">
+                            <span class="tag tag-act">Аркада</span>
+                            <span class="tag">Раннер</span>
+                            <span class="tag">Браузер</span>
+                        </div>
+                        <div class="commission-links">
+                            <a class="game-link" href="https://yandex.ru/games/app/313660" target="_blank" rel="noopener">Играть в Яндекс Играх →</a>
+                        </div>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <section id="jams" class="jams">
+            <div class="section-head">
+                <span class="kicker">/ Game jams</span>
+                <h2>Конкурсные игры</h2>
+                <p class="section-sub">Работы для джемов «Гаминатор», «КОД», «WHAT?IF», «Звукорассказы» и «Конкурс Симуляторов» на&nbsp;Gamin. Эксперименты под жёсткими дедлайнами.</p>
+            </div>
+
+            <div class="jam-stats">
+                <div class="jam-stat">
+                    <span class="jam-stat-num">37</span>
+                    <span class="jam-stat-lab">работ на&nbsp;джемах</span>
+                </div>
+                <div class="jam-stat">
+                    <span class="jam-stat-num">12</span>
+                    <span class="jam-stat-lab">разных конкурсов</span>
+                </div>
+                <div class="jam-stat">
+                    <span class="jam-stat-num">11</span>
+                    <span class="jam-stat-lab">Гаминаторов подряд</span>
+                </div>
+            </div>
+
+            <div class="jam-grid">
+                <a class="jam-card" href="https://gamin.me/entries/1188-prisoner-of-the-wasteland" target="_blank" rel="noopener">
+                    <div class="jam-cover">
+                        <img src="https://gamin.me/uploads/entries/preview/1188/logogame.png" alt="Prisoner of the Wasteland" loading="lazy">
+                    </div>
+                    <div class="jam-body">
+                        <span class="jam-tag jam-gaminator">Gaminator 28</span>
+                        <h3>Prisoner of the Wasteland</h3>
+                        <p>Постапокалипсис: спустя 10&nbsp;лет после захвата мира ИИ Тея-Зеро выжившие пробиваются сквозь купол роботов к&nbsp;ковчегу.</p>
+                        <span class="jam-engine">Unity · Shooter</span>
+                    </div>
+                </a>
+
+                <a class="jam-card" href="https://gamin.me/entries/1160-schastie" target="_blank" rel="noopener">
+                    <div class="jam-cover jam-cover-fallback jam-audio">
+                        <div class="cover-text">♪<br>СЧАСТЬЕ</div>
+                    </div>
+                    <div class="jam-body">
+                        <span class="jam-tag jam-sound">Звукорассказы 1</span>
+                        <h3>Счастье</h3>
+                        <p>Звуковая история про путь к&nbsp;счастью. Первый эксперимент со&nbsp;звуковым дизайном — все звуки записаны самостоятельно.</p>
+                        <span class="jam-engine">Audio narrative</span>
+                    </div>
+                </a>
+
+                <a class="jam-card" href="https://gamin.me/entries/1157-sdelay-igru" target="_blank" rel="noopener">
+                    <div class="jam-cover">
+                        <img src="https://gamin.me/uploads/entries/preview/1157/logo.png" alt="Сделай игру" loading="lazy">
+                    </div>
+                    <div class="jam-body">
+                        <span class="jam-tag jam-kod">КОД 24</span>
+                        <h3>Ничего не успел, игру не сделал</h3>
+                        <p>Самоироничный вход на&nbsp;джем с&nbsp;названием, говорящим само за&nbsp;себя. Мета-эксперимент о&nbsp;геймдеве в&nbsp;дедлайн.</p>
+                        <span class="jam-engine">Web</span>
+                    </div>
+                </a>
+
+                <a class="jam-card" href="https://gamin.me/entries/1127-prizrak-muchenika" target="_blank" rel="noopener">
+                    <div class="jam-cover">
+                        <img src="https://gamin.me/uploads/icons/3f5a7c965c9c23288fd5620ee6660c5c.png" alt="Призрак мученика" loading="lazy">
+                    </div>
+                    <div class="jam-body">
+                        <span class="jam-tag jam-draw">Рисование 1</span>
+                        <h3>Призрак мученика</h3>
+                        <p>Концепт-арт чернильного монстра: летающий призрак, плюющийся чернилами. Кто он&nbsp;— рыцарь или казнённый злодей?</p>
+                        <span class="jam-engine">Art / Lore</span>
+                    </div>
+                </a>
+
+                <a class="jam-card" href="https://gamin.me/entries/1125-chernilnyy-nochnoy-temnyy-demon" target="_blank" rel="noopener">
+                    <div class="jam-cover jam-cover-fallback">
+                        <div class="cover-text">ЧЕРНИЛЬНЫЙ<br>ДЕМОН</div>
+                    </div>
+                    <div class="jam-body">
+                        <span class="jam-tag jam-draw">Рисование 1</span>
+                        <h3>Чернильный демон</h3>
+                        <p>Огромный монстр с&nbsp;закрученными рогами и&nbsp;светящимися глазами. Активнее в&nbsp;темноте, размножается яйцами в&nbsp;логовах.</p>
+                        <span class="jam-engine">Art / Lore</span>
+                    </div>
+                </a>
+
+                <a class="jam-card" href="https://gamin.me/entries/1122-kochegar-mihalych-2-vospominaniya" target="_blank" rel="noopener">
+                    <div class="jam-cover">
+                        <img src="https://gamin.me/uploads/entries/preview/1122/thumb_cd3fba66-1f2d-41f2-af96-0ef9e0.jpg" alt="Кочегар Михалыч 2: Воспоминания" loading="lazy">
+                    </div>
+                    <div class="jam-body">
+                        <span class="jam-tag jam-whatif">WHAT?IF 3</span>
+                        <h3>Кочегар Михалыч 2: Воспоминания</h3>
+                        <p>Максимально нелинейная история, вдохновлённая воспоминаниями кочегара Михалыча про его молодость.</p>
+                        <span class="jam-engine">Narrative</span>
+                    </div>
+                </a>
+
+                <a class="jam-card" href="https://gamin.me/entries/1096-stolb" target="_blank" rel="noopener">
+                    <div class="jam-cover">
+                        <img src="https://cdn.imgchest.com/files/l4necxggr54.png" alt="Столб" loading="lazy">
+                    </div>
+                    <div class="jam-body">
+                        <span class="jam-tag jam-sim">Симуляторы 1</span>
+                        <h3>Столб</h3>
+                        <p>Симулятор столба от&nbsp;первого лица. WASD, фонарик, и&nbsp;ровно столько геймплея, сколько было нужно для&nbsp;конкурса.</p>
+                        <span class="jam-engine">Unity · Simulator</span>
+                    </div>
+                </a>
+
+                <a class="jam-card" href="https://gamin.me/entries/1063-mirovozzrenie-worldview" target="_blank" rel="noopener">
+                    <div class="jam-cover">
+                        <img src="https://gamin.me/uploads/entries/preview/1063/thumb_logo.jpg" alt="Мировоззрение" loading="lazy">
+                    </div>
+                    <div class="jam-body">
+                        <span class="jam-tag jam-gaminator">Gaminator 27</span>
+                        <h3>Мировоззрение</h3>
+                        <p>Интерактивная история: мировоззрение Алекса рушится после неожиданных событий. Акцент на&nbsp;сюжете и&nbsp;настроении.</p>
+                        <span class="jam-engine">Narrative</span>
+                    </div>
+                </a>
+
+                <a class="jam-card" href="https://gamin.me/entries/1050-neplatformer" target="_blank" rel="noopener">
+                    <div class="jam-cover">
+                        <img src="https://img.itch.zone/aW1hZ2UvMjUzNzk2NC8xNTA5Nzk0NC5wbmc=/794x1000/N1mYbd.png" alt="НЕплатформер" loading="lazy">
+                    </div>
+                    <div class="jam-body">
+                        <span class="jam-tag jam-kod">КОД 22</span>
+                        <h3>НЕплатформер</h3>
+                        <p>Пародия на&nbsp;платформер: помоги человечку дойти до&nbsp;финиша, используя любые подручные инструменты.</p>
+                        <span class="jam-engine">Джем-оригинал → NOplatformer</span>
+                    </div>
+                </a>
+
+                <a class="jam-card" href="https://gamin.me/entries/1044-kochegar-priklyucheniya-stazhera" target="_blank" rel="noopener">
+                    <div class="jam-cover">
+                        <img src="https://gamin.me/uploads/entries/preview/1044/thumb_logo.jpg" alt="Кочегар: Приключения стажёра" loading="lazy">
+                    </div>
+                    <div class="jam-body">
+                        <span class="jam-tag jam-whatif">WHAT?IF 2</span>
+                        <h3>Кочегар: Приключения стажёра</h3>
+                        <p>Первый день стажёра на&nbsp;кочегарке под началом сурового, но&nbsp;мудрого Михалыча. Работать или схалявить?</p>
+                        <span class="jam-engine">Unity · Story</span>
+                    </div>
+                </a>
+
+                <a class="jam-card" href="https://gamin.me/entries/1024-sudim-po-zvuku" target="_blank" rel="noopener">
+                    <div class="jam-cover">
+                        <img src="https://img.itch.zone/aW1hZ2UvMzI3MDQ2NC8xOTUyMDg5NS5qcGc=/794x1000/GGHx%2Bl.jpg" alt="Судим по звуку" loading="lazy">
+                    </div>
+                    <div class="jam-body">
+                        <span class="jam-tag jam-kod">КОД 21</span>
+                        <h3>Судим по звуку</h3>
+                        <p>Викторина, где нужно судить музыку по&nbsp;разным категориям и&nbsp;побеждать музыкальных боссов.</p>
+                        <span class="jam-engine">Джем-оригинал → Judge the Sound</span>
+                    </div>
+                </a>
+
+                <a class="jam-card" href="https://gamin.me/entries/1013-great-empires" target="_blank" rel="noopener">
+                    <div class="jam-cover">
+                        <img src="https://gamin.me/uploads/entries/preview/1013/logo.png" alt="Great Empires" loading="lazy">
+                    </div>
+                    <div class="jam-body">
+                        <span class="jam-tag jam-gaminator">Gaminator 26</span>
+                        <h3>Great Empires</h3>
+                        <p>Ранний прототип большой стратегии о&nbsp;возвышении империй. Тема джема — «Неопознанный летающий объект».</p>
+                        <span class="jam-engine">Прототип Great Empires</span>
+                    </div>
+                </a>
+
+                <a class="jam-card" href="https://gamin.me/entries/992-evakuatsiya-vne-konkursa" target="_blank" rel="noopener">
+                    <div class="jam-cover jam-cover-fallback">
+                        <div class="cover-text">ЭВАКУАЦИЯ</div>
+                    </div>
+                    <div class="jam-body">
+                        <span class="jam-tag jam-kod">КОД 20</span>
+                        <h3>Эвакуация <span class="jam-note">[вне конкурса]</span></h3>
+                        <p>Внеконкурсная работа на&nbsp;тему «Движение&nbsp;— жизнь»: эвакуация на&nbsp;скорость.</p>
+                        <span class="jam-engine">Out of contest</span>
+                    </div>
+                </a>
+
+                <a class="jam-card" href="https://gamin.me/entries/972-a-kakoe-tut-dolzhno-byt-nazvanie" target="_blank" rel="noopener">
+                    <div class="jam-cover jam-cover-fallback jam-violet">
+                        <div class="cover-text">#9268C3</div>
+                    </div>
+                    <div class="jam-body">
+                        <span class="jam-tag jam-tricolor">Триколор 5</span>
+                        <h3>А какое тут должно быть название?</h3>
+                        <p>Цветовой джем — работа в&nbsp;палитре оттенков фиолетового #9268c3.</p>
+                        <span class="jam-engine">Color jam</span>
+                    </div>
+                </a>
+
+                <a class="jam-card" href="https://gamin.me/entries/963-village-monsters" target="_blank" rel="noopener">
+                    <div class="jam-cover">
+                        <img src="https://gamin.me/uploads/entries/preview/963/image_7.png" alt="Village & Monsters" loading="lazy">
+                    </div>
+                    <div class="jam-body">
+                        <span class="jam-tag jam-gaminator">Gaminator 25</span>
+                        <h3>Village &amp; Monsters</h3>
+                        <p>Деревня и&nbsp;монстры на&nbsp;стыке реальности и&nbsp;фантазии&nbsp;— тема Gaminator 25.</p>
+                        <span class="jam-engine">Adventure</span>
+                    </div>
+                </a>
+
+                <a class="jam-card" href="https://gamin.me/entries/946-pinaem-myach" target="_blank" rel="noopener">
+                    <div class="jam-cover">
+                        <img src="https://gamin.me/uploads/entries/preview/946/logo.png" alt="Пинаем мяч!" loading="lazy">
+                    </div>
+                    <div class="jam-body">
+                        <span class="jam-tag jam-kod">КОД 19</span>
+                        <h3>Пинаем мяч!</h3>
+                        <p>Аркада про рикошеты&nbsp;— пинай мяч и&nbsp;смотри, как он&nbsp;отскакивает от&nbsp;всего на&nbsp;свете.</p>
+                        <span class="jam-engine">Arcade</span>
+                    </div>
+                </a>
+
+                <a class="jam-card" href="https://gamin.me/entries/926-cyber-panopticon" target="_blank" rel="noopener">
+                    <div class="jam-cover">
+                        <img src="https://gamin.me/uploads/entries/preview/926/logo.png" alt="Cyber Panopticon" loading="lazy">
+                    </div>
+                    <div class="jam-body">
+                        <span class="jam-tag jam-gaminator">Gaminator 24</span>
+                        <h3>Cyber Panopticon</h3>
+                        <p>Детектив в&nbsp;киберпанке: вы&nbsp;— детектив Маркус в&nbsp;деле о&nbsp;кибер-убийце 2060&nbsp;года.</p>
+                        <span class="jam-engine">Джем-оригинал → Cyber Panopticon</span>
+                    </div>
+                </a>
+
+                <a class="jam-card" href="https://gamin.me/entries/910-happy-heroic-ending" target="_blank" rel="noopener">
+                    <div class="jam-cover">
+                        <img src="https://gamin.me/uploads/entries/preview/910/oblojka2.png" alt="Happy Heroic Ending" loading="lazy">
+                    </div>
+                    <div class="jam-body">
+                        <span class="jam-tag jam-sound">Звуки Гамина 4</span>
+                        <h3>Happy Heroic Ending</h3>
+                        <p>Звуковая работа на&nbsp;тему «Конец большого пути»&nbsp;— героическая концовка.</p>
+                        <span class="jam-engine">Audio</span>
+                    </div>
+                </a>
+
+                <a class="jam-card" href="https://gamin.me/entries/900-padenie-v-bezdnu" target="_blank" rel="noopener">
+                    <div class="jam-cover">
+                        <img src="https://gamin.me/uploads/entries/preview/900/bezdna.png" alt="Падение в бездну" loading="lazy">
+                    </div>
+                    <div class="jam-body">
+                        <span class="jam-tag jam-kod">КОД 18</span>
+                        <h3>Падение в&nbsp;бездну</h3>
+                        <p>Управляйте падающим шаром на&nbsp;пути к&nbsp;центру Земли. Тема джема&nbsp;— «Свободное падение».</p>
+                        <span class="jam-engine">Джем-оригинал → Fall into the Abyss</span>
+                    </div>
+                </a>
+
+                <a class="jam-card" href="https://gamin.me/entries/888-along-the-night-roads" target="_blank" rel="noopener">
+                    <div class="jam-cover">
+                        <img src="https://gamin.me/uploads/entries/preview/888/2765913620.jpg" alt="Along the night roads" loading="lazy">
+                    </div>
+                    <div class="jam-body">
+                        <span class="jam-tag jam-kod">КОД 17</span>
+                        <h3>Along the night roads</h3>
+                        <p>Ночное путешествие, которому никто не&nbsp;поверит&nbsp;— тема КОД 17.</p>
+                        <span class="jam-engine">Atmospheric</span>
+                    </div>
+                </a>
+
+                <a class="jam-card" href="https://gamin.me/entries/871-vosvoyasi" target="_blank" rel="noopener">
+                    <div class="jam-cover">
+                        <img src="https://gamin.me/uploads/entries/preview/871/sekret.png" alt="Восвояси" loading="lazy">
+                    </div>
+                    <div class="jam-body">
+                        <span class="jam-tag jam-gaminator">Gaminator 23</span>
+                        <h3>Восвояси</h3>
+                        <p>Путь домой через параллели и&nbsp;пересечения&nbsp;— тема Gaminator 23.</p>
+                        <span class="jam-engine">Adventure</span>
+                    </div>
+                </a>
+
+                <a class="jam-card" href="https://gamin.me/entries/856-slava-robotam" target="_blank" rel="noopener">
+                    <div class="jam-cover">
+                        <img src="https://gamin.me/uploads/entries/preview/856/cover.png" alt="СЛАВА РОБОТАМ" loading="lazy">
+                    </div>
+                    <div class="jam-body">
+                        <span class="jam-tag jam-gaminator">Gaminator 22</span>
+                        <h3>СЛАВА РОБОТАМ</h3>
+                        <p>2647&nbsp;год: стройте завод роботов на&nbsp;собственной планете и&nbsp;отбивайтесь от&nbsp;пиратов.</p>
+                        <span class="jam-engine">Джем-оригинал → Glory to the Robots</span>
+                    </div>
+                </a>
+
+                <a class="jam-card" href="https://gamin.me/entries/846-sense-of-the-tank" target="_blank" rel="noopener">
+                    <div class="jam-cover">
+                        <img src="https://gamin.me/uploads/entries/preview/846/skrin2.png" alt="Sense of the tank" loading="lazy">
+                    </div>
+                    <div class="jam-body">
+                        <span class="jam-tag jam-bitsy">Bitsy Jam 2</span>
+                        <h3>Sense of the tank</h3>
+                        <p>Минималистичная Bitsy-история на&nbsp;тему «Сильное чувство».</p>
+                        <span class="jam-engine">Bitsy · Narrative</span>
+                    </div>
+                </a>
+
+                <a class="jam-card" href="https://gamin.me/entries/828-spasenie" target="_blank" rel="noopener">
+                    <div class="jam-cover">
+                        <img src="https://gamin.me/uploads/entries/preview/828/logogame.png" alt="Спасение" loading="lazy">
+                    </div>
+                    <div class="jam-body">
+                        <span class="jam-tag jam-gaminator">Gaminator 21</span>
+                        <h3>Спасение</h3>
+                        <p>Атмосферное приключение с&nbsp;тайной&nbsp;— тема «Наши маски и&nbsp;тайны».</p>
+                        <span class="jam-engine">Прототип The Rescue</span>
+                    </div>
+                </a>
+
+                <a class="jam-card" href="https://gamin.me/entries/810-simulyator-chego-to" target="_blank" rel="noopener">
+                    <div class="jam-cover">
+                        <img src="https://gamin.me/uploads/entries/preview/810/s.png" alt="Симулятор чего-то" loading="lazy">
+                    </div>
+                    <div class="jam-body">
+                        <span class="jam-tag jam-kod">КОД 16</span>
+                        <h3>Симулятор чего-то</h3>
+                        <p>Странный симулятор на&nbsp;тему «Один на&nbsp;один». Игра-эксперимент.</p>
+                        <span class="jam-engine">Experimental</span>
+                    </div>
+                </a>
+
+                <a class="jam-card" href="https://gamin.me/entries/799-delicious-blood" target="_blank" rel="noopener">
+                    <div class="jam-cover">
+                        <img src="https://gamin.me/uploads/entries/preview/799/eca73c87780c3453d02642c71f37b8.jpg" alt="Delicious blood" loading="lazy">
+                    </div>
+                    <div class="jam-body">
+                        <span class="jam-tag jam-br">GBR IV</span>
+                        <h3>Delicious blood</h3>
+                        <p>1148&nbsp;год: Велес против нашествия вампиров. RPG с&nbsp;диалогами и&nbsp;торговлей.</p>
+                        <span class="jam-engine">Джем-оригинал → Delicious Blood</span>
+                    </div>
+                </a>
+
+                <a class="jam-card" href="https://gamin.me/entries/781-zhizn-igra" target="_blank" rel="noopener">
+                    <div class="jam-cover">
+                        <img src="https://gamin.me/uploads/entries/preview/781/icon.png" alt="Жизнь - игра?" loading="lazy">
+                    </div>
+                    <div class="jam-body">
+                        <span class="jam-tag jam-kod">КОД 15</span>
+                        <h3>Жизнь — игра?</h3>
+                        <p>Метарефлексия про геймдев и&nbsp;жизнь&nbsp;— тема «Жизнь — игра».</p>
+                        <span class="jam-engine">Meta</span>
+                    </div>
+                </a>
+
+                <a class="jam-card" href="https://gamin.me/entries/769-anomalistic-space" target="_blank" rel="noopener">
+                    <div class="jam-cover">
+                        <img src="https://gamin.me/uploads/entries/preview/769/_mxg-23my2y.jpg" alt="Anomalistic Space" loading="lazy">
+                    </div>
+                    <div class="jam-body">
+                        <span class="jam-tag jam-mp3">MP3.EXE 1</span>
+                        <h3>Anomalistic Space</h3>
+                        <p>Музыкальный джем на&nbsp;тему ANGST/LIGHT&nbsp;— аномальное космическое пространство.</p>
+                        <span class="jam-engine">Music · Atmospheric</span>
+                    </div>
+                </a>
+
+                <a class="jam-card" href="https://gamin.me/entries/757-gods-of-all" target="_blank" rel="noopener">
+                    <div class="jam-cover">
+                        <img src="https://gamin.me/uploads/entries/preview/757/en.jpg" alt="Gods of All" loading="lazy">
+                    </div>
+                    <div class="jam-body">
+                        <span class="jam-tag jam-anthro">Антроподжем 1</span>
+                        <h3>Gods of All</h3>
+                        <p>3D-приключение по&nbsp;мифологии коми-пермяков. Играем за&nbsp;Омеля, одного из&nbsp;двух высших божеств.</p>
+                        <span class="jam-engine">Джем-оригинал → Gods of All</span>
+                    </div>
+                </a>
+
+                <a class="jam-card" href="https://gamin.me/entries/724-the-unstable-mansion" target="_blank" rel="noopener">
+                    <div class="jam-cover">
+                        <img src="https://gamin.me/uploads/entries/preview/724/rfzckmqtmpu.jpg" alt="The Unstable Mansion" loading="lazy">
+                    </div>
+                    <div class="jam-body">
+                        <span class="jam-tag jam-gaminator">Gaminator 20</span>
+                        <h3>The Unstable Mansion</h3>
+                        <p>Нестабильный особняк на&nbsp;тему игровой ностальгии&nbsp;— Gaminator 20.</p>
+                        <span class="jam-engine">Atmospheric</span>
+                    </div>
+                </a>
+
+                <a class="jam-card" href="https://gamin.me/entries/660-voistinu-kosmicheskaya-bitva" target="_blank" rel="noopener">
+                    <div class="jam-cover">
+                        <img src="https://gamin.me/uploads/entries/preview/660/battlespace.png" alt="Воистину космическая битва!" loading="lazy">
+                    </div>
+                    <div class="jam-body">
+                        <span class="jam-tag jam-sound">Звуки Гамина 3</span>
+                        <h3>Воистину космическая битва!</h3>
+                        <p>Звуковая работа про космическое сражение&nbsp;— тема «Последняя битва».</p>
+                        <span class="jam-engine">Audio</span>
+                    </div>
+                </a>
+
+                <a class="jam-card" href="https://gamin.me/entries/657-bitva-vseya-gamina" target="_blank" rel="noopener">
+                    <div class="jam-cover">
+                        <img src="https://gamin.me/uploads/entries/preview/657/bitva.png" alt="Битва всея Гамина" loading="lazy">
+                    </div>
+                    <div class="jam-body">
+                        <span class="jam-tag jam-sound">Звуки Гамина 3</span>
+                        <h3>Битва всея Гамина</h3>
+                        <p>Вторая звуковая работа в&nbsp;том&nbsp;же джеме&nbsp;— альтернативный взгляд на&nbsp;«Последнюю битву».</p>
+                        <span class="jam-engine">Audio</span>
+                    </div>
+                </a>
+
+                <a class="jam-card" href="https://gamin.me/entries/651-race" target="_blank" rel="noopener">
+                    <div class="jam-cover">
+                        <img src="https://gamin.me/uploads/entries/preview/651/u6w1wfnbkc8.jpg" alt="Race" loading="lazy">
+                    </div>
+                    <div class="jam-body">
+                        <span class="jam-tag jam-br">GBR III</span>
+                        <h3>Race</h3>
+                        <p>Гонка для&nbsp;Gamin Battle Royale 3.</p>
+                        <span class="jam-engine">Arcade · Racing</span>
+                    </div>
+                </a>
+
+                <a class="jam-card" href="https://gamin.me/entries/628-mashina-vremeni" target="_blank" rel="noopener">
+                    <div class="jam-cover">
+                        <img src="https://gamin.me/uploads/entries/preview/628/prevyu.png" alt="Машина времени" loading="lazy">
+                    </div>
+                    <div class="jam-body">
+                        <span class="jam-tag jam-kod">КОД 14</span>
+                        <h3>Машина времени</h3>
+                        <p>Игра на&nbsp;тему «Рецепт»&nbsp;— рецепт машины времени.</p>
+                        <span class="jam-engine">Puzzle</span>
+                    </div>
+                </a>
+
+                <a class="jam-card" href="https://gamin.me/entries/302-antivirus-minako" target="_blank" rel="noopener">
+                    <div class="jam-cover">
+                        <img src="https://gamin.me/uploads/entries/preview/302/title_150x2.png" alt="Antivirus Minako" loading="lazy">
+                    </div>
+                    <div class="jam-body">
+                        <span class="jam-tag jam-gaminator">Gaminator 19</span>
+                        <h3>Antivirus Minako</h3>
+                        <p>ИИ-антивирус Минако должна остановить вирус и&nbsp;предотвратить ядерную войну. Тема&nbsp;— «19 минут».</p>
+                        <span class="jam-engine">Джем-оригинал → Antivirus Minako</span>
+                    </div>
+                </a>
+
+                <a class="jam-card" href="https://gamin.me/entries/256-kosmicheskiy-sup-ili-edinorogi-atakuyut-rogami" target="_blank" rel="noopener">
+                    <div class="jam-cover">
+                        <img src="https://gamin.me/uploads/entries/preview/256/edinorog.png" alt="Космический суп" loading="lazy">
+                    </div>
+                    <div class="jam-body">
+                        <span class="jam-tag jam-kod">КОД 13</span>
+                        <h3>Космический суп, или Единороги атакуют рогами</h3>
+                        <p>Безумный эксперимент с&nbsp;единорогами и&nbsp;космосом&nbsp;— тема «Эксперимент».</p>
+                        <span class="jam-engine">Experimental</span>
+                    </div>
+                </a>
+
+                <a class="jam-card" href="https://gamin.me/entries/133-istoriya-brayana" target="_blank" rel="noopener">
+                    <div class="jam-cover">
+                        <img src="https://gamin.me/uploads/entries/preview/133/istoriyabrayana.png" alt="История Брайана" loading="lazy">
+                    </div>
+                    <div class="jam-body">
+                        <span class="jam-tag jam-gaminator">Gaminator 18</span>
+                        <h3>История Брайана</h3>
+                        <p>Брайан против чёрных магов, захвативших земли Альянса. Adventure-RPG в&nbsp;фэнтези-сеттинге.</p>
+                        <span class="jam-engine">Джем-оригинал → Brian's Story</span>
+                    </div>
+                </a>
+            </div>
+
+            <div class="games-cta">
+                <p>Полный архив джемовских работ — на&nbsp;<a href="https://gamin.me/users/ilya873" target="_blank" rel="noopener">Gamin</a>.</p>
+            </div>
+        </section>
+
+        <section id="prototypes" class="prototypes">
+            <div class="section-head">
+                <span class="kicker">/ Веб-эксперименты</span>
+                <h2>Прототипы и мини-игры</h2>
+                <p class="section-sub">Маленькие проекты прямо в браузере — игровые механики, наброски и эксперименты. Откройте и поиграйте.</p>
+            </div>
+            <div class="proto-grid">
+                <a class="proto-card" href="TicTacToe.html">
+                    <span class="proto-icon">⊞</span>
+                    <span class="proto-title">Крестики-Нолики</span>
+                    <span class="proto-sub">Классика</span>
+                </a>
+                <a class="proto-card" href="paint.html">
+                    <span class="proto-icon">🎨</span>
+                    <span class="proto-title">Рисовалка</span>
+                    <span class="proto-sub">Canvas paint</span>
+                </a>
+                <a class="proto-card" href="game_ball.html">
+                    <span class="proto-icon">●</span>
+                    <span class="proto-title">Игрушка на КОД</span>
+                    <span class="proto-sub">Прототип</span>
+                </a>
+                <a class="proto-card" href="snake.html">
+                    <span class="proto-icon">🐍</span>
+                    <span class="proto-title">Змейка+</span>
+                    <span class="proto-sub">Расширенная</span>
+                </a>
+                <a class="proto-card" href="sound_generator.html">
+                    <span class="proto-icon">♪</span>
+                    <span class="proto-title">Генератор звуков</span>
+                    <span class="proto-sub">Audio toy</span>
+                </a>
+                <a class="proto-card" href="game_shooter/game_shooter.html">
+                    <span class="proto-icon">⌖</span>
+                    <span class="proto-title">Мини-шутер</span>
+                    <span class="proto-sub">Action prototype</span>
+                </a>
+                <a class="proto-card" href="hahki/hahki.html">
+                    <span class="proto-icon">♚</span>
+                    <span class="proto-title">Шашки</span>
+                    <span class="proto-sub">Настолка</span>
+                </a>
+                <a class="proto-card" href="gameUSSR/gameUSSR.html">
+                    <span class="proto-icon">☭</span>
+                    <span class="proto-title">Правитель СССР</span>
+                    <span class="proto-sub">Мини-стратегия</span>
+                </a>
+                <a class="proto-card" href="game climate/climate.html">
+                    <span class="proto-icon">🌍</span>
+                    <span class="proto-title">Симулятор Земли</span>
+                    <span class="proto-sub">Климатический</span>
+                </a>
+                <a class="proto-card" href="gamespace.html">
+                    <span class="proto-icon">🚀</span>
+                    <span class="proto-title">Игра для ТГ</span>
+                    <span class="proto-sub">Telegram prototype</span>
+                </a>
+                <a class="proto-card" href="TicTacToe2.html">
+                    <span class="proto-icon">⊞</span>
+                    <span class="proto-title">XO — версия 2</span>
+                    <span class="proto-sub">Эксперимент</span>
+                </a>
+                <a class="proto-card" href="game_razrab.html">
+                    <span class="proto-icon">⚙</span>
+                    <span class="proto-title">Razrab</span>
+                    <span class="proto-sub">Dev sandbox</span>
+                </a>
+            </div>
+        </section>
+
+        <section id="about" class="about">
+            <div class="about-grid">
+                <div class="about-text">
+                    <span class="kicker">/ About</span>
+                    <h2>Кто я и&nbsp;что делаю</h2>
+                    <div class="about-identity">
+                        <figure class="ava-fig">
+                            <img src="img/avatar.png" width="84" height="84" alt="Аватар Ilya873" loading="lazy" decoding="async">
+                        </figure>
+                        <div class="about-id-text">
+                            <strong class="about-name">Ilya873</strong>
+                            <span class="about-role">Соло-инди-разработчик игр</span>
+                        </div>
+                    </div>
+                    <p>
+                        Я <strong>Ilya873</strong> — соло-инди-разработчик. Делаю игры в&nbsp;<em>GameMaker</em>
+                        и&nbsp;<em>Unity</em>: от&nbsp;маленьких джемовских прототипов
+                        до&nbsp;полноценных проектов для Steam.
+                    </p>
+                    <p>
+                        Люблю необычные идеи: божество, что вершит судьбы стран; детектив
+                        в&nbsp;киберпанке; музыкальная викторина; борьба с&nbsp;вирусом в&nbsp;роли ИИ;
+                        мифология коми-пермяков. Если идея интересная — я&nbsp;её сделаю.
+                    </p>
+                    <p>
+                        Свежий релиз — <strong>Hearth &amp; Shadow</strong> в&nbsp;Steam, и&nbsp;он&nbsp;собрал
+                        положительные отзывы. Параллельно пилю прототипы и&nbsp;участвую в&nbsp;джемах.
+                    </p>
+                </div>
+                <div class="about-side">
+                    <div class="stack-block">
+                        <h4>Технологии</h4>
+                        <div class="stack-tags">
+                            <span>GameMaker</span>
+                            <span>Unity</span>
+                            <span>C#</span>
+                            <span>GML</span>
+                            <span>HTML5</span>
+                            <span>JavaScript</span>
+                            <span>Pixel Art</span>
+                            <span>3D</span>
+                        </div>
+                    </div>
+                    <div class="stack-block">
+                        <h4>Жанры</h4>
+                        <div class="stack-tags">
+                            <span>Стратегия</span>
+                            <span>RPG</span>
+                            <span>Adventure</span>
+                            <span>Симулятор</span>
+                            <span>Карточная</span>
+                            <span>Песочница</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="contact" class="contact">
+            <div class="section-head">
+                <span class="kicker">/ Где меня найти</span>
+                <h2>Все мои платформы</h2>
+                <p class="section-sub">Steam, itch.io, GameJolt, Gamin, ВКонтакте — выбирайте удобное.</p>
+            </div>
+            <div class="links-grid">
+                <a class="link-card link-steam" href="https://store.steampowered.com/app/4373690/Hearth__Shadow/" target="_blank" rel="noopener">
+                    <span class="link-ico">
+                        <svg viewBox="0 0 24 24" width="26" height="26" fill="currentColor"><path d="M11.979 0C5.678 0 .511 4.86.022 11.037l6.432 2.658c.545-.371 1.203-.59 1.912-.59.063 0 .125.004.188.006l2.861-4.142V8.91c0-2.495 2.028-4.524 4.524-4.524 2.494 0 4.524 2.031 4.524 4.527s-2.03 4.525-4.524 4.525h-.105l-4.076 2.911c0 .052.004.105.004.159 0 1.875-1.515 3.396-3.39 3.396-1.635 0-3.016-1.173-3.331-2.727L.436 15.27C1.862 20.307 6.486 24 11.979 24c6.627 0 11.999-5.373 11.999-12S18.605 0 11.979 0zM7.54 18.21l-1.473-.61c.262.543.714.999 1.314 1.25 1.297.539 2.793-.076 3.332-1.375.263-.63.264-1.319.005-1.949s-.75-1.121-1.377-1.383c-.624-.26-1.29-.249-1.878-.03l1.523.63c.956.4 1.409 1.5 1.009 2.455-.397.957-1.497 1.41-2.454 1.012H7.54zm11.415-9.303c0-1.662-1.353-3.015-3.015-3.015-1.665 0-3.015 1.353-3.015 3.015 0 1.665 1.35 3.015 3.015 3.015 1.663 0 3.015-1.35 3.015-3.015zm-5.273-.005c0-1.252 1.013-2.266 2.265-2.266 1.249 0 2.266 1.014 2.266 2.266 0 1.251-1.017 2.265-2.266 2.265-1.253 0-2.265-1.014-2.265-2.265z"/></svg>
+                    </span>
+                    <div>
+                        <h4>Steam</h4>
+                        <p>Hearth &amp; Shadow — уже вышла, играйте</p>
+                    </div>
+                </a>
+                <a class="link-card link-itch" href="https://ilya873.itch.io/" target="_blank" rel="noopener">
+                    <span class="link-ico">
+                        <svg viewBox="0 0 24 24" width="26" height="26" fill="currentColor"><path d="M3.13 1.338C2.08 1.96.02 4.328 0 4.95v1.03c0 1.303 1.22 2.45 2.325 2.45 1.33 0 2.436-1.102 2.436-2.41 0 1.308 1.07 2.41 2.4 2.41 1.328 0 2.362-1.102 2.362-2.41 0 1.308 1.137 2.41 2.466 2.41h.024c1.33 0 2.466-1.102 2.466-2.41 0 1.308 1.034 2.41 2.363 2.41 1.33 0 2.4-1.102 2.4-2.41 0 1.308 1.106 2.41 2.435 2.41C22.78 8.43 24 7.282 24 5.98V4.95c-.02-.62-2.082-2.99-3.13-3.612-3.253-.114-5.508-.134-8.87-.133-3.362 0-7.945.053-8.87.133zm6.376 6.477a2.74 2.74 0 0 1-.468.602c-.5.49-1.19.795-1.947.795a2.786 2.786 0 0 1-1.95-.795c-.182-.178-.32-.37-.446-.59-.127.222-.303.412-.486.59a2.788 2.788 0 0 1-1.95.795c-.092 0-.187-.025-.264-.052-.107 1.113-.152 2.176-.168 2.95v.005l-.006 1.167c.02 2.334-.23 7.564 1.03 8.85 1.952.454 5.545.662 9.15.663 3.605 0 7.198-.21 9.15-.664 1.26-1.284 1.01-6.514 1.03-8.848l-.006-1.167v-.004c-.016-.775-.06-1.838-.168-2.95-.077.026-.172.052-.263.052a2.788 2.788 0 0 1-1.95-.795c-.184-.178-.36-.368-.486-.59-.127.22-.265.412-.447.59a2.786 2.786 0 0 1-1.95.794c-.76 0-1.446-.303-1.948-.793a2.74 2.74 0 0 1-.468-.602 2.738 2.738 0 0 1-.463.602 2.787 2.787 0 0 1-1.95.794h-.16a2.787 2.787 0 0 1-1.95-.793 2.738 2.738 0 0 1-.464-.602zm-2.004 2.59v.002c.795.002 1.5 0 2.373.953.687-.072 1.406-.108 2.125-.107.72 0 1.438.035 2.125.107.873-.953 1.578-.95 2.372-.953.376 0 1.876 0 2.92 2.934l1.123 4.028c.832 2.995-.266 3.068-1.636 3.07-2.03-.075-3.156-1.55-3.156-3.025-1.124.184-2.436.276-3.748.277-1.312 0-2.624-.093-3.748-.277 0 1.475-1.125 2.95-3.156 3.026-1.37-.004-2.468-.077-1.636-3.072l1.122-4.027c1.045-2.934 2.545-2.934 2.92-2.934zM12 12.714c-.002.002-2.14 1.964-2.523 2.662l1.4-.056v1.22c0 .056.56.033 1.123.007.562.026 1.124.05 1.124-.008v-1.22l1.4.055C14.138 14.677 12 12.713 12 12.713z"/></svg>
+                    </span>
+                    <div>
+                        <h4>itch.io</h4>
+                        <p>Основная витрина — 13+ игр</p>
+                    </div>
+                </a>
+                <a class="link-card link-gj" href="https://gamejolt.com/@Ilya873/games" target="_blank" rel="noopener">
+                    <span class="link-ico">
+                        <svg viewBox="0 0 24 24" width="26" height="26" fill="currentColor"><path d="M6.353 0v2.824H4.94v2.823H3.53v2.824H2.118v2.823H.706v2.824h8.47v2.823H7.765v2.824H6.353v2.823h1.412v-1.412h1.411v-1.411h1.412v-1.412H12V16.94h1.412v-1.41h1.412v-1.411h1.411v-1.412h1.412v-1.412h1.412V9.882h1.412V8.471h1.411V7.059h-4.235V5.647h1.412V4.235h1.412V2.824h1.411V1.412h1.412V0zm0 22.588H4.94V24h1.412zM7.765 2.824h9.882v1.411h-1.412v1.412h-1.411V7.06h-1.412v1.41H12v1.411h1.412v1.412H12V9.882h-1.412v1.412H9.176V9.882H7.765v1.412H6.353V9.882H4.94V8.471h1.412V5.647h1.412zM6.353 8.47v1.411h1.412v-1.41zm2.823 1.411h1.412v-1.41H9.176zm5.648 0h1.411v1.412h-1.411Z"/></svg>
+                    </span>
+                    <div>
+                        <h4>GameJolt</h4>
+                        <p>Архив проектов и&nbsp;демо</p>
+                    </div>
+                </a>
+                <a class="link-card link-gamin" href="https://gamin.me/users/ilya873" target="_blank" rel="noopener">
+                    <span class="link-ico">
+                        <svg viewBox="0 0 24 24" width="26" height="26" fill="currentColor"><path d="M21 6H3a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h18a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2zM11 13H8v3H6v-3H3v-2h3V8h2v3h3v2zm4.5 2a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm4-3a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z"/></svg>
+                    </span>
+                    <div>
+                        <h4>Gamin</h4>
+                        <p>Игры с джемов «Гаминатор», «КОД»</p>
+                    </div>
+                </a>
+                <a class="link-card link-vk" href="https://vk.com/ilya873" target="_blank" rel="noopener">
+                    <span class="link-ico">
+                        <svg viewBox="0 0 24 24" width="26" height="26" fill="currentColor"><path d="m9.489.004.729-.003h3.564l.73.003.914.01.433.007.418.011.403.014.388.016.374.021.36.025.345.03.333.033c1.74.196 2.933.616 3.833 1.516.9.9 1.32 2.092 1.516 3.833l.034.333.029.346.025.36.02.373.025.588.012.41.013.644.009.915.004.98-.001 3.313-.003.73-.01.914-.007.433-.011.418-.014.403-.016.388-.021.374-.025.36-.03.345-.033.333c-.196 1.74-.616 2.933-1.516 3.833-.9.9-2.092 1.32-3.833 1.516l-.333.034-.346.029-.36.025-.373.02-.588.025-.41.012-.644.013-.915.009-.98.004-3.313-.001-.73-.003-.914-.01-.433-.007-.418-.011-.403-.014-.388-.016-.374-.021-.36-.025-.345-.03-.333-.033c-1.74-.196-2.933-.616-3.833-1.516-.9-.9-1.32-2.092-1.516-3.833l-.034-.333-.029-.346-.025-.36-.02-.373-.025-.588-.012-.41-.013-.644-.009-.915-.004-.98.001-3.313.003-.73.01-.914.007-.433.011-.418.014-.403.016-.388.021-.374.025-.36.03-.345.033-.333c.196-1.74.616-2.933 1.516-3.833.9-.9 2.092-1.32 3.833-1.516l.333-.034.346-.029.36-.025.373-.02.588-.025.41-.012.644-.013.915-.009ZM6.79 7.3H4.05c.13 6.24 3.25 9.99 8.72 9.99h.31v-3.57c2.01.2 3.53 1.67 4.14 3.57h2.84c-.78-2.84-2.83-4.41-4.11-5.01 1.28-.74 3.08-2.54 3.51-4.98h-2.58c-.56 1.98-2.22 3.78-3.8 3.95V7.3H10.5v6.92c-1.6-.4-3.62-2.34-3.71-6.92Z"/></svg>
+                    </span>
+                    <div>
+                        <h4>ВКонтакте</h4>
+                        <p>Новости, посты, обсуждения</p>
+                    </div>
+                </a>
+                <a class="link-card link-tg" href="https://t.me/ilya873" target="_blank" rel="noopener">
+                    <span class="link-ico">
+                        <svg viewBox="0 0 24 24" width="26" height="26" fill="currentColor"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+                    </span>
+                    <div>
+                        <h4>Telegram</h4>
+                        <p>@ilya873 — пишите напрямую</p>
+                    </div>
+                </a>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <div class="footer-inner">
+            <div>
+                <span class="logo-mark logo-mark-sm">
+                    <img src="img/avatar.png" width="28" height="28" alt="" decoding="async">
+                </span>
+                <span>© <span id="year"></span> Ilya873 · Соло-инди с любовью к экспериментам</span>
+            </div>
+            <div class="footer-links">
+                <a href="https://store.steampowered.com/app/4373690/Hearth__Shadow/" target="_blank" rel="noopener">Steam</a>
+                <a href="https://ilya873.itch.io/" target="_blank" rel="noopener">itch.io</a>
+                <a href="https://gamejolt.com/@Ilya873/games" target="_blank" rel="noopener">GameJolt</a>
+                <a href="https://gamin.me/users/ilya873" target="_blank" rel="noopener">Gamin</a>
+                <a href="https://vk.com/ilya873" target="_blank" rel="noopener">VK</a>
+            </div>
         </div>
-        <div class="content">
-            <!-- Ваш контент здесь -->
+    </footer>
+
+    <a href="#top" class="to-top" aria-label="Наверх">↑</a>
+
+    <div class="lightbox" role="dialog" aria-modal="true" aria-label="Просмотр медиа Hearth &amp; Shadow">
+        <button class="lightbox-close" type="button" aria-label="Закрыть">×</button>
+        <button class="lightbox-nav lightbox-prev" type="button" aria-label="Предыдущее">‹</button>
+        <button class="lightbox-nav lightbox-next" type="button" aria-label="Следующее">›</button>
+        <div class="lightbox-stage">
+            <img class="lightbox-img" src="" alt="">
+            <div class="lightbox-video" hidden>
+                <video class="lightbox-video-el" controls playsinline></video>
+                <a class="lightbox-steam" href="https://store.steampowered.com/app/4373690/Hearth__Shadow/" target="_blank" rel="noopener">
+                    <span class="lightbox-steam-play" aria-hidden="true"></span>
+                    Смотреть трейлер в&nbsp;Steam
+                </a>
+            </div>
         </div>
+        <span class="lightbox-counter" aria-hidden="true"></span>
     </div>
+
+    <div class="sr-toast" role="status" aria-live="polite"></div>
+
+    <script src="main.js?v=12"></script>
 </body>
 </html>
-

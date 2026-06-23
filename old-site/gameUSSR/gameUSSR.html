@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Управление СССР</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #1a1a1a;
+            background-image: url('image.png');
+            background-size: cover;
+            color: #ffffff;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background-color: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            position: relative;
+        }
+        h1 {
+            text-align: center;
+            font-weight: bold;
+        }
+        .status, .event, .choices {
+            margin: 20px 0;
+        }
+        .status div, .choices button {
+            margin: 10px 0;
+        }
+        .choices button {
+            width: 100%;
+            padding: 15px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #b30000;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+            font-weight: bold;
+        }
+        .choices button:hover {
+            background-color: #ff1a1a;
+        }
+        .event {
+            text-align: center;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        #statusContainer {
+            display: none;
+            position: relative;
+        }
+        .status div {
+            font-weight: bold;
+        }
+        #topRightStatus {
+            position: absolute;
+            top: 0;
+            right: 0;
+            text-align: right;
+        }
+        #topRightStatus div {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Управление СССР</h1>
+        <div id="statusContainer" class="status">
+            <div>Экономика: <span id="economy">50</span></div>
+            <div>Довольство народа: <span id="publicSupport">50</span></div>
+            <div>Военная мощь: <span id="militaryPower">50</span></div>
+            <div>Отношения с Западом: <span id="relationsWest">50</span></div>
+            <div>Отношения с Востоком: <span id="relationsEast">50</span></div>
+            <div>Одобрение народа: <span id="odobrenie">50</span></div>
+            <div id="topRightStatus">
+                <div>Пятилетка: <span id="pletka">1</span></div>
+                <div>Текущая пятилетка: <span id="eventspletka">1</span></div>
+            </div>
+        </div>
+        <div class="event" id="event">Добро пожаловать, товарищ! Вы стали главой СССР. Следите за показателями страны и не опускайте их до нуля. Каждый выросший показатель в конце пятилетки добавляет одобрение народа, а снизившийся понижает одобрение. Удачи!</div>
+        <div class="choices" id="choices">
+            <button onclick="startGame()">Начать игру</button>
+        </div>
+    </div>
+
+    <script>
+        let economy;
+        let publicSupport;
+        let militaryPower;
+        let relationsWest;
+        let relationsEast;
+		let odobrenie;
+
+        let internalPolicy;
+        let foreignPolicy;
+		
+		let pletka;
+		let eventspletka;
+		
+		//значения прошлой пятилетки
+		let memoryparametrs;
+
+const internalEvents = {
+    'Индустриализация': [
+        { message: 'Успешный запуск нового завода', actions: [
+            { text: 'Продолжить поддержку', economyChange: 10, publicSupportChange: -5 },
+            { text: 'Сократить расходы', economyChange: 5 }
+        ]},
+        { message: 'Протесты рабочих из-за тяжелых условий', actions: [
+            { text: 'Подавить протесты', economyChange: -5, publicSupportChange: -10 },
+            { text: 'Улучшить условия труда', economyChange: -10, publicSupportChange: 10 }
+        ]},
+        { message: 'Повышение производительности', actions: [
+            { text: 'Поощрить лучших работников', economyChange: 5, publicSupportChange: 5 },
+            { text: 'Сократить рабочие часы', economyChange: -5, publicSupportChange: 10 }
+        ]},
+        { message: 'Нехватка сырья', actions: [
+            { text: 'Импортировать сырье', economyChange: -10, relationsWestChange: 5, relationsEastChange: 5 },
+            { text: 'Найти внутренние источники', economyChange: -5 }
+        ]},
+        { message: 'Новая технология производства', actions: [
+            { text: 'Инвестировать в технологию', economyChange: 10, publicSupportChange: -5 },
+            { text: 'Оставить все как есть', publicSupportChange: -5 }
+        ]}
+    ],
+    'Аграрная реформа': [
+        { message: 'Увеличение урожая', actions: [
+            { text: 'Продать излишки за границу', economyChange: 10, relationsWestChange: 5, relationsEastChange: 5 },
+            { text: 'Раздать народу', publicSupportChange: 10 }
+        ]},
+        { message: 'Засуха', actions: [
+            { text: 'Импортировать продовольствие', economyChange: -15, relationsWestChange: 5, relationsEastChange: 5 },
+            { text: 'Перераспределить запасы', economyChange: -10, publicSupportChange: -10 }
+        ]},
+        { message: 'Развитие сельскохозяйственных технологий', actions: [
+            { text: 'Внедрить новые технологии', economyChange: 10, publicSupportChange: -5 },
+            { text: 'Продолжить использовать старые методы', publicSupportChange: -5 }
+        ]},
+        { message: 'Недовольство крестьян', actions: [
+            { text: 'Подавить протесты', publicSupportChange: -10 },
+            { text: 'Пойти на уступки', economyChange: -5, publicSupportChange: 5 }
+        ]},
+        { message: 'Успешное завершение уборки урожая', actions: [
+            { text: 'Отпраздновать успех', publicSupportChange: 5 },
+            { text: 'Инвестировать в следующий сезон', economyChange: -5, publicSupportChange: 5 }
+        ]}
+    ],
+    'Легкая промышленность': [
+        { message: 'Успехи в текстильной промышленности', actions: [
+            { text: 'Увеличить экспорт', economyChange: 10, publicSupportChange: 5, relationsWestChange: 5, relationsEastChange: 5 },
+            { text: 'Повысить зарплаты рабочим', economyChange: 5, publicSupportChange: 10 }
+        ]},
+        { message: 'Недовольство рабочих условий', actions: [
+            { text: 'Подавить протесты', economyChange: -10, publicSupportChange: -10 },
+            { text: 'Улучшить условия труда', economyChange: -5, publicSupportChange: 10 }
+        ]},
+        { message: 'Снижение спроса на товары', actions: [
+            { text: 'Сократить производство', economyChange: -10 },
+            { text: 'Инвестировать в маркетинг', economyChange: -5, publicSupportChange: 5 }
+        ]},
+        { message: 'Новая мода в одежде', actions: [
+            { text: 'Подстроиться под моду', economyChange: 10, publicSupportChange: 5 },
+            { text: 'Игнорировать моду', economyChange: -5, publicSupportChange: -5 }
+        ]},
+        { message: 'Открытие новой фабрики', actions: [
+            { text: 'Поддержать открытие', economyChange: 10, publicSupportChange: 5 },
+            { text: 'Не вмешиваться', economyChange: 0 }
+        ]}
+    ]
+};
+
+
+const foreignEvents = {
+    'Сближение с Западом': [
+        { message: 'Подписание выгодного договора с западной страной', actions: [
+            { text: 'Принять', economyChange: 10, publicSupportChange: 5, relationsWestChange: 15, relationsEastChange: -10 },
+            { text: 'Отказать', publicSupportChange: -5, relationsWestChange: -15, relationsEastChange: 10 }
+        ]},
+        { message: 'Шпионский скандал с западной страной', actions: [
+            { text: 'Игнорировать', publicSupportChange: -5, relationsWestChange: -15, relationsEastChange: 5 },
+            { text: 'Ответить протестом', relationsWestChange: -20, relationsEastChange: 5 }
+        ]},
+        { message: 'Предложение о совместных военных учениях', actions: [
+            { text: 'Принять', militaryPowerChange: 10, relationsWestChange: 10, relationsEastChange: -10 },
+            { text: 'Отказаться', relationsWestChange: -10 }
+        ]},
+        { message: 'Экономическая помощь от западной страны', actions: [
+            { text: 'Принять помощь', economyChange: 15, relationsWestChange: 10, relationsEastChange: -5 },
+            { text: 'Отказаться', publicSupportChange: -5, relationsWestChange: -10 }
+        ]},
+        { message: 'Западные страны предлагают культурный обмен', actions: [
+            { text: 'Принять', publicSupportChange: 10, relationsWestChange: 10 },
+            { text: 'Отказаться', publicSupportChange: -5, relationsWestChange: -10 }
+        ]}
+    ],
+    'Сближение с Востоком': [
+        { message: 'Подписание договора о дружбе с восточной страной', actions: [
+            { text: 'Принять', economyChange: 5, publicSupportChange: 5, relationsWestChange: -10, relationsEastChange: 15 },
+            { text: 'Отказать', publicSupportChange: -5, relationsWestChange: 10, relationsEastChange: -15 }
+        ]},
+        { message: 'Экономическая помощь от восточной страны', actions: [
+            { text: 'Принять', economyChange: 10, publicSupportChange: 5, relationsWestChange: -5, relationsEastChange: 10 },
+            { text: 'Отказаться', publicSupportChange: -5, relationsWestChange: 5, relationsEastChange: -10 }
+        ]},
+        { message: 'Совместные военные учения с восточной страной', actions: [
+            { text: 'Принять', militaryPowerChange: 10, relationsEastChange: 10, relationsWestChange: -10 },
+            { text: 'Отказаться', relationsEastChange: -10 }
+        ]},
+        { message: 'Восточная страна предлагает культурный обмен', actions: [
+            { text: 'Принять', publicSupportChange: 10, relationsEastChange: 10, relationsWestChange: -5 },
+            { text: 'Отказаться', publicSupportChange: -5, relationsEastChange: -10, relationsWestChange: 5 }
+        ]},
+        { message: 'Споры по торговым соглашениям с восточной страной', actions: [
+            { text: 'Смягчить условия', economyChange: -5, relationsEastChange: 10 },
+            { text: 'Ужесточить условия', economyChange: 5, relationsEastChange: -10 }
+        ]}
+    ],
+    'Изоляционизм': [
+        { message: 'Снижение торговых оборотов', actions: [
+            { text: 'Увеличить внутренние инвестиции', economyChange: -10, publicSupportChange: -5, relationsWestChange: -10, relationsEastChange: -10 },
+            { text: 'Сократить расходы', economyChange: -5, publicSupportChange: -5, relationsWestChange: -5, relationsEastChange: -5 }
+        ]},
+        { message: 'Повышение внутренней стабильности', actions: [
+            { text: 'Продолжить текущую политику', publicSupportChange: 10 },
+            { text: 'Увеличить расходы на армию', economyChange: -5, militaryPowerChange: 10 }
+        ]},
+        { message: 'Рост недовольства населения', actions: [
+            { text: 'Подавить протесты', publicSupportChange: -10 },
+            { text: 'Ввести реформы', economyChange: -10, publicSupportChange: 10 }
+        ]},
+        { message: 'Открытие нового завода', actions: [
+            { text: 'Поддержать', economyChange: 10, publicSupportChange: 5 },
+            { text: 'Не вмешиваться' }
+        ]},
+        { message: 'Внутренний научный прорыв', actions: [
+            { text: 'Инвестировать в науку', economyChange: -5, publicSupportChange: 10, militaryPowerChange: 5 },
+            { text: 'Коммерциализировать достижения', economyChange: 15, publicSupportChange: 5 }
+        ]}
+    ]
+};
+
+const globalEvents = [
+    { message: 'Всемирный экономический кризис', actions: [
+        { text: 'Поддержать экономику', economyChange: -5, publicSupportChange: -15, relationsWestChange: -10, relationsEastChange: -10 },
+        { text: 'Игнорировать', economyChange: -20, publicSupportChange: -10 }
+    ]},
+    { message: 'Эпидемия', actions: [
+        { text: 'Ввести карантин', economyChange: -10, publicSupportChange: -20 },
+        { text: 'Предоставить медицинскую помощь', economyChange: -15, publicSupportChange: -10 }
+    ]},
+    { message: 'Успехи в космосе', actions: [
+        { text: 'Отпраздновать успехи', economyChange: 10, publicSupportChange: 10, militaryPowerChange: 10, relationsWestChange: 10, relationsEastChange: 10 },
+        { text: 'Инвестировать в дальнейшие исследования', economyChange: -10, publicSupportChange: 5, militaryPowerChange: 15, relationsWestChange: 5, relationsEastChange: 5 }
+    ]},
+    { message: 'Война', actions: [
+        { text: 'Мобилизовать армию', economyChange: -20, publicSupportChange: -10, militaryPowerChange: 20, relationsWestChange: -10, relationsEastChange: -10 },
+        { text: 'Заключить мир', economyChange: -10, publicSupportChange: -5, militaryPowerChange: -10 }
+    ]},
+    { message: 'Научный прорыв', actions: [
+        { text: 'Инвестировать в науку', economyChange: -5, publicSupportChange: 10, militaryPowerChange: 5, relationsWestChange: 10, relationsEastChange: 10 },
+        { text: 'Коммерциализировать достижения', economyChange: 15, publicSupportChange: 5 }
+    ]}
+];
+
+        function updateStatus() {
+            document.getElementById('economy').innerText = economy;
+            document.getElementById('publicSupport').innerText = publicSupport;
+            document.getElementById('militaryPower').innerText = militaryPower;
+            document.getElementById('relationsWest').innerText = relationsWest;
+            document.getElementById('relationsEast').innerText = relationsEast;
+			document.getElementById('odobrenie').innerText = odobrenie;
+			document.getElementById('pletka').innerText = pletka;
+			document.getElementById('eventspletka').innerText = eventspletka + '/5';
+        }
+
+        function setEvent(message) {
+            document.getElementById('event').innerText = message;
+        }
+
+        function clearChoices() {
+            document.getElementById('choices').innerHTML = '';
+        }
+
+        function addChoice(text, callback) {
+            let button = document.createElement('button');
+            button.innerText = text;
+            button.onclick = callback;
+            document.getElementById('choices').appendChild(button);
+        }
+
+        function startGame() {
+            document.getElementById('statusContainer').style.display = 'block';
+			startParametrs();
+			saveParamets();
+            updateStatus();
+            clearChoices();
+            setEvent('Добро пожаловать, товарищ! Вы стали главой СССР. Выберите внутриполитический курс.');
+            addChoice('Индустриализация', () => selectInternalPolicy('Индустриализация'));
+            addChoice('Аграрная реформа', () => selectInternalPolicy('Аграрная реформа'));
+            addChoice('Легкая промышленность', () => selectInternalPolicy('Легкая промышленность'));
+        }
+
+        function selectInternalPolicy(policy) {
+            internalPolicy = policy;
+            updateStatus();
+            clearChoices();
+            setEvent(`Вы выбрали внутриполитический курс: ${policy}. Теперь выберите внешнеполитический курс.`);
+            addChoice('Сближение с Западом', () => selectForeignPolicy('Сближение с Западом'));
+            addChoice('Сближение с Востоком', () => selectForeignPolicy('Сближение с Востоком'));
+            addChoice('Изоляционизм', () => selectForeignPolicy('Изоляционизм'));
+        }
+
+        function selectForeignPolicy(policy) {
+            foreignPolicy = policy;
+            updateStatus();
+            clearChoices();
+            setEvent(`Вы выбрали внешнеполитический курс: ${policy}. Готовьтесь к управлению страной!`);
+            addChoice('Продолжить', randomEvent);
+        }
+
+function odobrenieChange(parametr, memoryparametr) {
+
+for (i=1; i<=4; i++)
+{
+		if (parametr[i]<memoryparametr[i]) {
+		odobrenie-=5;
+		}
+		else if (parametr[i]>memoryparametr[i])
+		{
+		odobrenie+=5;
+		}
+		
+		if (odobrenie<0)
+		{
+		odobrenie=0;
+		}
+		else if (odobrenie>100)
+		{
+		odobrenie=100;
+		}
+}
+}
+
+function startParametrs() {
+        economy = 50;
+        publicSupport = 50;
+        militaryPower = 50;
+        relationsWest = 50;
+        relationsEast = 50;
+		odobrenie = 50;
+
+        internalPolicy = '';
+        foreignPolicy = '';
+		
+		pletka = 1;
+		eventspletka = 0;
+		
+		//значения прошлой пятилетки
+		memoryEconomy = 50;
+}
+
+function saveParamets() {
+memoryparametrs = [economy, militaryPower, publicSupport, relationsEast, relationsWest];
+}
+
+let lastEventIndex = -1;
+
+function randomEvent() {
+    let parametrs = [economy, militaryPower, publicSupport, relationsEast, relationsWest];
+    eventspletka++;
+    if (eventspletka >= 5) {
+        pletka++;
+        eventspletka = 0;
+
+        //меняем одобрение
+        odobrenieChange(parametrs, memoryparametrs);
+
+        saveParamets();
+    }
+
+    const events = [
+        ...internalEvents[internalPolicy],
+        ...foreignEvents[foreignPolicy],
+        ...globalEvents
+    ];
+
+    let eventIndex;
+    do {
+        eventIndex = Math.floor(Math.random() * events.length);
+    } while (eventIndex === lastEventIndex);
+
+    lastEventIndex = eventIndex;
+
+    const event = events[eventIndex];
+    setEvent(`Событие: ${event.message}`);
+    clearChoices();
+
+    event.actions.forEach(action => {
+        let buttonText = action.text;
+        let effects = [];
+
+        // Собираем все изменения в массив effects
+        if (action.economyChange !== undefined) effects.push(`Экономика: ${action.economyChange}`);
+        if (action.publicSupportChange !== undefined) effects.push(`Довольство: ${action.publicSupportChange}`);
+        if (action.militaryPowerChange !== undefined) effects.push(`Военная мощь: ${action.militaryPowerChange}`);
+        if (action.relationsWestChange !== undefined) effects.push(`Запад: ${action.relationsWestChange}`);
+        if (action.relationsEastChange !== undefined) effects.push(`Восток: ${action.relationsEastChange}`);
+
+        // Собираем текст кнопки с эффектами, разделенными запятыми
+        if (effects.length > 0) {
+            buttonText += ` (${effects.join(', ')})`;
+        }
+
+        addChoice(buttonText, () => {
+            applyEventChanges(action);
+            if (checkGameOver()) {
+                gameOver();
+                return;
+            }
+
+            randomEvent();
+        });
+    });
+}
+
+function applyEventChanges(event) {
+    if (event.economyChange !== undefined) {
+        economy += event.economyChange;
+    }
+    if (event.publicSupportChange !== undefined) {
+        publicSupport += event.publicSupportChange;
+    }
+    if (event.militaryPowerChange !== undefined) {
+        militaryPower += event.militaryPowerChange;
+    }
+    if (event.relationsWestChange !== undefined) {
+        relationsWest += event.relationsWestChange;
+    }
+    if (event.relationsEastChange !== undefined) {
+        relationsEast += event.relationsEastChange;
+    }
+    updateStatus();
+}
+
+        function checkGameOver() {
+            return economy <= 0 || publicSupport <= 0 || militaryPower <= 0 || relationsWest <= 0 || relationsEast <= 0 || odobrenie<=0;
+        }
+
+        function gameOver() {
+            clearChoices();
+    if (economy <= 0) {
+        setEvent('Игра окончена. Экономика вашей страны обрушилась. Граждане остались без работы и средств к существованию. В стране наступил хаос, и вы больше не можете контролировать ситуацию. Вы не смогли удержать власть. Попробуйте снова.');
+    }
+    else if (publicSupport <= 0) {
+        setEvent('Игра окончена. Довольство народа упало до нуля. Массовые протесты и восстания охватили всю страну. Началась гражданская война, и вы не смогли удержать власть. Попробуйте снова.');
+    }
+    else if (militaryPower <= 0) {
+        setEvent('Игра окончена. Враг воспользовался слабостью вашей армии. США объявили войну и быстро оккупировали страну ввиду отсутствия вооруженных сил. Вы не смогли удержать власть. Попробуйте снова.');
+    }
+    else if (relationsWest <= 0) {
+        setEvent('Игра окончена. Дипломатические отношения с Западом достигли точки невозврата. Началась ядерная война со странами Запада, и вы не смогли удержать власть. Попробуйте снова.');
+    }
+    else if (relationsEast <= 0) {
+        setEvent('Игра окончена. Дипломатические отношения с Востоком рухнули. Началась ядерная война со странами Востока, и вы не смогли удержать власть. Попробуйте снова.');
+    }
+    else if (approvalRating <= 0) {
+        setEvent('Игра окончена. Ваш рейтинг одобрения упал до нуля. Народ взбунтовался, захватил все правительственные здания и сверг вас с власти. Вы не смогли удержать власть. Попробуйте снова.');
+    }
+			
+            addChoice('Рестарт', startGame);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            updateStatus();
+            clearChoices();
+            addChoice('Начать игру', startGame);
+        });
+    </script>
+</body>
+</html>
